@@ -2472,8 +2472,15 @@ h3 {
 }
 
 @media (max-width: 620px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .site-header {
     padding: 14px 16px;
+    overflow: hidden;
   }
 
   .brand {
@@ -2485,6 +2492,18 @@ h3 {
     height: 36px;
   }
 
+  .nav {
+    max-width: 100%;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .session-badge {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .hero {
     min-height: auto;
   }
@@ -2493,7 +2512,65 @@ h3 {
   .dashboard-section,
   .admin-section,
   .leaderboard-section {
+    width: 100%;
+    overflow-x: hidden;
+    padding-right: 16px;
+    padding-left: 16px;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .admin-panel {
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .admin-table {
+    overflow-x: visible;
+  }
+
+  .admin-row,
+  .match-admin-row,
+  .team-player-row,
+  .draw-row,
+  .challenge-admin-row,
+  .admin-match-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-row.header-row {
+    display: none;
+  }
+
+  .admin-row span,
+  .admin-match-summary article {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .result-form {
+    gap: 10px;
+  }
+
+  .result-form .btn {
+    width: 100%;
+    min-height: 52px;
+  }
+
+  .scorer-chip-panel {
+    max-height: none;
+  }
+
+  .admin-match-prediction {
+    grid-template-columns: 1fr;
+  }
+
+  .team-player-form,
+  .team-player-toolbar {
+    grid-template-columns: 1fr;
   }
 
   input,
