@@ -671,6 +671,11 @@ function showError(element, error) {
     return;
   }
 
+  if (lowerMessage.includes("email rate limit exceeded")) {
+    setError("Supabase alcanzó el límite de correos por ahora. Espera unos minutos e intenta de nuevo.");
+    return;
+  }
+
   if (lowerMessage.includes("for security purposes") && lowerMessage.includes("seconds")) {
     const seconds = message.match(/after\s+(\d+)\s+seconds/i)?.[1];
     setError(
