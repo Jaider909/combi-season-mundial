@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COMBI SEASON Mundial</title>
+    <meta
+      name="description"
+      content="Polla mundialista premium de COMBI SEASON: predicciones, ranking, premios y una experiencia lista para activar pagos."
+    />
+    <link rel="stylesheet" href="styles.css?v=prepublish-cleanup" />
+  </head>
+  <body class="route-inicio">
+    <div class="file-warning is-hidden" id="fileWarning">
+      Esta app debe abrirse desde el servidor local para que funcionen login, Supabase y módulos.
+      Usa la URL HTTP del servidor local, por ejemplo http://127.0.0.1:4174/index.html
+    </div>
+    <header class="site-header">
+      <a class="brand" href="#inicio" aria-label="COMBI SEASON inicio">
+        <span class="brand-mark">CS</span>
+        <span>COMBI SEASON</span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="#como-funciona" data-public-nav>Cómo funciona</a>
+        <a href="#premios" data-public-nav>Premios</a>
+        <a class="is-hidden" href="#ranking" data-player-nav>Ranking</a>
+        <a class="is-hidden" href="#dashboard" data-player-nav>Dashboard</a>
+        <a class="is-hidden" href="#predicciones" data-player-nav>Predicciones</a>
+        <a class="is-hidden" href="#retos" data-player-nav>Retos</a>
+        <a class="is-hidden" href="#grupos" data-player-nav>Grupos</a>
+        <a class="is-hidden" href="#perfil" data-player-nav>Perfil</a>
+        <a class="is-hidden" href="#admin" data-admin-nav>Admin</a>
+        <a href="#login" data-public-nav>Login</a>
+        <a class="nav-action" href="#reserva" data-public-nav>Registrarme</a>
+        <span class="session-badge is-hidden" id="sessionUserBadge"></span>
+        <button class="nav-logout is-hidden" id="logoutButton" type="button">Cerrar sesión</button>
+      </nav>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" data-view="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Mundial 2026 · La polla de la temporada</p>
+          <h1>COMBI SEASON Mundial</h1>
+          <p class="hero-lede">
+            Arma tus marcadores, reta a tu parche y pelea la tabla desde el
+            primer pitazo hasta la final. La emoción del Mundial convertida en
+            juego, puntos, retos y orgullo de selección.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#reserva">
+              <span aria-hidden="true">↗</span>
+              Quiero mi cupo
+            </a>
+            <a class="btn btn-secondary" href="#como-funciona">
+              <span aria-hidden="true">↓</span>
+              Ver dinámica
+            </a>
+          </div>
+          <dl class="hero-stats" aria-label="Datos del torneo">
+            <div>
+              <dt>Inicio</dt>
+              <dd>11 junio</dd>
+            </div>
+            <div>
+              <dt>Partidos</dt>
+              <dd>104</dd>
+            </div>
+            <div>
+              <dt>Modo</dt>
+              <dd>Predicción</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero-visual" aria-label="Escenario visual de COMBI SEASON Mundial">
+          <img src="assets/combi-season-world-hero.png" alt="Estadio mundialista iluminado con balón en primer plano" />
+          <div class="countdown-card" aria-live="polite">
+            <span>Cuenta regresiva</span>
+            <strong id="countdown">Calculando...</strong>
+          </div>
+          <div class="floating-ticket">
+            <span>Cupo fundador</span>
+            <strong>Pago al cierre</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="ticker-band" data-view="ticker" aria-label="Beneficios rápidos">
+        <span>Predice marcador exacto</span>
+        <span>Gana puntos por goleadores</span>
+        <span>Reta 1 vs 1</span>
+        <span>104 partidos</span>
+        <span>Premios para el podio</span>
+      </section>
+
+      <section class="section intro-grid" id="como-funciona" data-view="como-funciona">
+        <div class="section-heading">
+          <p class="eyebrow">Diseñado para competir desde el celular</p>
+          <h2>Una polla mundialista con más tensión que una simple tabla.</h2>
+        </div>
+        <div class="steps">
+          <article class="step-card">
+            <span>01</span>
+            <h3>Regístrate con tu correo</h3>
+            <p>
+              Si estás en el sorteo, tu selección aparece automáticamente. Si
+              entras nuevo, eliges una selección libre.
+            </p>
+          </article>
+          <article class="step-card">
+            <span>02</span>
+            <h3>Lanza tus predicciones</h3>
+            <p>
+              Pronostica marcador, ganador y goleadores. Puedes jugar todos los
+              partidos, no solo los de tu selección.
+            </p>
+          </article>
+          <article class="step-card">
+            <span>03</span>
+            <h3>Sube en el ranking</h3>
+            <p>
+              Cuando el admin cierre resultados, la app recalcula puntos y la
+              tabla se mueve sola.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section scoring-section" data-view="como-funciona">
+        <div class="section-heading narrow">
+          <p class="eyebrow">Así se suman puntos</p>
+          <h2>Reglas claras para que cada partido tenga veneno.</h2>
+        </div>
+        <div class="scoring-grid">
+          <article>
+            <span>+8</span>
+            <strong>Marcador exacto</strong>
+            <p>Aciertas el resultado completo del partido.</p>
+          </article>
+          <article>
+            <span>+3</span>
+            <strong>Tendencia correcta</strong>
+            <p>Le pegas al ganador o al empate, aunque cambie el marcador.</p>
+          </article>
+          <article>
+            <span>+2</span>
+            <strong>Goleador acertado</strong>
+            <p>Sumas por cada goleador que coincida con el resultado real.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section experience" data-view="como-funciona">
+        <div class="phone-shell" aria-label="Vista previa de predicción">
+          <div class="phone-top">
+            <span></span>
+            <strong>Jornada 1</strong>
+            <span></span>
+          </div>
+          <div class="match-card active">
+            <div>
+              <span>MEX</span>
+              <strong>2</strong>
+            </div>
+            <small>vs</small>
+            <div>
+              <span>RSA</span>
+              <strong>1</strong>
+            </div>
+          </div>
+          <div class="prediction-row">
+            <span>Exacto</span>
+            <strong>+8 pts</strong>
+          </div>
+          <div class="prediction-row">
+            <span>Ganador</span>
+            <strong>+3 pts</strong>
+          </div>
+          <button class="preview-button" type="button">Vista de predicción</button>
+        </div>
+        <div class="feature-copy">
+          <p class="eyebrow">Experiencia lista para crecer</p>
+          <h2>Primero impacto. Luego pagos, cuentas y automatización.</h2>
+          <p>
+            Cada jugador entra a su dashboard, revisa calendario, grupos,
+            predicciones y ranking. El pago queda para activarlo al final,
+            cuando el parche ya esté listo.
+          </p>
+          <div class="feature-list">
+            <div>
+              <strong>Selección protegida</strong>
+              <span>Los sorteados quedan amarrados a su equipo por correo.</span>
+            </div>
+            <div>
+              <strong>Predicciones editables</strong>
+              <span>Puedes ajustar antes de que el partido cierre.</span>
+            </div>
+            <div>
+              <strong>Admin en control</strong>
+              <span>Resultados, goleadores, puntos y cruces desde un panel.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section public-showcase" data-view="como-funciona">
+        <div class="section-heading">
+          <p class="eyebrow">Lo que ve cada jugador</p>
+          <h2>Una experiencia completa sin salir del celular.</h2>
+        </div>
+        <div class="showcase-grid">
+          <article>
+            <span>01</span>
+            <h3>Dashboard personal</h3>
+            <p>Tu selección, tus puntos, tu posición y tus próximos partidos en una sola vista.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Predicciones editables</h3>
+            <p>Marcador, ganador y varios goleadores antes de que el admin cierre el partido.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Retos del parche</h3>
+            <p>Reto 1 vs 1 por partido: ganador 90%, app 10%, empate para la app.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Selección protegida</h3>
+            <p>Los equipos sorteados quedan reconocidos por correo al momento del registro.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section prize-section" id="premios" data-view="premios">
+        <div class="section-heading narrow">
+          <p class="eyebrow">Premios que se sienten alcanzables</p>
+          <h2>Una bolsa que puede crecer con cada inscrito.</h2>
+        </div>
+        <div class="prize-grid">
+          <article class="prize-card main-prize">
+            <span>Campeón</span>
+            <h3>70% de la bolsa</h3>
+            <p>Para quien domine la tabla general al cierre de la final.</p>
+          </article>
+          <article class="prize-card">
+            <span>Subcampeón</span>
+            <h3>20%</h3>
+            <p>Premio para mantener viva la pelea hasta el último día.</p>
+          </article>
+          <article class="prize-card">
+            <span>Momento Combi</span>
+            <h3>10%</h3>
+            <p>Racha, sorpresa o marcador exacto más decisivo del torneo.</p>
+          </article>
+        </div>
+        <div class="prize-note">
+          <strong>La bolsa final se confirma con los inscritos.</strong>
+          <span>Por ahora la app está lista para registrar jugadores, predicciones y retos. El pago se activa al final.</span>
+        </div>
+      </section>
+
+      <section class="section leaderboard-section" id="ranking" data-view="ranking">
+        <div class="section-heading">
+          <p class="eyebrow">Ranking en vivo</p>
+          <h2>Tabla real de jugadores COMBI SEASON.</h2>
+        </div>
+        <div class="ranking-spotlight" id="rankingSpotlight" aria-live="polite"></div>
+        <div class="leaderboard" id="rankingTable" aria-live="polite">
+          <div class="leaderboard-row header-row">
+            <span>Pos</span>
+            <span>Jugador</span>
+            <span>Equipo</span>
+            <span>Puntos</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section cta-section" id="reserva" data-view="reserva">
+        <div class="cta-copy">
+          <p class="eyebrow">Lista de salida</p>
+          <h2>Reserva tu cupo fundador.</h2>
+          <p>
+            Por ahora no cobramos dentro de la página. Capturamos interesados y
+            dejamos el botón de pago bloqueado para activarlo cuando definan
+            precio, reglas finales y pasarela.
+          </p>
+        </div>
+        <form class="signup-form" id="signupForm">
+          <label>
+            Nombre
+            <input name="name" type="text" placeholder="Tu nombre" required />
+          </label>
+          <label>
+            WhatsApp
+            <input name="phone" type="tel" placeholder="+57 300 000 0000" required />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="correo@ejemplo.com" required />
+          </label>
+          <label>
+            Contraseña
+            <input name="password" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+          </label>
+          <label>
+            Confirmar contraseña
+            <input name="confirmPassword" type="password" placeholder="Repite tu contraseña" minlength="6" required />
+          </label>
+          <div class="assigned-team-card" id="assignedTeamPreview">
+            <span>Selección asignada</span>
+            <strong>Se validará con tu correo del sorteo.</strong>
+          </div>
+          <label class="available-team-field is-hidden" id="availableTeamField">
+            Selección disponible
+            <select name="team" id="favoriteTeam">
+              <option value="">Selecciona una selección libre</option>
+            </select>
+          </label>
+          <label>
+            Nombre para el ranking
+            <input name="alias" type="text" placeholder="Ej: La Combi de Juan" required />
+          </label>
+          <button class="btn btn-primary" type="submit">
+            <span aria-hidden="true">✓</span>
+            Crear mi dashboard
+          </button>
+          <button class="btn btn-disabled" type="button" disabled>
+            Pago al cierre
+          </button>
+          <p class="form-note" id="formNote" role="status"></p>
+        </form>
+      </section>
+
+      <section class="section login-section" id="login" data-view="login">
+        <div class="cta-copy">
+          <p class="eyebrow">Acceso de jugador</p>
+          <h2>Entra a tu dashboard.</h2>
+          <p>
+            Entra con el email y la contraseña que usaste al registrarte.
+            Tu sesión abre el panel del jugador con tus partidos, predicciones y perfil.
+          </p>
+        </div>
+        <form class="signup-form" id="loginForm">
+          <label>
+            Email registrado
+            <input name="email" type="email" placeholder="correo@ejemplo.com" required />
+          </label>
+          <label>
+            Contraseña
+            <input name="password" type="password" placeholder="Tu contraseña" required />
+          </label>
+          <button class="btn btn-primary" type="submit">
+            <span aria-hidden="true">→</span>
+            Entrar al dashboard
+          </button>
+          <a class="form-link" href="#recuperar">Olvidé mi contraseña</a>
+          <p class="form-note" id="loginNote" role="status"></p>
+        </form>
+      </section>
+
+      <section class="section login-section" id="recuperar" data-view="recuperar">
+        <div class="cta-copy">
+          <p class="eyebrow">Recuperar acceso</p>
+          <h2>Restablece tu contraseña.</h2>
+          <p>
+            Escribe el email de tu registro y Supabase enviará un enlace para crear una contraseña nueva.
+          </p>
+        </div>
+        <form class="signup-form" id="recoveryForm">
+          <label>
+            Email registrado
+            <input name="email" type="email" placeholder="correo@ejemplo.com" required />
+          </label>
+          <button class="btn btn-primary" type="submit">
+            <span aria-hidden="true">↗</span>
+            Enviar enlace
+          </button>
+          <a class="form-link" href="#login">Volver al login</a>
+          <p class="form-note" id="recoveryNote" role="status"></p>
+        </form>
+      </section>
+
+      <section class="section login-section" id="restablecer" data-view="restablecer">
+        <div class="cta-copy">
+          <p class="eyebrow">Nueva contraseña</p>
+          <h2>Crea una contraseña nueva.</h2>
+          <p>
+            El enlace de recuperación ya abrió una sesión temporal. Define una contraseña segura para volver al dashboard.
+          </p>
+        </div>
+        <form class="signup-form" id="resetPasswordForm">
+          <label>
+            Nueva contraseña
+            <span class="password-field">
+              <input name="password" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+              <button class="password-toggle" type="button" data-toggle-password="#resetPasswordForm input[name='password']">
+                Ver
+              </button>
+            </span>
+          </label>
+          <label>
+            Confirmar nueva contraseña
+            <span class="password-field">
+              <input name="confirmPassword" type="password" placeholder="Repite la contraseña" minlength="6" required />
+              <button class="password-toggle" type="button" data-toggle-password="#resetPasswordForm input[name='confirmPassword']">
+                Ver
+              </button>
+            </span>
+          </label>
+          <button class="btn btn-primary" type="submit">
+            <span aria-hidden="true">✓</span>
+            Guardar contraseña
+          </button>
+          <p class="form-note" id="resetPasswordNote" role="status"></p>
+        </form>
+      </section>
+
+      <section class="section dashboard-section" id="dashboard" data-view="dashboard">
+        <div class="dashboard-empty" id="dashboardEmpty">
+          <p class="eyebrow">Panel del jugador</p>
+          <h2>Tu dashboard aparece después del registro.</h2>
+          <p>
+            Cuando alguien reserve su cupo, verá aquí su perfil, puntos,
+            predicciones disponibles y posición inicial. El pago no bloquea el juego.
+          </p>
+          <div class="dashboard-actions">
+            <a class="btn btn-primary" href="#reserva">
+              <span aria-hidden="true">↗</span>
+              Ir al registro
+            </a>
+          </div>
+        </div>
+
+        <div class="dashboard-shell is-hidden" id="userDashboard" aria-live="polite">
+          <div class="dashboard-hero">
+            <div>
+              <p class="eyebrow">Dashboard COMBI</p>
+              <h2 id="dashboardTitle">Bienvenido</h2>
+              <p id="dashboardSubtitle">
+                Tu cupo está reservado. Aquí empiezas a preparar tus predicciones.
+              </p>
+            </div>
+            <div class="status-pill">
+              <span id="dashboardNextLabel">Siguiente paso</span>
+              <strong id="dashboardNextAction">Activo para jugar</strong>
+            </div>
+          </div>
+
+          <div class="dashboard-metrics">
+            <article>
+              <span>Puntos</span>
+              <strong id="dashboardPoints">0</strong>
+            </article>
+            <article>
+              <span>Posición</span>
+              <strong id="dashboardPosition">Nuevo</strong>
+            </article>
+            <article>
+              <span>Predicciones</span>
+              <strong id="dashboardPredictions">0/104</strong>
+            </article>
+            <article>
+              <span>Equipo</span>
+              <strong id="dashboardTeam">-</strong>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="dashboard-panel wide-panel" data-dashboard-panel="actividad">
+              <div class="panel-header">
+                <div>
+                  <span>Movimiento del parche</span>
+                  <h3>Actividad reciente</h3>
+                </div>
+              </div>
+              <div class="activity-feed" id="dashboardActivityFeed" aria-live="polite"></div>
+            </article>
+
+            <article class="dashboard-panel" data-dashboard-panel="resumen-predicciones">
+              <div class="panel-header">
+                <div>
+                  <span>Tu selección</span>
+                  <h3>Próximos partidos</h3>
+                </div>
+                <a class="icon-button" href="#predicciones" title="Ir a predicción">→</a>
+              </div>
+              <div class="dashboard-progress">
+                <div>
+                  <span>Pendientes</span>
+                  <strong id="dashboardPendingPredictions">0</strong>
+                </div>
+                <div>
+                  <span>Guardadas</span>
+                  <strong id="dashboardSavedPredictions">0</strong>
+                </div>
+                <div>
+                  <span>Cerradas</span>
+                  <strong id="dashboardClosedMatches">0</strong>
+                </div>
+              </div>
+              <div class="fixture-list">
+                <div id="favoriteTeamMatches"></div>
+              </div>
+            </article>
+
+            <article class="dashboard-panel" data-dashboard-panel="perfil">
+              <div class="panel-header">
+                <div>
+                  <span>Perfil de jugador</span>
+                  <h3 id="dashboardAlias">Tu alias</h3>
+                </div>
+                <button class="icon-button" id="refreshProfilePanel" type="button" title="Actualizar perfil">↻</button>
+              </div>
+              <div class="profile-list">
+                <div>
+                  <span>Nombre</span>
+                  <strong id="dashboardName">-</strong>
+                </div>
+                <div>
+                  <span>WhatsApp</span>
+                  <strong id="dashboardPhone">-</strong>
+                </div>
+                <div>
+                  <span>Email</span>
+                  <strong id="dashboardEmail">-</strong>
+                </div>
+              </div>
+              <form class="profile-edit-form" id="profileEditForm">
+                <label>
+                  Nombre
+                  <input name="name" type="text" placeholder="Tu nombre" required />
+                </label>
+                <label>
+                  Alias en ranking
+                  <input name="alias" type="text" placeholder="Nombre visible" required />
+                </label>
+                <label>
+                  WhatsApp
+                  <input name="phone" type="tel" placeholder="+57 300 000 0000" required />
+                </label>
+                <button class="btn btn-secondary btn-full" type="submit">
+                  Guardar perfil
+                </button>
+                <p class="form-note" id="profileEditNote" role="status"></p>
+              </form>
+              <form class="profile-password-form" id="profilePasswordForm">
+                <label>
+                  Nueva contraseña
+                  <span class="password-field">
+                    <input name="password" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+                    <button class="password-toggle" type="button" data-toggle-password="#profilePasswordForm input[name='password']">
+                      Ver
+                    </button>
+                  </span>
+                </label>
+                <label>
+                  Confirmar contraseña
+                  <span class="password-field">
+                    <input name="confirmPassword" type="password" placeholder="Repite la contraseña" minlength="6" required />
+                    <button class="password-toggle" type="button" data-toggle-password="#profilePasswordForm input[name='confirmPassword']">
+                      Ver
+                    </button>
+                  </span>
+                </label>
+                <button class="btn btn-secondary btn-full" type="submit">
+                  Cambiar contraseña
+                </button>
+                <p class="form-note" id="profilePasswordNote" role="status"></p>
+              </form>
+            </article>
+
+            <article class="dashboard-panel wide-panel" data-dashboard-panel="grupos">
+              <div class="panel-header">
+                <div>
+                  <span>Grupos y clasificación</span>
+                  <h3>Tu grupo en el Mundial</h3>
+                </div>
+              </div>
+              <div class="group-dashboard">
+                <div class="user-group-table" id="userGroupTable"></div>
+                <div class="qualification-note">
+                  <strong>Clasificación</strong>
+                  <span>La tabla se actualiza con los resultados cerrados por el admin.</span>
+                </div>
+              </div>
+              <details class="all-groups-details">
+                <summary>Ver todos los grupos</summary>
+                <div class="all-groups-grid" id="allGroupsGrid"></div>
+              </details>
+            </article>
+
+            <article class="dashboard-panel wide-panel" data-dashboard-panel="predicciones">
+              <div class="panel-header">
+                <div>
+                  <span>Predicción del jugador</span>
+                  <h3 id="predictionModule">Partidos disponibles</h3>
+                </div>
+              </div>
+              <div class="prediction-controls" aria-label="Filtros de predicciones">
+                <div class="segmented-control">
+                  <button class="is-active" type="button" data-prediction-view="pending">Pendientes</button>
+                  <button type="button" data-prediction-view="saved">Guardadas</button>
+                  <button type="button" data-prediction-view="closed">Cerradas</button>
+                  <button type="button" data-prediction-view="all">Todos</button>
+                </div>
+                <label class="prediction-scope-filter">
+                  Ver
+                  <select id="predictionScopeFilter">
+                    <option value="favorite">Mi selección</option>
+                    <option value="group">Mi grupo</option>
+                    <option value="all">Todo el calendario</option>
+                  </select>
+                </label>
+                <label class="prediction-group-filter">
+                  Grupo
+                  <select id="predictionGroupFilter">
+                    <option value="A">Grupo A</option>
+                    <option value="B">Grupo B</option>
+                    <option value="C">Grupo C</option>
+                    <option value="D">Grupo D</option>
+                    <option value="E">Grupo E</option>
+                    <option value="F">Grupo F</option>
+                    <option value="G">Grupo G</option>
+                    <option value="H">Grupo H</option>
+                    <option value="I">Grupo I</option>
+                    <option value="J">Grupo J</option>
+                    <option value="K">Grupo K</option>
+                    <option value="L">Grupo L</option>
+                  </select>
+                </label>
+              </div>
+              <div class="prediction-matches-list" id="predictionMatchesList"></div>
+              <article class="selected-match-detail" id="selectedMatchDetail" aria-live="polite"></article>
+              <p class="prediction-editing-note" id="predictionEditingNote">
+                Selecciona un partido para crear o editar tu predicción.
+              </p>
+              <form class="prediction-form" id="predictionForm">
+                <label>
+                  <span id="homeScoreLabel">Goles local</span>
+                  <input name="homeScore" type="number" min="0" max="12" value="0" required />
+                </label>
+                <label>
+                  <span id="awayScoreLabel">Goles visitante</span>
+                  <input name="awayScore" type="number" min="0" max="12" value="0" required />
+                </label>
+                <label>
+                  <span id="homeScorerLabel">Goleadores local</span>
+                  <input name="homeScorer" id="homeScorer" type="text" placeholder="Separados por coma" list="homeScorerOptions" />
+                  <datalist id="homeScorerOptions"></datalist>
+                  <div class="prediction-scorer-panel" id="homePredictionScorerChips"></div>
+                </label>
+                <label>
+                  <span id="awayScorerLabel">Goleadores visitante</span>
+                  <input name="awayScorer" id="awayScorer" type="text" placeholder="Separados por coma" list="awayScorerOptions" />
+                  <datalist id="awayScorerOptions"></datalist>
+                  <div class="prediction-scorer-panel" id="awayPredictionScorerChips"></div>
+                </label>
+                <button class="btn btn-primary" type="submit">
+                  <span aria-hidden="true">✓</span>
+                  <span id="predictionSubmitText">Guardar predicción</span>
+                </button>
+              </form>
+              <button class="delete-prediction-button is-hidden" id="deletePredictionButton" type="button">
+                Eliminar predicción
+              </button>
+              <p class="prediction-summary" id="predictionSummary" role="status">
+                Aún no has guardado predicción para este partido.
+              </p>
+              <div class="scoring-rules">
+                <span>Marcador exacto: +8</span>
+                <span>Ganador: +3</span>
+                <span>Goleador acertado: +2 c/u</span>
+              </div>
+            </article>
+
+            <article class="dashboard-panel wide-panel" data-dashboard-panel="retos">
+              <div class="panel-header">
+                <div>
+                  <span>Retos 1 vs 1</span>
+                  <h3>Reta a otro jugador por un partido</h3>
+                </div>
+              </div>
+              <div class="challenge-summary" id="challengeSummaryCards"></div>
+              <form class="challenge-form" id="challengeForm">
+                <label>
+                  Partido
+                  <select name="matchId" id="challengeMatchSelect" required></select>
+                </label>
+                <label>
+                  Tu equipo
+                  <select name="team" id="challengeTeamSelect" required></select>
+                </label>
+                <label>
+                  Valor acordado
+                  <input name="stakeAmount" type="number" min="0" step="1000" value="20000" required />
+                </label>
+                <button class="btn btn-primary" type="submit">Crear reto</button>
+              </form>
+              <p class="prediction-editing-note" id="challengeNote" role="status"></p>
+              <div class="challenge-columns">
+                <section>
+                  <h4>Retos abiertos</h4>
+                  <div class="challenge-list" id="openChallengesList"></div>
+                </section>
+                <section>
+                  <h4>Mis retos</h4>
+                  <div class="challenge-list" id="myChallengesList"></div>
+                </section>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section admin-section" id="admin" data-view="admin">
+        <div class="section-heading">
+          <p class="eyebrow">Panel administrativo</p>
+          <h2>Control de inscritos para COMBI SEASON Mundial.</h2>
+        </div>
+
+        <div class="admin-grid">
+          <article class="admin-stat">
+            <span>Registros</span>
+            <strong id="adminTotalUsers">0</strong>
+          </article>
+          <article class="admin-stat">
+            <span>Participantes activos</span>
+            <strong id="adminPendingPayments">0</strong>
+          </article>
+          <article class="admin-stat">
+            <span>Predicciones totales</span>
+            <strong id="adminTotalPredictions">0</strong>
+          </article>
+          <article class="admin-stat">
+            <span>Promedio por jugador</span>
+            <strong id="adminPredictionAverage">0</strong>
+          </article>
+          <article class="admin-stat">
+            <span>Equipo más elegido</span>
+            <strong id="adminTopTeam">-</strong>
+          </article>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Movimiento del parche</span>
+              <h3>Actividad reciente</h3>
+            </div>
+          </div>
+          <div class="activity-feed admin-activity-feed" id="adminActivityFeed" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Sorteo oficial</span>
+              <h3>Participantes asignados</h3>
+            </div>
+          </div>
+          <div class="draw-summary" id="drawSummary" aria-live="polite"></div>
+          <div class="admin-table" id="drawParticipantsTable" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Inscritos</span>
+              <h3>Usuarios registrados</h3>
+            </div>
+            <button class="icon-button" id="refreshAdminPanel" type="button" title="Actualizar panel">↻</button>
+          </div>
+          <div class="admin-table" id="adminUsersTable" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Retos 1 vs 1</span>
+              <h3>Control de retos</h3>
+            </div>
+            <button class="mini-action danger-action" id="clearChallengesButton" type="button">
+              Limpiar retos de prueba
+            </button>
+          </div>
+          <div class="draw-summary" id="adminChallengeSummary" aria-live="polite"></div>
+          <div class="admin-table" id="adminChallengesTable" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Actividad</span>
+              <h3>Predicciones por partido</h3>
+            </div>
+          </div>
+          <div class="knockout-toolbar">
+            <button class="btn btn-secondary" id="syncKnockoutButton" type="button">
+              Actualizar cruces de eliminación
+            </button>
+            <span>Usa resultados cerrados para rellenar partidos 73-104.</span>
+          </div>
+          <form class="result-form" id="resultForm">
+            <label>
+              Partido
+              <select name="matchId" id="resultMatchSelect" required></select>
+            </label>
+            <label>
+              Goles local
+              <input name="homeScore" type="number" min="0" max="20" value="0" required />
+            </label>
+            <label>
+              Goles visitante
+              <input name="awayScore" type="number" min="0" max="20" value="0" required />
+            </label>
+            <label>
+              Goleadores local
+              <input name="homeScorers" type="hidden" />
+              <div class="scorer-chip-panel" id="homeScorerChips"></div>
+            </label>
+            <label>
+              Goleadores visitante
+              <input name="awayScorers" type="hidden" />
+              <div class="scorer-chip-panel" id="awayScorerChips"></div>
+            </label>
+            <button class="btn btn-primary" type="submit">Guardar resultado y puntos</button>
+          </form>
+          <p class="form-note admin-note" id="resultNote" role="status"></p>
+          <div class="admin-match-detail" id="adminMatchDetail" aria-live="polite"></div>
+          <div class="admin-table" id="adminMatchesTable" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <span>Plantillas</span>
+              <h3>Jugadores por selección</h3>
+            </div>
+          </div>
+          <div class="team-player-toolbar">
+            <label>
+              Selección
+              <select id="adminPlayerTeam"></select>
+            </label>
+          </div>
+          <form class="team-player-form" id="teamPlayerForm">
+            <label>
+              Nombre
+              <input name="name" type="text" placeholder="Nombre del jugador" required />
+            </label>
+            <label>
+              Posición
+              <input name="position" type="text" placeholder="Delantero" />
+            </label>
+            <label>
+              Número
+              <input name="shirtNumber" type="number" min="1" max="99" placeholder="10" />
+            </label>
+            <label>
+              Club
+              <input name="club" type="text" placeholder="Club" />
+            </label>
+            <label class="toggle-field">
+              <input name="isFeatured" type="checkbox" checked />
+              Destacado
+            </label>
+            <label class="toggle-field">
+              <input name="active" type="checkbox" checked />
+              Activo
+            </label>
+            <button class="btn btn-primary" type="submit">Guardar jugador</button>
+          </form>
+          <p class="form-note admin-note" id="teamPlayerNote" role="status"></p>
+          <div class="admin-table" id="adminTeamPlayersTable" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>COMBI SEASON Mundial</span>
+      <span>Hecho para lanzar, medir interés y activar pagos después.</span>
+    </footer>
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+      window.addEventListener("error", (event) => {
+        const loginNote = document.querySelector("#loginNote");
+        if (loginNote && !loginNote.textContent) {
+          loginNote.textContent = `Error de arranque: ${event.message}`;
+          loginNote.classList.add("is-error");
+        }
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        const loginNote = document.querySelector("#loginNote");
+        if (loginNote && !loginNote.textContent) {
+          const message = event.reason?.message || String(event.reason);
+          loginNote.textContent = `Error de conexión: ${message}`;
+          loginNote.classList.add("is-error");
+        }
+      });
+
+      if (window.location.protocol === "file:") {
+        document.querySelector("#fileWarning")?.classList.remove("is-hidden");
+      }
+    </script>
+    <script type="module" src="js/app.js?v=admin-rpc-fix"></script>
+  </body>
+</html>
