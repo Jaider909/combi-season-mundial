@@ -671,6 +671,16 @@ function showError(element, error) {
     return;
   }
 
+  if (lowerMessage.includes("for security purposes") && lowerMessage.includes("seconds")) {
+    const seconds = message.match(/after\s+(\d+)\s+seconds/i)?.[1];
+    setError(
+      seconds
+        ? `Supabase está protegiendo el envío de correos. Espera ${seconds} segundos e intenta de nuevo.`
+        : "Supabase está protegiendo el envío de correos. Espera un minuto e intenta de nuevo."
+    );
+    return;
+  }
+
   setError(`No se pudo completar: ${message}`);
 }
 
