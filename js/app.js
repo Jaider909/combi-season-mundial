@@ -73,7 +73,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-scorer-chips";
+} from "./ui/predictions.js?v=prediction-mobile-guard";
 import { renderRanking } from "./ui/ranking.js?v=ranking-polish";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -478,6 +478,22 @@ function parseScorerList(value) {
 
 function normalizeScorerInput(value) {
   return parseScorerList(value).join(", ");
+}
+
+function getFormValue(form, fieldName, fallback = "") {
+  const field = form?.elements?.[fieldName];
+
+  if (field && "value" in field) {
+    return field.value ?? fallback;
+  }
+
+  const value = new FormData(form).get(fieldName);
+  return value ?? fallback;
+}
+
+function getFormNumber(form, fieldName, fallback = 0) {
+  const value = Number(getFormValue(form, fieldName, fallback));
+  return Number.isFinite(value) ? value : fallback;
 }
 
 function resolveVisibleSelectedMatch(visibleMatches) {
@@ -1453,7 +1469,6 @@ predictionForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const data = new FormData(predictionForm);
   const submittedMatch = selectedMatch;
   const prediction = {
     playerId: user.id,
@@ -1461,10 +1476,10 @@ predictionForm.addEventListener("submit", async (event) => {
     matchId: selectedMatch.id,
     homeTeam: selectedMatch.homeTeam,
     awayTeam: selectedMatch.awayTeam,
-    homeScore: Number(data.get("homeScore")),
-    awayScore: Number(data.get("awayScore")),
-    homeScorer: normalizeScorerInput(data.get("homeScorer")),
-    awayScorer: normalizeScorerInput(data.get("awayScorer")),
+    homeScore: getFormNumber(predictionForm, "homeScore"),
+    awayScore: getFormNumber(predictionForm, "awayScore"),
+    homeScorer: normalizeScorerInput(getFormValue(predictionForm, "homeScorer")),
+    awayScorer: normalizeScorerInput(getFormValue(predictionForm, "awayScorer")),
     savedAt: new Date().toISOString(),
   };
 

@@ -206,6 +206,11 @@ function bindPredictionScorerChips(form) {
     const fieldName = chip.dataset.predictionScorerField;
     const scorerName = decodeURIComponent(chip.dataset.predictionScorerName || "");
     const input = form.querySelector(`[name="${fieldName}"]`);
+
+    if (!input) {
+      return;
+    }
+
     const selectedScorers = parseScorerInput(input.value);
     const nextScorers = selectedScorers.includes(scorerName)
       ? selectedScorers.filter((name) => name !== scorerName)
