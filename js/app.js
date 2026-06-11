@@ -2,11 +2,12 @@ import { assignedParticipants } from "./config/assigned-participants.js";
 import { qualifiedTeams } from "./config/teams.js";
 import {
   getPlayersForTeam,
+  listPlayersForTeams,
   listPlayersByTeam,
   listTeamPlayersForAdmin,
   saveTeamPlayer,
   updateTeamPlayer,
-} from "./services/team-player-repository.js?v=roster-pagination";
+} from "./services/team-player-repository.js?v=match-roster-guard";
 import { findGroupByTeam, worldCupGroups } from "./config/groups.js";
 import { isAdminEmail } from "./config/admins.js";
 import { startCountdown } from "./countdown.js";
@@ -188,6 +189,13 @@ async function refreshPanels(user) {
   );
   selectedMatch = resolveSelectedMatch(activeUser, favoriteMatches);
   selectedMatch = resolveVisibleSelectedMatch(visiblePredictionMatches);
+  if (selectedMatch) {
+    const selectedMatchPlayers = await listPlayersForTeams([
+      selectedMatch.homeTeam,
+      selectedMatch.awayTeam,
+    ]);
+    currentPlayersByTeam = { ...playersByTeam, ...selectedMatchPlayers };
+  }
   const prediction =
     activeUser && selectedMatch
       ? currentPredictions.find(
@@ -248,8 +256,8 @@ async function refreshPanels(user) {
   renderPredictionForm(
     selectedMatch,
     prediction,
-    getPlayersForTeam(playersByTeam, selectedMatch?.homeTeam),
-    getPlayersForTeam(playersByTeam, selectedMatch?.awayTeam)
+    getPlayersForTeam(currentPlayersByTeam, selectedMatch?.homeTeam),
+    getPlayersForTeam(currentPlayersByTeam, selectedMatch?.awayTeam)
   );
   renderPredictionSummary(prediction, selectedMatch);
   renderChallengeForm(currentMatches, activeUser);
@@ -1512,7 +1520,10 @@ predictionForm.addEventListener("submit", async (event) => {
       ) || prediction;
 
     if (!selectedMatch || selectedMatch.id !== submittedMatch.id) {
-      const playersByTeam = await listPlayersByTeam();
+      const playersByTeam = await listPlayersForTeams([
+        submittedMatch.homeTeam,
+        submittedMatch.awayTeam,
+      ]);
       selectedMatch = submittedMatch;
       renderSelectedMatchDetail(submittedMatch, savedPrediction);
       renderPredictionForm(

@@ -90,6 +90,46 @@ export function getPlayersForTeam(playersByTeam, team) {
   return playersByTeam?.[team] || fallbackTeamPlayers[team] || [];
 }
 
+export async function listPlayersForTeams(teams = []) {
+  const uniqueTeams = [...new Set(teams.filter(Boolean))];
+
+  if (!uniqueTeams.length) {
+    return {};
+  }
+
+  if (!isSupabaseConfigured()) {
+    const fallback = fallbackMap();
+    return Object.fromEntries(uniqueTeams.map((team) => [team, fallback[team] || []]));
+  }
+
+  try {
+    const client = await getSupabaseClient();
+    const { data, error } = await client
+      .from("team_players")
+      .select("team, name, position, is_featured")
+      .eq("active", true)
+      .in("team", uniqueTeams)
+      .order("team", { ascending: true })
+      .order("is_featured", { ascending: false })
+      .order("shirt_number", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const grouped = groupPlayers(data || []);
+    const fallback = fallbackMap();
+    return Object.fromEntries(
+      uniqueTeams.map((team) => [team, grouped[team]?.length ? grouped[team] : fallback[team] || []])
+    );
+  } catch (error) {
+    console.warn("No se pudieron cargar jugadores para el partido desde Supabase.", error);
+    const fallback = fallbackMap();
+    return Object.fromEntries(uniqueTeams.map((team) => [team, fallback[team] || []]));
+  }
+}
+
 export async function listTeamPlayersForAdmin(team = null) {
   if (!isSupabaseConfigured()) {
     return Object.entries(fallbackTeamPlayers).flatMap(([team, players]) =>
