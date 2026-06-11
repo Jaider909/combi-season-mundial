@@ -6,7 +6,7 @@ import {
   listTeamPlayersForAdmin,
   saveTeamPlayer,
   updateTeamPlayer,
-} from "./services/team-player-repository.js?v=roster-production";
+} from "./services/team-player-repository.js?v=roster-pagination";
 import { findGroupByTeam, worldCupGroups } from "./config/groups.js";
 import { isAdminEmail } from "./config/admins.js";
 import { startCountdown } from "./countdown.js";

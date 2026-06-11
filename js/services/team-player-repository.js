@@ -33,6 +33,37 @@ function groupPlayers(rows) {
   }, {});
 }
 
+async function fetchTeamPlayersPage(client, from, to) {
+  const { data, error } = await client
+    .from("team_players")
+    .select("team, name, position, is_featured")
+    .eq("active", true)
+    .order("team", { ascending: true })
+    .order("is_featured", { ascending: false })
+    .order("name", { ascending: true })
+    .range(from, to);
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+async function fetchAllActiveTeamPlayers(client) {
+  const pageSize = 1000;
+  const rows = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const page = await fetchTeamPlayersPage(client, from, from + pageSize - 1);
+    rows.push(...page);
+
+    if (page.length < pageSize) {
+      return rows;
+    }
+  }
+}
+
 export async function listPlayersByTeam() {
   if (cachedPlayersByTeam) {
     return cachedPlayersByTeam;
@@ -45,20 +76,8 @@ export async function listPlayersByTeam() {
 
   try {
     const client = await getSupabaseClient();
-    const { data, error } = await client
-      .from("team_players")
-      .select("team, name, position, is_featured")
-      .eq("active", true)
-      .order("team", { ascending: true })
-      .order("is_featured", { ascending: false })
-      .order("name", { ascending: true })
-      .range(0, 2000);
-
-    if (error) {
-      throw error;
-    }
-
-    cachedPlayersByTeam = data?.length ? groupPlayers(data) : fallbackMap();
+    const data = await fetchAllActiveTeamPlayers(client);
+    cachedPlayersByTeam = data.length ? groupPlayers(data) : fallbackMap();
     return cachedPlayersByTeam;
   } catch (error) {
     console.warn("No se pudieron cargar jugadores desde Supabase.", error);
