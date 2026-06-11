@@ -2,9 +2,7 @@
 -- FIFA: 12 Jun 2026 02:00 UTC = 11 Jun 2026 09:00 p.m. Colombia.
 
 update public.matches
-set
-  match_date = '2026-06-12T02:00:00+00:00',
-  updated_at = now()
+set match_date = '2026-06-12T02:00:00+00:00'
 where match_number = 2
   and home_team = 'Corea del Sur'
   and away_team = 'República Checa';
