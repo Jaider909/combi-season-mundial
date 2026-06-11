@@ -46,7 +46,7 @@ import {
   settleChallengesForMatch,
   updateChallenge,
 } from "./services/challenge-repository.js?v=challenge-finance-polish";
-import { calculatePredictionPoints, sumPlayerPoints } from "./services/scoring-service.js?v=multi-scorers";
+import { calculatePredictionPoints, sumPlayerPoints } from "./services/scoring-service.js?v=cumulative-scoring";
 import {
   clearCurrentUser,
   activateUserSession,
