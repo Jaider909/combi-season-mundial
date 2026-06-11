@@ -9,7 +9,7 @@ export const assignedParticipants = [
   { name: "Emiliano", email: "emilianojosevilla12@gmail.com", team: "Japón" },
   { name: "Julian Z", email: "julianz.98@hotmail.com", team: "Marruecos" },
   { name: "Cristian Zap", email: "cdzt10@gmail.com", team: "Suiza" },
-  { name: "Papo", email: "jazl940726@gmail.com", team: "Turquía" },
+  { name: "Papo", email: "jazl940726@gmail.com", team: "Ecuador" },
   { name: "Camilo", email: "kmig9507@gmail.com", team: "España" },
   { name: "Diego Tevez", email: "diego9305castro@gmail.com", team: "Inglaterra" },
   { name: "Gallego", email: "gallegol99@gmail.com", team: "Argentina" },
@@ -17,7 +17,6 @@ export const assignedParticipants = [
   { name: "Jaider", email: "jaimoro909@hotmail.com", team: "Colombia" },
   { name: "Fercho", email: "luisfgv1104@gmail.com", team: "Bélgica" },
   { name: "Mateo", email: "mateuro25@gmail.com", team: "Senegal" },
-  { name: "Melisa Garcia", email: "dmelissag2609@gmail.com", team: "Ecuador" },
 ];
 
 export function normalizeEmail(email) {

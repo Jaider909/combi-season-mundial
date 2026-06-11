@@ -51,15 +51,14 @@ values
   ('Emiliano', 'emilianojosevilla12@gmail.com', 'Japón'),
   ('Julian Z', 'julianz.98@hotmail.com', 'Marruecos'),
   ('Cristian Zap', 'cdzt10@gmail.com', 'Suiza'),
-  ('Papo', 'jazl940726@gmail.com', 'Turquía'),
+  ('Papo', 'jazl940726@gmail.com', 'Ecuador'),
   ('Camilo', 'kmig9507@gmail.com', 'España'),
   ('Diego Tevez', 'diego9305castro@gmail.com', 'Inglaterra'),
   ('Gallego', 'gallegol99@gmail.com', 'Argentina'),
   ('Tavo', 'gonzalezg6107@gmail.com', 'Portugal'),
   ('Jaider', 'jaimoro909@hotmail.com', 'Colombia'),
   ('Fercho', 'luisfgv1104@gmail.com', 'Bélgica'),
-  ('Mateo', 'mateuro25@gmail.com', 'Senegal'),
-  ('Melisa Garcia', 'dmelissag2609@gmail.com', 'Ecuador')
+  ('Mateo', 'mateuro25@gmail.com', 'Senegal')
 on conflict (email) do update set
   name = excluded.name,
   assigned_team = excluded.assigned_team;
