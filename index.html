@@ -8,7 +8,7 @@
       name="description"
       content="Polla mundialista premium de COMBI SEASON: predicciones, ranking, premios y una experiencia lista para activar pagos."
     />
-    <link rel="stylesheet" href="styles.css?v=prediction-scroll-focus" />
+    <link rel="stylesheet" href="styles.css?v=mobile-editor-first" />
     <script defer src="/_vercel/insights/script.js"></script>
   </head>
   <body class="route-inicio">
@@ -632,47 +632,51 @@
                   </select>
                 </label>
               </div>
-              <div class="prediction-matches-list" id="predictionMatchesList"></div>
-              <article class="selected-match-detail" id="selectedMatchDetail" aria-live="polite"></article>
-              <p class="prediction-editing-note" id="predictionEditingNote">
-                Selecciona un partido para crear o editar tu predicción.
-              </p>
-              <form class="prediction-form" id="predictionForm">
-                <label>
-                  <span id="homeScoreLabel">Goles local</span>
-                  <input name="homeScore" type="number" min="0" max="12" value="0" required />
-                </label>
-                <label>
-                  <span id="awayScoreLabel">Goles visitante</span>
-                  <input name="awayScore" type="number" min="0" max="12" value="0" required />
-                </label>
-                <label>
-                  <span id="homeScorerLabel">Goleadores local</span>
-                  <input name="homeScorer" id="homeScorer" type="text" placeholder="Separados por coma" list="homeScorerOptions" />
-                  <datalist id="homeScorerOptions"></datalist>
-                  <div class="prediction-scorer-panel" id="homePredictionScorerChips"></div>
-                </label>
-                <label>
-                  <span id="awayScorerLabel">Goleadores visitante</span>
-                  <input name="awayScorer" id="awayScorer" type="text" placeholder="Separados por coma" list="awayScorerOptions" />
-                  <datalist id="awayScorerOptions"></datalist>
-                  <div class="prediction-scorer-panel" id="awayPredictionScorerChips"></div>
-                </label>
-                <button class="btn btn-primary" type="submit">
-                  <span aria-hidden="true">✓</span>
-                  <span id="predictionSubmitText">Guardar predicción</span>
-                </button>
-              </form>
-              <button class="delete-prediction-button is-hidden" id="deletePredictionButton" type="button">
-                Eliminar predicción
-              </button>
-              <p class="prediction-summary" id="predictionSummary" role="status">
-                Aún no has guardado predicción para este partido.
-              </p>
-              <div class="scoring-rules">
-                <span>Marcador exacto: +8</span>
-                <span>Ganador: +3</span>
-                <span>Goleador acertado: +2 c/u</span>
+              <div class="prediction-workspace">
+                <div class="prediction-matches-list" id="predictionMatchesList"></div>
+                <div class="prediction-editor" id="predictionEditor">
+                  <article class="selected-match-detail" id="selectedMatchDetail" aria-live="polite"></article>
+                  <p class="prediction-editing-note" id="predictionEditingNote">
+                    Selecciona un partido para crear o editar tu predicción.
+                  </p>
+                  <form class="prediction-form" id="predictionForm">
+                    <label>
+                      <span id="homeScoreLabel">Goles local</span>
+                      <input name="homeScore" type="number" min="0" max="12" value="0" required />
+                    </label>
+                    <label>
+                      <span id="awayScoreLabel">Goles visitante</span>
+                      <input name="awayScore" type="number" min="0" max="12" value="0" required />
+                    </label>
+                    <label>
+                      <span id="homeScorerLabel">Goleadores local</span>
+                      <input name="homeScorer" id="homeScorer" type="text" placeholder="Separados por coma" list="homeScorerOptions" />
+                      <datalist id="homeScorerOptions"></datalist>
+                      <div class="prediction-scorer-panel" id="homePredictionScorerChips"></div>
+                    </label>
+                    <label>
+                      <span id="awayScorerLabel">Goleadores visitante</span>
+                      <input name="awayScorer" id="awayScorer" type="text" placeholder="Separados por coma" list="awayScorerOptions" />
+                      <datalist id="awayScorerOptions"></datalist>
+                      <div class="prediction-scorer-panel" id="awayPredictionScorerChips"></div>
+                    </label>
+                    <button class="btn btn-primary" type="submit">
+                      <span aria-hidden="true">✓</span>
+                      <span id="predictionSubmitText">Guardar predicción</span>
+                    </button>
+                  </form>
+                  <button class="delete-prediction-button is-hidden" id="deletePredictionButton" type="button">
+                    Eliminar predicción
+                  </button>
+                  <p class="prediction-summary" id="predictionSummary" role="status">
+                    Aún no has guardado predicción para este partido.
+                  </p>
+                  <div class="scoring-rules">
+                    <span>Marcador exacto: +8</span>
+                    <span>Ganador: +3</span>
+                    <span>Goleador acertado: +2 c/u</span>
+                  </div>
+                </div>
               </div>
             </article>
 
@@ -907,6 +911,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=match-roster-guard"></script>
+    <script type="module" src="js/app.js?v=mobile-editor-first"></script>
   </body>
 </html>

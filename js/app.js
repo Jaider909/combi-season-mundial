@@ -505,13 +505,17 @@ function getFormNumber(form, fieldName, fallback = 0) {
 }
 
 function scrollToPredictionEditor() {
-  const target = document.querySelector("#predictionEditingNote") || predictionForm;
+  const target = document.querySelector("#predictionEditor") || predictionForm;
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
   const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 18;
 
   window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
   predictionForm.classList.add("is-focused");
   window.setTimeout(() => predictionForm.classList.remove("is-focused"), 1400);
+  window.setTimeout(() => {
+    const nextTop = target.getBoundingClientRect().top + window.scrollY - headerHeight - 18;
+    window.scrollTo({ top: Math.max(nextTop, 0), behavior: "smooth" });
+  }, 120);
 }
 
 function resolveVisibleSelectedMatch(visibleMatches) {

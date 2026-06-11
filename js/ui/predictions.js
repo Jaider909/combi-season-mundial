@@ -449,7 +449,7 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
             <p>${match.phase} · ${match.status}</p>
             ${predictionDetails}
           </div>
-          <button class="btn btn-secondary btn-full" type="button">
+          <button class="btn btn-secondary btn-full" type="button" data-select-match="${match.id}">
             ${status}
           </button>
         </article>

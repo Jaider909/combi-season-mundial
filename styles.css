@@ -1644,6 +1644,15 @@ h3 {
   margin-bottom: 18px;
 }
 
+.prediction-workspace {
+  display: flex;
+  flex-direction: column;
+}
+
+.prediction-editor {
+  scroll-margin-top: 110px;
+}
+
 .selected-match-detail {
   display: grid;
   gap: 14px;
@@ -2444,6 +2453,11 @@ h3 {
 
   .hero-visual img {
     height: 460px;
+  }
+
+  .prediction-editor {
+    order: -1;
+    margin-bottom: 18px;
   }
 
   .steps,
