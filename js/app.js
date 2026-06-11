@@ -57,7 +57,7 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin } from "./ui/admin.js?v=challenge-finance-polish";
+import { renderAdmin } from "./ui/admin.js?v=admin-lock-matches";
 import { renderDashboard } from "./ui/dashboard.js?v=editable-profile";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=live-standings";
 import {
@@ -400,14 +400,9 @@ function syncResultForm(matchId) {
   writeSelectedScorers("awayScorers", resultScorers.awayScorers);
   renderScorerChips(match);
   const isLocked = match.status === "locked";
-  resultForm
-    .querySelectorAll('input:not([name="matchId"]), button[type="submit"]')
-    .forEach((field) => {
-      field.disabled = isLocked;
-    });
   resultNote.textContent =
     isLocked
-      ? `Cruce bloqueado: ${match.homeTeam} vs ${match.awayTeam}. Se activa cuando se definan clasificados.`
+      ? `Predicciones cerradas: ${match.homeTeam} vs ${match.awayTeam}. Puedes guardar resultado al finalizar.`
       : match.status === "finished"
       ? `Resultado cargado: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}.`
       : `Partido abierto: ${match.homeTeam} vs ${match.awayTeam}.`;
@@ -1371,11 +1366,6 @@ resultForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (match.status === "locked") {
-    showNote(resultNote, "Este cruce está bloqueado hasta definir clasificados.", "warning");
-    return;
-  }
-
   try {
     setButtonBusy(resultSubmitButton, true, "Guardando...");
     resultSelectedMatchId = matchId;
@@ -1410,7 +1400,36 @@ resultMatchSelect.addEventListener("change", (event) => {
 });
 
 document.querySelector("#adminMatchesTable").addEventListener("click", async (event) => {
+  const lockButton = event.target.closest("[data-lock-match]");
   const button = event.target.closest("[data-reopen-match]");
+
+  if (lockButton) {
+    const matchId = lockButton.dataset.lockMatch;
+    const match = currentMatches.find((item) => item.id === matchId);
+
+    if (!match) {
+      showNote(resultNote, "No encontramos ese partido para cerrar.", "warning");
+      return;
+    }
+
+    try {
+      setButtonBusy(lockButton, true, "Cerrando...");
+      resultSelectedMatchId = matchId;
+      const lockedMatch = {
+        ...match,
+        status: "locked",
+      };
+      await updateMatchResult(matchId, lockedMatch);
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, `Predicciones cerradas para ${match.homeTeam} vs ${match.awayTeam}.`, "success");
+      notifyApp("Predicciones cerradas", `${match.homeTeam} vs ${match.awayTeam}`);
+    } catch (error) {
+      showError(resultNote, error);
+    } finally {
+      setButtonBusy(lockButton, false);
+    }
+    return;
+  }
 
   if (button) {
     const matchId = button.dataset.reopenMatch;

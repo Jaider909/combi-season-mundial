@@ -371,7 +371,27 @@ export function renderAdmin(
     .map((match) => {
       const total = getMatchPredictionCount(predictions, match.id);
       const isFinished = match.status === "finished";
-      const actionLabel = isFinished ? "Reabrir" : "Abierto";
+      const isLocked = match.status === "locked";
+      const actionButton = match.status === "open"
+        ? `
+            <button
+              class="mini-action"
+              type="button"
+              data-lock-match="${match.id}"
+            >
+              Cerrar
+            </button>
+          `
+        : `
+            <button
+              class="mini-action"
+              type="button"
+              data-reopen-match="${match.id}"
+              ${isFinished || isLocked ? "" : "disabled"}
+            >
+              Reabrir
+            </button>
+          `;
 
       return `
         <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
@@ -381,14 +401,7 @@ export function renderAdmin(
           <span>${total} predicciones</span>
           <span>
             <span class="payment-chip">${escapeHtml(match.status)}</span>
-            <button
-              class="mini-action"
-              type="button"
-              data-reopen-match="${match.id}"
-              ${isFinished ? "" : "disabled"}
-            >
-              ${actionLabel}
-            </button>
+            ${actionButton}
           </span>
         </div>
       `;
