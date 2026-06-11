@@ -1226,7 +1226,7 @@ refreshAdminPanel.addEventListener("click", async () => {
 
 clearChallengesButton.addEventListener("click", async () => {
   const shouldClear = window.confirm(
-    "¿Limpiar todos los retos de prueba? Esta accion borra retos abiertos, aceptados y cerrados. No borra usuarios, partidos ni predicciones."
+    "¿Limpiar retos cancelados? Esta accion no borra retos abiertos, aceptados, cerrados, usuarios, partidos ni predicciones."
   );
 
   if (!shouldClear) {
@@ -1237,8 +1237,8 @@ clearChallengesButton.addEventListener("click", async () => {
     setButtonBusy(clearChallengesButton, true, "Limpiando...");
     await clearChallenges();
     await refreshPanels(await getCurrentUser());
-    showNote(resultNote, "Retos limpiados correctamente.", "success");
-    notifyApp("Retos limpiados", "El módulo quedó en cero.");
+    showNote(resultNote, "Retos cancelados limpiados correctamente.", "success");
+    notifyApp("Retos cancelados limpiados", "El historial activo se conserva.");
   } catch (error) {
     showError(resultNote, error);
   } finally {

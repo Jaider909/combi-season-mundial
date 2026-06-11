@@ -124,7 +124,10 @@ export async function updateChallenge(challengeId, patch) {
 
 export async function clearChallenges() {
   if (!isSupabaseConfigured()) {
-    writeJson(challengesKey, []);
+    const activeChallenges = readJson(challengesKey, []).filter(
+      (challenge) => challenge.status !== "cancelled"
+    );
+    writeJson(challengesKey, activeChallenges);
     return;
   }
 
@@ -132,7 +135,7 @@ export async function clearChallenges() {
   const { error } = await client
     .from("challenges")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+    .eq("status", "cancelled");
 
   if (error) {
     throw error;
