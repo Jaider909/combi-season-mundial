@@ -375,11 +375,11 @@ export function renderAdmin(
       const actionButton = match.status === "open"
         ? `
             <button
-              class="mini-action"
+              class="mini-action mini-action-danger"
               type="button"
               data-lock-match="${match.id}"
             >
-              Cerrar
+              Cerrar predicciones
             </button>
           `
         : `
@@ -389,7 +389,7 @@ export function renderAdmin(
               data-reopen-match="${match.id}"
               ${isFinished || isLocked ? "" : "disabled"}
             >
-              Reabrir
+              Reabrir predicciones
             </button>
           `;
 

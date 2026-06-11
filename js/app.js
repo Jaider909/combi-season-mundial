@@ -57,7 +57,7 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin } from "./ui/admin.js?v=admin-lock-matches";
+import { renderAdmin } from "./ui/admin.js?v=admin-prediction-lock";
 import { renderDashboard } from "./ui/dashboard.js?v=editable-profile";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=live-standings";
 import {
@@ -1504,7 +1504,7 @@ predictionForm.addEventListener("submit", async (event) => {
   if (selectedMatch.status === "locked") {
     showNote(
       document.querySelector("#predictionEditingNote"),
-      "Este cruce todavía está pendiente de clasificación.",
+      "Las predicciones de este partido ya fueron cerradas por el administrador.",
       "warning"
     );
     return;

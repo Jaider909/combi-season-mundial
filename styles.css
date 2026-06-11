@@ -2366,6 +2366,7 @@ h3 {
 
 .mini-action {
   display: inline-flex;
+  justify-content: center;
   margin-top: 8px;
   padding: 7px 10px;
   color: var(--ink);
@@ -2375,6 +2376,12 @@ h3 {
   font-size: 0.78rem;
   font-weight: 900;
   cursor: pointer;
+}
+
+.mini-action-danger {
+  color: #fff6f6;
+  background: #6f2430;
+  box-shadow: 0 8px 18px rgba(111, 36, 48, 0.16);
 }
 
 .mini-action:disabled {
