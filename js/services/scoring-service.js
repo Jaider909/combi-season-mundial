@@ -24,6 +24,10 @@ function countMatchingScorers(players = [], predictedScorers) {
   return [...uniquePredictions].filter((playerName) => realPlayers.has(playerName)).length;
 }
 
+const EXACT_SCORE_POINTS = 8;
+const WINNER_POINTS = 3;
+const SCORER_POINTS = 2;
+
 export function calculatePredictionPoints(prediction, match) {
   if (
     match.status !== "finished" ||
@@ -37,21 +41,15 @@ export function calculatePredictionPoints(prediction, match) {
     prediction.homeScore === match.homeScore && prediction.awayScore === match.awayScore;
 
   const scorerPoints =
-    countMatchingScorers(match.homeScorers, prediction.homeScorer) * 2 +
-    countMatchingScorers(match.awayScorers, prediction.awayScorer) * 2;
-
-  if (exactScore) {
-    return 8 + scorerPoints;
-  }
+    countMatchingScorers(match.homeScorers, prediction.homeScorer) * SCORER_POINTS +
+    countMatchingScorers(match.awayScorers, prediction.awayScorer) * SCORER_POINTS;
 
   const predictedDiff = Math.sign(prediction.homeScore - prediction.awayScore);
   const realDiff = Math.sign(match.homeScore - match.awayScore);
+  const winnerPoints = predictedDiff === realDiff ? WINNER_POINTS : 0;
+  const exactScorePoints = exactScore ? EXACT_SCORE_POINTS : 0;
 
-  if (predictedDiff === realDiff) {
-    return 3 + scorerPoints;
-  }
-
-  return scorerPoints;
+  return exactScorePoints + winnerPoints + scorerPoints;
 }
 
 export function sumPlayerPoints(predictions, playerId) {
