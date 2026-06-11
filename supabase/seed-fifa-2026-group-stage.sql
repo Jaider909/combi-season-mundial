@@ -10,7 +10,7 @@ insert into public.matches
   (match_number, match_date, phase, group_code, home_team, away_team, status, source)
 values
   (1, '2026-06-11T19:00:00+00:00', 'Grupo A', 'A', 'México', 'Sudáfrica', 'open', 'FIFA World Cup 2026 official schedule PDF'),
-  (2, '2026-06-13T02:00:00+00:00', 'Grupo A', 'A', 'Corea del Sur', 'República Checa', 'open', 'FIFA World Cup 2026 official schedule PDF'),
+  (2, '2026-06-12T02:00:00+00:00', 'Grupo A', 'A', 'Corea del Sur', 'República Checa', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (3, '2026-06-12T19:00:00+00:00', 'Grupo B', 'B', 'Canadá', 'Bosnia y Herzegovina', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (4, '2026-06-14T01:00:00+00:00', 'Grupo D', 'D', 'Estados Unidos', 'Paraguay', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (5, '2026-06-14T01:00:00+00:00', 'Grupo C', 'C', 'Haití', 'Escocia', 'open', 'FIFA World Cup 2026 official schedule PDF'),
