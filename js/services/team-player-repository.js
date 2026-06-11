@@ -51,7 +51,8 @@ export async function listPlayersByTeam() {
       .eq("active", true)
       .order("team", { ascending: true })
       .order("is_featured", { ascending: false })
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .range(0, 2000);
 
     if (error) {
       throw error;
@@ -70,7 +71,7 @@ export function getPlayersForTeam(playersByTeam, team) {
   return playersByTeam?.[team] || fallbackTeamPlayers[team] || [];
 }
 
-export async function listTeamPlayersForAdmin() {
+export async function listTeamPlayersForAdmin(team = null) {
   if (!isSupabaseConfigured()) {
     return Object.entries(fallbackTeamPlayers).flatMap(([team, players]) =>
       players.map((name) => ({
@@ -87,12 +88,20 @@ export async function listTeamPlayersForAdmin() {
   }
 
   const client = await getSupabaseClient();
-  const { data, error } = await client
+  let query = client
     .from("team_players")
     .select("id, team, name, position, shirt_number, club, is_featured, active")
-    .order("team", { ascending: true })
+    .order("shirt_number", { ascending: true })
     .order("is_featured", { ascending: false })
     .order("name", { ascending: true });
+
+  if (team) {
+    query = query.eq("team", team);
+  } else {
+    query = query.range(0, 2000);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;
