@@ -496,6 +496,16 @@ function getFormNumber(form, fieldName, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function scrollToPredictionEditor() {
+  const target = document.querySelector("#predictionEditingNote") || predictionForm;
+  const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+  const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 18;
+
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+  predictionForm.classList.add("is-focused");
+  window.setTimeout(() => predictionForm.classList.remove("is-focused"), 1400);
+}
+
 function resolveVisibleSelectedMatch(visibleMatches) {
   if (!visibleMatches.length) {
     return null;
@@ -1593,7 +1603,7 @@ document.querySelector("#predictionMatchesList").addEventListener("click", async
   selectedMatchWasManual = true;
   selectedMatchTeam = (await getCurrentUser())?.team || null;
   await refreshPanels(await getCurrentUser());
-  predictionForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  scrollToPredictionEditor();
 });
 
 document.querySelector("#favoriteTeamMatches").addEventListener("click", async (event) => {
@@ -1616,7 +1626,7 @@ document.querySelector("#favoriteTeamMatches").addEventListener("click", async (
   predictionScopeMode = "favorite";
   window.location.hash = "predicciones";
   await refreshPanels(await getCurrentUser());
-  predictionForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  scrollToPredictionEditor();
 });
 
 document.querySelector("#predictionMatchesList").addEventListener("keydown", async (event) => {
@@ -1635,7 +1645,7 @@ document.querySelector("#predictionMatchesList").addEventListener("keydown", asy
   selectedMatchWasManual = true;
   selectedMatchTeam = (await getCurrentUser())?.team || null;
   await refreshPanels(await getCurrentUser());
-  predictionForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  scrollToPredictionEditor();
 });
 
 document.querySelector(".prediction-controls").addEventListener("click", async (event) => {

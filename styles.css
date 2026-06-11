@@ -1291,6 +1291,14 @@ h3 {
   grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   gap: 12px;
   align-items: end;
+  border-radius: 10px;
+  transition: box-shadow 180ms ease, outline-color 180ms ease;
+}
+
+.prediction-form.is-focused {
+  outline: 2px solid var(--lime);
+  outline-offset: 8px;
+  box-shadow: 0 0 0 10px rgba(224, 255, 70, 0.12);
 }
 
 .prediction-form label {
