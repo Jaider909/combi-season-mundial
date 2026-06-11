@@ -6,7 +6,7 @@ import {
   listTeamPlayersForAdmin,
   saveTeamPlayer,
   updateTeamPlayer,
-} from "./services/team-player-repository.js?v=admin-manager";
+} from "./services/team-player-repository.js?v=roster-production";
 import { findGroupByTeam, worldCupGroups } from "./config/groups.js";
 import { isAdminEmail } from "./config/admins.js";
 import { startCountdown } from "./countdown.js";
@@ -347,7 +347,7 @@ function renderAdminTeamPlayers() {
 
 async function refreshAdminTeamPlayers() {
   try {
-    currentTeamPlayers = await listTeamPlayersForAdmin();
+    currentTeamPlayers = await listTeamPlayersForAdmin(adminSelectedPlayerTeam);
     renderAdminTeamPlayers();
   } catch (error) {
     showError(teamPlayerNote, error);
