@@ -1215,7 +1215,7 @@ clearChallengesButton.addEventListener("click", async () => {
 
 adminPlayerTeam.addEventListener("change", (event) => {
   adminSelectedPlayerTeam = event.target.value;
-  renderAdminTeamPlayers();
+  refreshAdminTeamPlayers();
 });
 
 teamPlayerForm.addEventListener("submit", async (event) => {
