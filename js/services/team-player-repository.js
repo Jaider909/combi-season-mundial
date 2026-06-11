@@ -1,4 +1,4 @@
-import { teamPlayers as fallbackTeamPlayers } from "../config/team-players.js?v=phase-1";
+import { teamPlayers as fallbackTeamPlayers } from "../config/team-players.js?v=switzerland-fallback";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase-client.js";
 
 let cachedPlayersByTeam = null;
