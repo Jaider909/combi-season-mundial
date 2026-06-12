@@ -2196,6 +2196,20 @@ h3 {
   margin: 12px 0 18px;
 }
 
+.admin-quick-matches {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  background: #fbfaf4;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+}
+
+.compact-header {
+  margin-bottom: 0;
+}
+
 .admin-match-summary {
   display: grid;
   grid-template-columns: minmax(220px, 1.2fr) repeat(3, minmax(110px, 0.45fr)) minmax(180px, 1fr);

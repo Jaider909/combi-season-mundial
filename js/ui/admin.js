@@ -9,6 +9,19 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function getBogotaDateKey(value) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(value));
+
+  return ["year", "month", "day"]
+    .map((type) => parts.find((part) => part.type === type)?.value)
+    .join("-");
+}
+
 function getTopTeam(users) {
   const counts = users.reduce((summary, user) => {
     summary[user.team] = (summary[user.team] || 0) + 1;
@@ -24,6 +37,49 @@ function countPredictions(predictions, playerId) {
 
 function getMatchPredictionCount(predictions, matchId) {
   return predictions.filter((prediction) => prediction.matchId === matchId).length;
+}
+
+function renderMatchActionButton(match) {
+  const isFinished = match.status === "finished";
+  const isLocked = match.status === "locked";
+
+  if (match.status === "open") {
+    return `
+      <button
+        class="mini-action mini-action-danger"
+        type="button"
+        data-lock-match="${match.id}"
+      >
+        Cerrar predicciones
+      </button>
+    `;
+  }
+
+  return `
+    <button
+      class="mini-action"
+      type="button"
+      data-reopen-match="${match.id}"
+      ${isFinished || isLocked ? "" : "disabled"}
+    >
+      Reabrir predicciones
+    </button>
+  `;
+}
+
+function renderMatchRow(match, total) {
+  return `
+    <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
+      <span><strong>Partido ${match.matchNumber || "-"}</strong><br>${formatDate(match.date)}</span>
+      <span>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</span>
+      <span>${escapeHtml(match.phase)}</span>
+      <span>${total} predicciones</span>
+      <span>
+        <span class="payment-chip">${escapeHtml(match.status)}</span>
+        ${renderMatchActionButton(match)}
+      </span>
+    </div>
+  `;
 }
 
 function getUserById(users, userId) {
@@ -223,6 +279,57 @@ function renderAdminChallenges(users, matches, challenges = []) {
   `;
 }
 
+function renderAdminTodayMatches(matches, predictions) {
+  const container = document.querySelector("#adminTodayMatches");
+
+  if (!container) {
+    return;
+  }
+
+  if (!matches.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const todayKey = getBogotaDateKey(new Date());
+  const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const todayMatches = sortedMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
+  const isTodayView = todayMatches.length > 0;
+  const quickMatches = isTodayView
+    ? todayMatches
+    : sortedMatches
+        .filter((match) => match.status !== "finished" && new Date(match.date) >= new Date())
+        .slice(0, 5);
+
+  if (!quickMatches.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const rows = quickMatches
+    .map((match) => renderMatchRow(match, getMatchPredictionCount(predictions, match.id)))
+    .join("");
+
+  container.innerHTML = `
+    <div class="panel-header compact-header">
+      <div>
+        <span>${isTodayView ? "Agenda de hoy" : "Próximos partidos"}</span>
+        <h3>${isTodayView ? "Partidos para operar hoy" : "Siguientes partidos por preparar"}</h3>
+      </div>
+    </div>
+    <div class="admin-table">
+      <div class="admin-row match-admin-row header-row">
+        <span>Fecha</span>
+        <span>Partido</span>
+        <span>Grupo</span>
+        <span>Actividad</span>
+        <span>Estado</span>
+      </div>
+      ${rows}
+    </div>
+  `;
+}
+
 function renderSelectedMatchDetail(users, predictions, match) {
   const detail = document.querySelector("#adminMatchDetail");
 
@@ -315,6 +422,7 @@ export function renderAdmin(
   setText("#adminTopTeam", getTopTeam(users));
   renderDrawParticipants(users, participants);
   renderAdminChallenges(users, matches, challenges);
+  renderAdminTodayMatches(matches, predictions);
 
   resultMatchSelect.innerHTML = matches
     .map(
@@ -370,41 +478,8 @@ export function renderAdmin(
     .slice(0, 12)
     .map((match) => {
       const total = getMatchPredictionCount(predictions, match.id);
-      const isFinished = match.status === "finished";
-      const isLocked = match.status === "locked";
-      const actionButton = match.status === "open"
-        ? `
-            <button
-              class="mini-action mini-action-danger"
-              type="button"
-              data-lock-match="${match.id}"
-            >
-              Cerrar predicciones
-            </button>
-          `
-        : `
-            <button
-              class="mini-action"
-              type="button"
-              data-reopen-match="${match.id}"
-              ${isFinished || isLocked ? "" : "disabled"}
-            >
-              Reabrir predicciones
-            </button>
-          `;
 
-      return `
-        <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
-          <span><strong>Partido ${match.matchNumber || "-"}</strong><br>${formatDate(match.date)}</span>
-          <span>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</span>
-          <span>${escapeHtml(match.phase)}</span>
-          <span>${total} predicciones</span>
-          <span>
-            <span class="payment-chip">${escapeHtml(match.status)}</span>
-            ${actionButton}
-          </span>
-        </div>
-      `;
+      return renderMatchRow(match, total);
     })
     .join("");
 

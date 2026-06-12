@@ -834,6 +834,7 @@
             <button class="btn btn-primary" type="submit">Guardar resultado y puntos</button>
           </form>
           <p class="form-note admin-note" id="resultNote" role="status"></p>
+          <div class="admin-quick-matches" id="adminTodayMatches" aria-live="polite"></div>
           <div class="admin-match-detail" id="adminMatchDetail" aria-live="polite"></div>
           <div class="admin-table" id="adminMatchesTable" aria-live="polite"></div>
         </div>
@@ -912,6 +913,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=prediction-chain"></script>
+    <script type="module" src="js/app.js?v=admin-today-matches"></script>
   </body>
 </html>

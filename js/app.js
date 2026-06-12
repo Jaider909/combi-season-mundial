@@ -57,7 +57,7 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin } from "./ui/admin.js?v=admin-prediction-lock";
+import { renderAdmin } from "./ui/admin.js?v=admin-today-matches";
 import { renderDashboard } from "./ui/dashboard.js?v=editable-profile";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=live-standings";
 import {
@@ -1399,7 +1399,7 @@ resultMatchSelect.addEventListener("change", (event) => {
   syncResultForm(resultSelectedMatchId);
 });
 
-document.querySelector("#adminMatchesTable").addEventListener("click", async (event) => {
+async function handleAdminMatchTableClick(event) {
   const lockButton = event.target.closest("[data-lock-match]");
   const button = event.target.closest("[data-reopen-match]");
 
@@ -1470,7 +1470,10 @@ document.querySelector("#adminMatchesTable").addEventListener("click", async (ev
     syncResultForm(resultSelectedMatchId);
     resultForm.scrollIntoView({ behavior: "smooth", block: "center" });
   }
-});
+}
+
+document.querySelector("#adminMatchesTable").addEventListener("click", handleAdminMatchTableClick);
+document.querySelector("#adminTodayMatches").addEventListener("click", handleAdminMatchTableClick);
 
 predictionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
