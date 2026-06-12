@@ -1,4 +1,4 @@
-import { setText } from "./dom.js";
+import { setText } from "./dom.js?v=safe-text";
 
 export function renderDashboard(user, stats = {}) {
   const dashboardEmpty = document.querySelector("#dashboardEmpty");

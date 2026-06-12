@@ -57,15 +57,15 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin } from "./ui/admin.js?v=admin-today-matches";
-import { renderDashboard } from "./ui/dashboard.js?v=editable-profile";
-import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=live-standings";
+import { renderAdmin } from "./ui/admin.js?v=safe-text";
+import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
+import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=challenge-finance-polish";
-import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js";
+} from "./ui/challenges.js?v=safe-text";
+import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=safe-text";
 import {
   renderFavoriteTeamMatches,
   getVisiblePredictionMatches,
@@ -75,10 +75,10 @@ import {
   renderPredictionSummary,
   renderSelectedMatchDetail,
 } from "./ui/predictions.js?v=prediction-mobile-guard";
-import { renderRanking } from "./ui/ranking.js?v=ranking-polish";
+import { renderRanking } from "./ui/ranking.js?v=safe-text";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
-import { escapeHtml } from "./ui/dom.js";
+import { escapeHtml } from "./ui/dom.js?v=safe-text";
 
 document.body.dataset.appBoot = "starting";
 
@@ -716,6 +716,11 @@ function showError(element, error) {
         ? `Supabase está protegiendo el envío de correos. Espera ${seconds} segundos e intenta de nuevo.`
         : "Supabase está protegiendo el envío de correos. Espera un minuto e intenta de nuevo."
     );
+    return;
+  }
+
+  if (lowerMessage.includes("tostring") || lowerMessage.includes("undefined is not an object")) {
+    setError("La app recibió un dato incompleto. Actualiza la página e intenta de nuevo.");
     return;
   }
 

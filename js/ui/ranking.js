@@ -1,4 +1,4 @@
-import { escapeHtml } from "./dom.js";
+import { escapeHtml } from "./dom.js?v=safe-text";
 
 function countPredictions(predictions, playerId) {
   return predictions.filter((prediction) => prediction.playerId === playerId).length;

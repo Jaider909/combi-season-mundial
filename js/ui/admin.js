@@ -1,4 +1,4 @@
-import { escapeHtml, setText } from "./dom.js";
+import { escapeHtml, setText } from "./dom.js?v=safe-text";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("es-CO", {

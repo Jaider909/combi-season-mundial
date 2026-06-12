@@ -1,4 +1,4 @@
-import { escapeHtml } from "./dom.js";
+import { escapeHtml } from "./dom.js?v=safe-text";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("es-CO", {

@@ -7,7 +7,7 @@ export function setText(selector, value) {
 }
 
 export function escapeHtml(value) {
-  return value
+  return String(value ?? "")
     .toString()
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
