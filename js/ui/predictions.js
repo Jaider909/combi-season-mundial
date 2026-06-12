@@ -38,8 +38,26 @@ function formatMatchDate(date) {
   }).format(new Date(date));
 }
 
+function hasMatchStarted(match) {
+  const matchTime = new Date(match?.date).getTime();
+
+  return Number.isFinite(matchTime) && matchTime <= Date.now();
+}
+
 function isLockedMatch(match) {
   return match?.status === "locked";
+}
+
+export function isPredictionClosedForPlayer(match) {
+  if (!match) {
+    return true;
+  }
+
+  return match.status === "finished" || isLockedMatch(match) || hasMatchStarted(match);
+}
+
+function isAutoClosedMatch(match) {
+  return match?.status === "open" && hasMatchStarted(match);
 }
 
 export function renderSelectedMatchDetail(match, prediction) {
@@ -58,13 +76,16 @@ export function renderSelectedMatchDetail(match, prediction) {
 
   const isClosed = match.status === "finished";
   const isLocked = isLockedMatch(match);
+  const isAutoClosed = isAutoClosedMatch(match);
   const statusLabel = isLocked
-    ? "Pendiente de clasificación"
+    ? "Cerrado por admin"
     : isClosed
       ? "Cerrado"
-      : prediction
-        ? "Predicción guardada"
-        : "Abierto";
+      : isAutoClosed
+        ? "Cerrado por inicio"
+        : prediction
+          ? "Predicción guardada"
+          : "Abierto";
   const predictionCopy = prediction
     ? `${prediction.homeScore} - ${prediction.awayScore} · Local: ${
         prediction.homeScorer || "Sin goleadores"
@@ -77,7 +98,7 @@ export function renderSelectedMatchDetail(match, prediction) {
         <span>Partido ${match.matchNumber || "-"}</span>
         <strong>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</strong>
       </div>
-      <em class="${isClosed ? "is-closed" : ""} ${isLocked ? "is-locked" : ""}">${statusLabel}</em>
+      <em class="${isClosed || isAutoClosed ? "is-closed" : ""} ${isLocked ? "is-locked" : ""}">${statusLabel}</em>
     </div>
     <div class="selected-match-meta">
       <div>
@@ -118,8 +139,18 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
         );
         const isClosed = match.status === "finished";
         const isLocked = isLockedMatch(match);
-        const stateLabel = isLocked ? "Bloqueado" : isClosed ? "Cerrado" : prediction ? "Guardada" : "Pendiente";
-        const actionLabel = isLocked ? "Ver cruce" : isClosed ? "Ver detalle" : prediction ? "Editar" : "Predecir";
+        const isAutoClosed = isAutoClosedMatch(match);
+        const isUnavailable = isLocked || isClosed || isAutoClosed;
+        const stateLabel = isLocked
+          ? "Cerrado"
+          : isClosed
+            ? "Finalizado"
+            : isAutoClosed
+              ? "Cerrado por inicio"
+              : prediction
+                ? "Guardada"
+                : "Pendiente";
+        const actionLabel = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
 
         return `
         <article class="fixture-item">
@@ -307,12 +338,12 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
       parseScorerInput(awayScorerInput.value),
       true
     );
-    document.querySelector("#predictionSubmitText").textContent = "Cruce pendiente";
+    document.querySelector("#predictionSubmitText").textContent = "Predicción cerrada";
     document.querySelector("#predictionEditingNote").textContent =
-      "Este cruce se activará cuando se definan los clasificados.";
+      "Las predicciones de este partido están cerradas por el administrador.";
   }
 
-  if (match.status === "finished") {
+  if (match.status === "finished" || isAutoClosedMatch(match)) {
     form.classList.add("is-disabled");
     deleteButton.classList.add("is-hidden");
     deleteButton.disabled = true;
@@ -333,7 +364,12 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
       parseScorerInput(awayScorerInput.value),
       true
     );
-    document.querySelector("#predictionSubmitText").textContent = "Partido cerrado";
+    document.querySelector("#predictionSubmitText").textContent = match.status === "finished"
+      ? "Partido cerrado"
+      : "Predicción cerrada";
+    document.querySelector("#predictionEditingNote").textContent = match.status === "finished"
+      ? "Este partido ya fue finalizado. Puedes ver tu predicción, pero no editarla."
+      : "Este partido ya empezó. Las predicciones quedaron cerradas automáticamente.";
   }
 }
 
@@ -380,8 +416,7 @@ export function getVisiblePredictionMatches(
   if (viewMode === "pending") {
     return scopedMatches.filter(
       (match) =>
-        match.status !== "finished" &&
-        !isLockedMatch(match) &&
+        !isPredictionClosedForPlayer(match) &&
         !getPredictionForMatch(predictions, playerId, match.id)
     );
   }
@@ -389,14 +424,13 @@ export function getVisiblePredictionMatches(
   if (viewMode === "saved") {
     return scopedMatches.filter(
       (match) =>
-        match.status !== "finished" &&
-        !isLockedMatch(match) &&
+        !isPredictionClosedForPlayer(match) &&
         getPredictionForMatch(predictions, playerId, match.id)
     );
   }
 
   if (viewMode === "closed") {
-    return scopedMatches.filter((match) => match.status === "finished");
+    return scopedMatches.filter((match) => isPredictionClosedForPlayer(match));
   }
 
   return scopedMatches;
@@ -425,10 +459,12 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
       const prediction = getPredictionForMatch(predictions, playerId, match.id);
       const isClosed = match.status === "finished";
       const isLocked = isLockedMatch(match);
-      const status = isLocked ? "Bloqueado" : isClosed ? "Cerrado" : prediction ? "Editar" : "Predecir";
+      const isAutoClosed = isAutoClosedMatch(match);
+      const isUnavailable = isLocked || isClosed || isAutoClosed;
+      const status = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
       const selectedClass = match.id === selectedMatchId ? " is-selected" : "";
       const savedClass = prediction ? " is-saved" : "";
-      const closedClass = isClosed ? " is-closed" : "";
+      const closedClass = isClosed || isAutoClosed ? " is-closed" : "";
       const lockedClass = isLocked ? " is-locked" : "";
       const predictionDetails = prediction
         ? `
@@ -446,7 +482,7 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
           <div class="prediction-match-copy">
             <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
             <h4>${match.homeTeam} vs ${match.awayTeam}</h4>
-            <p>${match.phase} · ${match.status}</p>
+            <p>${match.phase} · ${isAutoClosed ? "cerrado por inicio" : match.status}</p>
             ${predictionDetails}
           </div>
           <button class="btn btn-secondary btn-full" type="button" data-select-match="${match.id}">

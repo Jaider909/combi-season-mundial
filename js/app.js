@@ -64,17 +64,18 @@ import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=safe-text";
+} from "./ui/challenges.js?v=auto-close";
 import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=safe-text";
 import {
   renderFavoriteTeamMatches,
   getVisiblePredictionMatches,
+  isPredictionClosedForPlayer,
   renderPredictionControls,
   renderPredictionForm,
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-mobile-guard";
+} from "./ui/predictions.js?v=auto-close";
 import { renderRanking } from "./ui/ranking.js?v=safe-text";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -123,6 +124,7 @@ let currentChallenges = [];
 let selectedMatch = null;
 let selectedMatchTeam = null;
 let selectedMatchWasManual = false;
+let isMatchClockRefreshRunning = false;
 let predictionViewMode = "pending";
 let predictionScopeMode = "favorite";
 let predictionGroupCode = null;
@@ -211,11 +213,10 @@ async function refreshPanels(user) {
   const savedFavoritePredictions = userPredictions.filter((item) =>
     favoriteMatchIds.has(item.matchId)
   ).length;
-  const closedFavoriteMatches = favoriteMatches.filter((match) => match.status === "finished").length;
+  const closedFavoriteMatches = favoriteMatches.filter((match) => isPredictionClosedForPlayer(match)).length;
   const pendingFavoritePredictions = favoriteMatches.filter(
     (match) =>
-      match.status !== "finished" &&
-      match.status !== "locked" &&
+      !isPredictionClosedForPlayer(match) &&
       !userPredictions.some((predictionItem) => predictionItem.matchId === match.id)
   ).length;
   const sortedUsers = [...users].sort((a, b) => {
@@ -291,6 +292,33 @@ async function refreshPanels(user) {
 
   if (activeUser?.role === "admin") {
     await refreshAdminTeamPlayers();
+  }
+}
+
+function shouldRefreshForMatchClock() {
+  const now = Date.now();
+
+  return currentMatches.some((match) => {
+    const matchTime = new Date(match.date).getTime();
+
+    return match.status === "open" && Number.isFinite(matchTime) && matchTime <= now && now - matchTime < 70000;
+  });
+}
+
+async function refreshPanelsOnMatchStart() {
+  if (isMatchClockRefreshRunning || !shouldRefreshForMatchClock()) {
+    return;
+  }
+
+  try {
+    isMatchClockRefreshRunning = true;
+    const user = await getCurrentUser();
+
+    if (user) {
+      await refreshPanels(user);
+    }
+  } finally {
+    isMatchClockRefreshRunning = false;
   }
 }
 
@@ -709,6 +737,19 @@ function showError(element, error) {
     return;
   }
 
+  if (
+    lowerMessage.includes("predicciones de este partido ya estan cerradas") ||
+    lowerMessage.includes("partido cerrado")
+  ) {
+    setError("Este partido ya empezó o fue cerrado. Ya no permite cambios en predicciones.");
+    return;
+  }
+
+  if (lowerMessage.includes("no puedes eliminar predicciones")) {
+    setError("Este partido ya está cerrado. No puedes eliminar esa predicción.");
+    return;
+  }
+
   if (lowerMessage.includes("for security purposes") && lowerMessage.includes("seconds")) {
     const seconds = message.match(/after\s+(\d+)\s+seconds/i)?.[1];
     setError(
@@ -913,6 +954,7 @@ async function getActivePlayer() {
 
 startCountdown("#countdown");
 hydrateSession();
+window.setInterval(refreshPanelsOnMatchStart, 60 * 1000);
 
 if (isCloudMode()) {
   formNote.textContent = "Modo nube activo: los registros se guardan en Supabase.";
@@ -1094,7 +1136,7 @@ challengeForm.addEventListener("submit", async (event) => {
   const creatorTeam = data.get("team")?.toString();
   const stakeAmount = Number(data.get("stakeAmount"));
 
-  if (!match || match.status !== "open") {
+  if (!match || match.status !== "open" || isPredictionClosedForPlayer(match)) {
     showNote(challengeNote, "Selecciona un partido abierto.", "warning");
     return;
   }
@@ -1518,6 +1560,15 @@ predictionForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (isPredictionClosedForPlayer(selectedMatch)) {
+    showNote(
+      document.querySelector("#predictionEditingNote"),
+      "Este partido ya empezó. Las predicciones se cerraron automáticamente.",
+      "warning"
+    );
+    return;
+  }
+
   const submittedMatch = selectedMatch;
   const prediction = {
     playerId: user.id,
@@ -1606,7 +1657,7 @@ deletePredictionButton.addEventListener("click", async () => {
     return;
   }
 
-  if (selectedMatch.status === "finished") {
+  if (selectedMatch.status === "finished" || isPredictionClosedForPlayer(selectedMatch)) {
     showNote(
       document.querySelector("#predictionEditingNote"),
       "Este partido ya está cerrado y no permite eliminar predicciones.",

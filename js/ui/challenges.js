@@ -1,4 +1,5 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
+import { isPredictionClosedForPlayer } from "./predictions.js?v=auto-close";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("es-CO", {
@@ -96,7 +97,7 @@ export function renderChallengeForm(matches = [], activeUser = null) {
     return;
   }
 
-  const openMatches = matches.filter((match) => match.status === "open");
+  const openMatches = matches.filter((match) => match.status === "open" && !isPredictionClosedForPlayer(match));
   matchSelect.innerHTML = openMatches
     .map(
       (match) => `
@@ -118,7 +119,9 @@ export function renderChallengeTeamOptions(matches = [], activeUser = null) {
     return;
   }
 
-  const match = matches.find((item) => item.id === matchSelect.value) || matches.find((item) => item.status === "open");
+  const match =
+    matches.find((item) => item.id === matchSelect.value && !isPredictionClosedForPlayer(item)) ||
+    matches.find((item) => item.status === "open" && !isPredictionClosedForPlayer(item));
 
   if (!match) {
     teamSelect.innerHTML = '<option value="">Sin partidos abiertos</option>';
