@@ -8,7 +8,7 @@ export const assignedParticipants = [
   { name: "Daniela Villa", email: "villadaniela1995@gmail.com", team: "Alemania" },
   { name: "Emiliano", email: "emilianojosevilla12@gmail.com", team: "Japón" },
   { name: "Julian Z", email: "julianz.98@hotmail.com", team: "Marruecos" },
-  { name: "Cristian Zap", email: "cdzt10@gmail.com", team: "Suiza" },
+  { name: "Cristian Zap", email: "cdzt10@gmail.com", team: "Turquía" },
   { name: "Papo", email: "jazl940726@gmail.com", team: "Ecuador" },
   { name: "Camilo", email: "kmig9507@gmail.com", team: "España" },
   { name: "Diego Tevez", email: "diego9305castro@gmail.com", team: "Inglaterra" },

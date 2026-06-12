@@ -1,4 +1,4 @@
-import { assignedParticipants } from "./config/assigned-participants.js";
+import { assignedParticipants } from "./config/assigned-participants.js?v=cristian-turkey";
 import { qualifiedTeams } from "./config/teams.js";
 import {
   getPlayersForTeam,
@@ -1526,12 +1526,9 @@ predictionForm.addEventListener("submit", async (event) => {
 
   try {
     setButtonBusy(predictionSubmitButton, true, "Guardando...");
+    const shouldContinuePendingFlow = predictionViewMode === "pending";
     prediction.estimatedPoints = estimatePredictionPoints(prediction);
     await savePrediction(prediction);
-
-    if (predictionViewMode === "pending") {
-      predictionViewMode = "saved";
-    }
 
     selectedMatch = submittedMatch;
     selectedMatchWasManual = true;
@@ -1542,7 +1539,24 @@ predictionForm.addEventListener("submit", async (event) => {
         (item) => item.playerId === user.id && item.matchId === submittedMatch.id
       ) || prediction;
 
-    if (!selectedMatch || selectedMatch.id !== submittedMatch.id) {
+    if (shouldContinuePendingFlow && selectedMatch?.id && selectedMatch.id !== submittedMatch.id) {
+      showNote(
+        document.querySelector("#predictionEditingNote"),
+        "Predicción guardada. Ya te dejamos el siguiente partido pendiente listo.",
+        "success"
+      );
+      notifyApp("Predicción guardada", `${submittedMatch.homeTeam} vs ${submittedMatch.awayTeam}`);
+      scrollToPredictionEditor();
+      return;
+    }
+
+    if (shouldContinuePendingFlow && !selectedMatch) {
+      predictionViewMode = "saved";
+      selectedMatch = submittedMatch;
+      selectedMatchWasManual = true;
+      selectedMatchTeam = user.team;
+      await refreshPanels(user);
+    } else if (!selectedMatch || selectedMatch.id !== submittedMatch.id) {
       const playersByTeam = await listPlayersForTeams([
         submittedMatch.homeTeam,
         submittedMatch.awayTeam,

@@ -50,7 +50,7 @@ values
   ('Daniela Villa', 'villadaniela1995@gmail.com', 'Alemania'),
   ('Emiliano', 'emilianojosevilla12@gmail.com', 'Japón'),
   ('Julian Z', 'julianz.98@hotmail.com', 'Marruecos'),
-  ('Cristian Zap', 'cdzt10@gmail.com', 'Suiza'),
+  ('Cristian Zap', 'cdzt10@gmail.com', 'Turquía'),
   ('Papo', 'jazl940726@gmail.com', 'Ecuador'),
   ('Camilo', 'kmig9507@gmail.com', 'España'),
   ('Diego Tevez', 'diego9305castro@gmail.com', 'Inglaterra'),
