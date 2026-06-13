@@ -757,6 +757,16 @@
           </article>
         </div>
 
+        <div class="admin-workbench">
+          <nav class="admin-tabs" aria-label="Módulos administrativos">
+            <button class="is-active" type="button" data-admin-tab="resumen">Resumen</button>
+            <button type="button" data-admin-tab="jugadores">Jugadores</button>
+            <button type="button" data-admin-tab="partidos">Partidos</button>
+            <button type="button" data-admin-tab="retos">Retos</button>
+            <button type="button" data-admin-tab="plantillas">Plantillas</button>
+          </nav>
+
+          <div class="admin-module is-active" data-admin-module="resumen">
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -777,7 +787,9 @@
           <div class="draw-summary" id="drawSummary" aria-live="polite"></div>
           <div class="admin-table" id="drawParticipantsTable" aria-live="polite"></div>
         </div>
+          </div>
 
+          <div class="admin-module" data-admin-module="jugadores">
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -800,7 +812,9 @@
             <div class="empty-admin">Selecciona un jugador para revisar su actividad.</div>
           </div>
         </div>
+          </div>
 
+          <div class="admin-module" data-admin-module="retos">
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -814,7 +828,9 @@
           <div class="draw-summary" id="adminChallengeSummary" aria-live="polite"></div>
           <div class="admin-table" id="adminChallengesTable" aria-live="polite"></div>
         </div>
+          </div>
 
+          <div class="admin-module" data-admin-module="partidos">
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -858,7 +874,9 @@
           <div class="admin-match-detail" id="adminMatchDetail" aria-live="polite"></div>
           <div class="admin-table" id="adminMatchesTable" aria-live="polite"></div>
         </div>
+          </div>
 
+          <div class="admin-module" data-admin-module="plantillas">
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -902,6 +920,8 @@
           <p class="form-note admin-note" id="teamPlayerNote" role="status"></p>
           <div class="admin-table" id="adminTeamPlayersTable" aria-live="polite"></div>
         </div>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -933,6 +953,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=admin-user-manager"></script>
+    <script type="module" src="js/app.js?v=admin-workbench"></script>
   </body>
 </html>

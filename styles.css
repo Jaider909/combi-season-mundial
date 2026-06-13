@@ -2020,6 +2020,66 @@ h3 {
   margin-bottom: 18px;
 }
 
+.admin-workbench {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-tabs {
+  position: sticky;
+  top: 86px;
+  z-index: 7;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+  background: rgba(247, 245, 237, 0.94);
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(6, 17, 31, 0.06);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tabs button {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 900;
+  background: #eef2eb;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-tabs button.is-active {
+  color: var(--ink);
+  background: var(--accent);
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(224, 255, 75, 0.28);
+}
+
+.admin-module {
+  display: none;
+}
+
+.admin-module.is-active {
+  display: block;
+}
+
+.admin-module[data-admin-module="resumen"].is-active,
+.admin-module[data-admin-module="jugadores"].is-active {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.admin-module[data-admin-module="jugadores"] #adminUserManager {
+  position: sticky;
+  top: 78px;
+}
+
 .admin-stat,
 .admin-panel {
   background: var(--white);
@@ -2732,6 +2792,27 @@ h3 {
     padding-right: 16px;
     padding-left: 16px;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .admin-tabs {
+    position: static;
+    margin-right: -4px;
+    margin-left: -4px;
+    padding: 8px;
+  }
+
+  .admin-tabs button {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .admin-module[data-admin-module="resumen"].is-active,
+  .admin-module[data-admin-module="jugadores"].is-active {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-module[data-admin-module="jugadores"] #adminUserManager {
+    position: static;
   }
 
   .admin-panel {

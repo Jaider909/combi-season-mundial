@@ -59,7 +59,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-user-manager";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-workbench";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
@@ -133,6 +133,7 @@ let predictionScopeMode = "all";
 let predictionGroupCode = null;
 let resultSelectedMatchId = null;
 let adminSelectedUserId = null;
+let adminActiveModule = "resumen";
 let currentTeamPlayers = [];
 let adminSelectedPlayerTeam = "Colombia";
 let currentPlayersByTeam = {};
@@ -298,6 +299,7 @@ async function refreshPanels(user) {
 
   if (activeUser?.role === "admin") {
     await refreshAdminTeamPlayers();
+    setAdminModule(adminActiveModule);
   }
 }
 
@@ -873,6 +875,25 @@ function setButtonBusy(button, isBusy, busyText = "Guardando...") {
     }
 
     delete button.dataset.originalText;
+  }
+}
+
+function setAdminModule(moduleName, shouldScroll = false) {
+  const nextModule = moduleName || "resumen";
+  adminActiveModule = nextModule;
+
+  document.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    const isActive = button.dataset.adminTab === nextModule;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  document.querySelectorAll("[data-admin-module]").forEach((module) => {
+    module.classList.toggle("is-active", module.dataset.adminModule === nextModule);
+  });
+
+  if (shouldScroll) {
+    document.querySelector(".admin-workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -1575,6 +1596,7 @@ async function handleAdminMatchTableClick(event) {
   const matchRow = event.target.closest("[data-admin-select-match]");
 
   if (matchRow) {
+    setAdminModule("partidos");
     resultSelectedMatchId = matchRow.dataset.adminSelectMatch;
     syncResultForm(resultSelectedMatchId);
     resultForm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1584,6 +1606,16 @@ async function handleAdminMatchTableClick(event) {
 document.querySelector("#adminMatchesTable").addEventListener("click", handleAdminMatchTableClick);
 document.querySelector("#adminTodayMatches").addEventListener("click", handleAdminMatchTableClick);
 
+document.querySelector(".admin-tabs")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-admin-tab]");
+
+  if (!button) {
+    return;
+  }
+
+  setAdminModule(button.dataset.adminTab, true);
+});
+
 document.querySelector("#adminUsersTable").addEventListener("click", async (event) => {
   const button = event.target.closest("[data-admin-select-user]");
 
@@ -1591,6 +1623,7 @@ document.querySelector("#adminUsersTable").addEventListener("click", async (even
     return;
   }
 
+  setAdminModule("jugadores");
   adminSelectedUserId = button.dataset.adminSelectUser;
   await refreshPanels(await getCurrentUser());
   document.querySelector("#adminUserManager")?.scrollIntoView({ behavior: "smooth", block: "start" });
