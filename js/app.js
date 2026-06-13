@@ -57,7 +57,7 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin } from "./ui/admin.js?v=safe-text";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=match-activity-order";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
@@ -121,6 +121,7 @@ const logoutButton = document.querySelector("#logoutButton");
 let currentMatches = [];
 let currentPredictions = [];
 let currentChallenges = [];
+let currentUsers = [];
 let selectedMatch = null;
 let selectedMatchTeam = null;
 let selectedMatchWasManual = false;
@@ -205,6 +206,7 @@ async function refreshPanels(user) {
         ) || getLocalPredictionForUser(activeUser.email, selectedMatch.id)
       : null;
   const users = activeUser || getInitialRoute() === "ranking" ? await listUsers() : [];
+  currentUsers = users;
   const drawParticipants = activeUser?.role === "admin" ? await listAssignedParticipants() : [];
   const userPredictions = activeUser
     ? currentPredictions.filter((item) => item.playerId === activeUser.id)
@@ -1444,6 +1446,7 @@ resultForm.addEventListener("submit", async (event) => {
 resultMatchSelect.addEventListener("change", (event) => {
   resultSelectedMatchId = event.target.value;
   syncResultForm(resultSelectedMatchId);
+  renderAdminMatchDetail(currentUsers, currentPredictions, currentMatches, resultSelectedMatchId);
 });
 
 async function handleAdminMatchTableClick(event) {

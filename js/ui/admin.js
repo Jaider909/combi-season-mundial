@@ -39,6 +39,19 @@ function getMatchPredictionCount(predictions, matchId) {
   return predictions.filter((prediction) => prediction.matchId === matchId).length;
 }
 
+function sortMatchesByNumber(matches) {
+  return [...matches].sort((a, b) => {
+    const numberA = Number(a.matchNumber);
+    const numberB = Number(b.matchNumber);
+
+    if (Number.isFinite(numberA) && Number.isFinite(numberB)) {
+      return numberA - numberB;
+    }
+
+    return new Date(a.date) - new Date(b.date);
+  });
+}
+
 function renderMatchActionButton(match) {
   const isFinished = match.status === "finished";
   const isLocked = match.status === "locked";
@@ -292,7 +305,7 @@ function renderAdminTodayMatches(matches, predictions) {
   }
 
   const todayKey = getBogotaDateKey(new Date());
-  const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sortedMatches = sortMatchesByNumber(matches);
   const todayMatches = sortedMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
   const isTodayView = todayMatches.length > 0;
   const quickMatches = isTodayView
@@ -401,6 +414,13 @@ function renderSelectedMatchDetail(users, predictions, match) {
   `;
 }
 
+export function renderAdminMatchDetail(users = [], predictions = [], matches = [], selectedMatchId = null) {
+  const sortedMatches = sortMatchesByNumber(matches);
+  const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
+
+  renderSelectedMatchDetail(users, predictions, selectedMatch);
+}
+
 export function renderAdmin(
   users,
   predictions = [],
@@ -413,7 +433,8 @@ export function renderAdmin(
   const adminMatchesTable = document.querySelector("#adminMatchesTable");
   const resultMatchSelect = document.querySelector("#resultMatchSelect");
   const average = users.length ? (predictions.length / users.length).toFixed(1) : "0";
-  const selectedMatch = matches.find((match) => match.id === selectedMatchId) || matches[0] || null;
+  const sortedMatches = sortMatchesByNumber(matches);
+  const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
 
   setText("#adminTotalUsers", users.length);
   setText("#adminPendingPayments", users.length);
@@ -424,7 +445,7 @@ export function renderAdmin(
   renderAdminChallenges(users, matches, challenges);
   renderAdminTodayMatches(matches, predictions);
 
-  resultMatchSelect.innerHTML = matches
+  resultMatchSelect.innerHTML = sortedMatches
     .map(
       (match) => `
         <option value="${match.id}" ${match.id === selectedMatchId ? "selected" : ""}>
@@ -473,9 +494,7 @@ export function renderAdmin(
     return;
   }
 
-  const matchRows = [...matches]
-    .sort((a, b) => getMatchPredictionCount(predictions, b.id) - getMatchPredictionCount(predictions, a.id))
-    .slice(0, 12)
+  const matchRows = sortedMatches
     .map((match) => {
       const total = getMatchPredictionCount(predictions, match.id);
 
