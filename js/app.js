@@ -64,7 +64,7 @@ import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=auto-close";
+} from "./ui/challenges.js?v=expired-challenges";
 import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=safe-text";
 import {
   renderFavoriteTeamMatches,
@@ -1196,6 +1196,18 @@ document.querySelector("#userDashboard").addEventListener("click", async (event)
     if (acceptButton) {
       if (challenge.creatorPlayerId === user.id) {
         showNote(challengeNote, "No puedes aceptar tu propio reto.", "warning");
+        return;
+      }
+
+      const match = currentMatches.find((item) => item.id === challenge.matchId);
+
+      if (!match || challenge.status !== "open" || isPredictionClosedForPlayer(match)) {
+        showNote(
+          challengeNote,
+          "Este reto ya venció porque el partido empezó, se cerró o finalizó.",
+          "warning"
+        );
+        await refreshPanels(user);
         return;
       }
 

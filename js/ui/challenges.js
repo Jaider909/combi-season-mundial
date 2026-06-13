@@ -23,6 +23,20 @@ function getPlayerName(users, playerId) {
   return user?.alias || user?.name || "Jugador";
 }
 
+function getChallengeMatch(challenge, matches) {
+  return matches.find((item) => item.id === challenge.matchId) || null;
+}
+
+function isExpiredChallenge(challenge, matches) {
+  if (challenge.status !== "open") {
+    return false;
+  }
+
+  const match = getChallengeMatch(challenge, matches);
+
+  return !match || isPredictionClosedForPlayer(match);
+}
+
 function getChallengeShareUrl(challenge, match, creator) {
   const appUrl = `${window.location.origin}${window.location.pathname}#retos`;
   const total = (challenge.stakeAmount || 0) * 2;
@@ -43,7 +57,11 @@ function getChallengeShareUrl(challenge, match, creator) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
-function getChallengeState(challenge, activeUser) {
+function getChallengeState(challenge, activeUser, isExpired = false) {
+  if (isExpired) {
+    return "Vencido";
+  }
+
   if (challenge.status === "open") {
     return challenge.creatorPlayerId === activeUser?.id ? "Esperando rival" : "Disponible";
   }
@@ -63,11 +81,15 @@ function getChallengeState(challenge, activeUser) {
   return challenge.winnerPlayerId === activeUser?.id ? "Ganado" : "Cerrado";
 }
 
-function getChallengeStateClass(challenge) {
-  return `is-${challenge.status || "open"}`;
+function getChallengeStateClass(challenge, isExpired = false) {
+  return isExpired ? "is-expired" : `is-${challenge.status || "open"}`;
 }
 
-function getChallengeOutcome(challenge, activeUser, winnerName) {
+function getChallengeOutcome(challenge, activeUser, winnerName, isExpired = false) {
+  if (isExpired) {
+    return "Este partido ya empezó o se cerró. El reto quedó vencido y no se puede aceptar.";
+  }
+
   if (challenge.status === "open") {
     return challenge.creatorPlayerId === activeUser?.id
       ? "Comparte el enlace para conseguir rival."
@@ -154,11 +176,17 @@ export function renderChallenges(challenges = [], matches = [], users = [], acti
       challenge.creatorPlayerId === activeUser?.id || challenge.opponentPlayerId === activeUser?.id
   );
   const openChallenges = visibleChallenges.filter(
-    (challenge) => challenge.status === "open" && challenge.creatorPlayerId !== activeUser?.id
+    (challenge) =>
+      challenge.status === "open" &&
+      challenge.creatorPlayerId !== activeUser?.id &&
+      !isExpiredChallenge(challenge, matches)
   );
-  const activeCount = userChallenges.filter((challenge) => challenge.status === "accepted").length;
+  const activeUserChallenges = userChallenges.filter(
+    (challenge) => !isExpiredChallenge(challenge, matches)
+  );
+  const activeCount = activeUserChallenges.filter((challenge) => challenge.status === "accepted").length;
   const wonCount = userChallenges.filter((challenge) => challenge.winnerPlayerId === activeUser?.id).length;
-  const amountInPlay = userChallenges
+  const amountInPlay = activeUserChallenges
     .filter((challenge) => ["open", "accepted"].includes(challenge.status))
     .reduce((sum, challenge) => sum + (challenge.stakeAmount || 0), 0);
   const wonAmount = userChallenges
@@ -198,7 +226,8 @@ export function renderChallenges(challenges = [], matches = [], users = [], acti
 }
 
 function renderChallengeCard(challenge, matches, users, activeUser, mode) {
-  const match = matches.find((item) => item.id === challenge.matchId);
+  const match = getChallengeMatch(challenge, matches);
+  const isExpired = isExpiredChallenge(challenge, matches);
   const creator = getPlayerName(users, challenge.creatorPlayerId);
   const opponent = challenge.opponentPlayerId ? getPlayerName(users, challenge.opponentPlayerId) : "Sin rival";
   const winner = challenge.winnerPlayerId ? getPlayerName(users, challenge.winnerPlayerId) : "App";
@@ -210,17 +239,19 @@ function renderChallengeCard(challenge, matches, users, activeUser, mode) {
       ? match.awayTeam
       : match.homeTeam
     : "";
-  const canAccept = mode === "open" && challenge.status === "open";
+  const canAccept = mode === "open" && challenge.status === "open" && !isExpired;
   const canCancel = mode === "mine" && challenge.status === "open" && challenge.creatorPlayerId === activeUser?.id;
-  const canShare = challenge.status === "open";
+  const canShare = challenge.status === "open" && !isExpired;
   const shareUrl = getChallengeShareUrl(challenge, match, creator);
-  const stateClass = getChallengeStateClass(challenge);
-  const outcome = getChallengeOutcome(challenge, activeUser, winner);
+  const stateClass = getChallengeStateClass(challenge, isExpired);
+  const outcome = getChallengeOutcome(challenge, activeUser, winner, isExpired);
 
   return `
     <article class="challenge-card ${stateClass}">
       <div>
-        <span class="challenge-state ${stateClass}">${escapeHtml(getChallengeState(challenge, activeUser))}</span>
+        <span class="challenge-state ${stateClass}">${escapeHtml(
+          getChallengeState(challenge, activeUser, isExpired)
+        )}</span>
         <h4>${escapeHtml(formatMatch(match))}</h4>
         <div class="challenge-versus">
           <span><strong>${escapeHtml(creator)}</strong><small>${escapeHtml(challenge.creatorTeam)}</small></span>

@@ -1427,6 +1427,11 @@ h3 {
   border-color: rgba(255, 190, 96, 0.36);
 }
 
+.challenge-card.is-expired {
+  border-color: rgba(255, 255, 255, 0.16);
+  opacity: 0.82;
+}
+
 .challenge-card h4 {
   margin: 8px 0;
   overflow-wrap: anywhere;
@@ -1461,6 +1466,11 @@ h3 {
 
 .challenge-state.is-draw {
   background: #ffd37a;
+}
+
+.challenge-state.is-expired {
+  color: #f7d3d3;
+  background: rgba(125, 35, 48, 0.88);
 }
 
 .challenge-versus {
