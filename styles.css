@@ -1770,10 +1770,11 @@ h3 {
 
 .prediction-match-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
   min-width: 0;
+  min-height: 260px;
   padding: 16px;
   background: rgba(6, 17, 31, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1816,13 +1817,14 @@ h3 {
 
 .prediction-match-copy {
   min-width: 0;
+  max-width: 100%;
 }
 
 .prediction-match-card h4 {
   margin: 4px 0;
   font-size: 1.1rem;
   line-height: 1.35;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
 }
 
@@ -1832,10 +1834,21 @@ h3 {
 }
 
 .prediction-match-card span {
+  display: inline-block;
+  max-width: 100%;
   color: var(--lime);
   font-size: 0.78rem;
   font-weight: 900;
+  line-height: 1.35;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.prediction-match-card .btn {
+  align-self: end;
+  justify-self: stretch;
+  min-height: 50px;
+  white-space: normal;
 }
 
 .saved-prediction,
@@ -1861,6 +1874,8 @@ h3 {
   color: rgba(255, 255, 255, 0.68);
   font-size: 0.82rem;
   font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .prediction-form.is-disabled {
