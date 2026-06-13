@@ -32,6 +32,13 @@ function getTopTeam(users) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
 }
 
+function normalizeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 function countPredictions(predictions, playerId) {
   return predictions.filter((prediction) => prediction.playerId === playerId).length;
 }
@@ -610,10 +617,33 @@ export function renderAdmin(
   const adminUsersTable = document.querySelector("#adminUsersTable");
   const adminMatchesTable = document.querySelector("#adminMatchesTable");
   const resultMatchSelect = document.querySelector("#resultMatchSelect");
+  const adminUserSearch = document.querySelector("#adminUserSearch");
+  const adminUserTeamFilter = document.querySelector("#adminUserTeamFilter");
+  const adminMatchSearch = document.querySelector("#adminMatchSearch");
+  const adminMatchStatusFilter = document.querySelector("#adminMatchStatusFilter");
   const average = users.length ? (predictions.length / users.length).toFixed(1) : "0";
   const sortedMatches = sortMatchesByNumber(matches);
+  const userSearchTerm = normalizeText(adminUserSearch?.value);
+  const selectedTeamFilter = adminUserTeamFilter?.value || "";
+  const matchSearchTerm = normalizeText(adminMatchSearch?.value);
+  const selectedMatchStatus = adminMatchStatusFilter?.value || "";
   const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
   const selectedUser = users.find((user) => user.id === selectedUserId) || null;
+  const filteredUsers = users.filter((user) => {
+    const searchSource = normalizeText(`${user.alias} ${user.name} ${user.email} ${user.phone} ${user.team}`);
+    const matchesSearch = !userSearchTerm || searchSource.includes(userSearchTerm);
+    const matchesTeam = !selectedTeamFilter || user.team === selectedTeamFilter;
+
+    return matchesSearch && matchesTeam;
+  });
+  const filteredMatches = sortedMatches.filter((match) => {
+    const matchNumber = String(match.matchNumber || "");
+    const searchSource = normalizeText(`${matchNumber} ${match.homeTeam} ${match.awayTeam} ${match.phase}`);
+    const matchesSearch = !matchSearchTerm || searchSource.includes(matchSearchTerm);
+    const matchesStatus = !selectedMatchStatus || match.status === selectedMatchStatus;
+
+    return matchesSearch && matchesStatus;
+  });
 
   setText("#adminTotalUsers", users.length);
   setText("#adminPendingPayments", users.length);
@@ -624,6 +654,26 @@ export function renderAdmin(
   renderAdminChallenges(users, matches, challenges);
   renderAdminTodayMatches(matches, predictions);
   renderAdminUserDetail(selectedUser, predictions, matches, challenges, users);
+
+  if (adminUserTeamFilter) {
+    const currentTeamValue = adminUserTeamFilter.value;
+    const teamOptions = [...new Set(users.map((user) => user.team).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, "es")
+    );
+
+    adminUserTeamFilter.innerHTML = `
+      <option value="">Todos los equipos</option>
+      ${teamOptions
+        .map(
+          (team) => `
+            <option value="${escapeHtml(team)}" ${team === currentTeamValue ? "selected" : ""}>
+              ${escapeHtml(team)}
+            </option>
+          `
+        )
+        .join("")}
+    `;
+  }
 
   resultMatchSelect.innerHTML = sortedMatches
     .map(
@@ -642,7 +692,10 @@ export function renderAdmin(
     return;
   }
 
-  const rows = users
+  if (!filteredUsers.length) {
+    adminUsersTable.innerHTML = '<div class="empty-admin">No encontramos jugadores con esos filtros.</div>';
+  } else {
+  const rows = filteredUsers
     .map(
       (user) => `
         <div class="admin-row">
@@ -671,13 +724,19 @@ export function renderAdmin(
     </div>
     ${rows}
   `;
+  }
 
   if (!matches.length) {
     adminMatchesTable.innerHTML = '<div class="empty-admin">Aún no hay partidos cargados.</div>';
     return;
   }
 
-  const matchRows = sortedMatches
+  if (!filteredMatches.length) {
+    adminMatchesTable.innerHTML = '<div class="empty-admin">No encontramos partidos con esos filtros.</div>';
+    return;
+  }
+
+  const matchRows = filteredMatches
     .map((match) => {
       const total = getMatchPredictionCount(predictions, match.id);
 

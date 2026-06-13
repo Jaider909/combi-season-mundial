@@ -798,6 +798,18 @@
             </div>
             <button class="icon-button" id="refreshAdminPanel" type="button" title="Actualizar panel">↻</button>
           </div>
+          <div class="admin-toolbar">
+            <label>
+              Buscar
+              <input id="adminUserSearch" type="search" placeholder="Nombre, correo o WhatsApp" />
+            </label>
+            <label>
+              Equipo
+              <select id="adminUserTeamFilter">
+                <option value="">Todos los equipos</option>
+              </select>
+            </label>
+          </div>
           <div class="admin-table" id="adminUsersTable" aria-live="polite"></div>
         </div>
 
@@ -872,6 +884,21 @@
           <p class="form-note admin-note" id="resultNote" role="status"></p>
           <div class="admin-quick-matches" id="adminTodayMatches" aria-live="polite"></div>
           <div class="admin-match-detail" id="adminMatchDetail" aria-live="polite"></div>
+          <div class="admin-toolbar">
+            <label>
+              Buscar partido
+              <input id="adminMatchSearch" type="search" placeholder="Equipo o número" />
+            </label>
+            <label>
+              Estado
+              <select id="adminMatchStatusFilter">
+                <option value="">Todos</option>
+                <option value="open">Abiertos</option>
+                <option value="locked">Cerrados</option>
+                <option value="finished">Finalizados</option>
+              </select>
+            </label>
+          </div>
           <div class="admin-table" id="adminMatchesTable" aria-live="polite"></div>
         </div>
           </div>
@@ -953,6 +980,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=admin-workbench"></script>
+    <script type="module" src="js/app.js?v=admin-workbench-filters"></script>
   </body>
 </html>

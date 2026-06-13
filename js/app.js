@@ -59,7 +59,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-workbench";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-workbench-filters";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
@@ -124,6 +124,7 @@ let currentMatches = [];
 let currentPredictions = [];
 let currentChallenges = [];
 let currentUsers = [];
+let currentDrawParticipants = [];
 let selectedMatch = null;
 let selectedMatchTeam = null;
 let selectedMatchWasManual = false;
@@ -212,6 +213,7 @@ async function refreshPanels(user) {
   const users = activeUser || getInitialRoute() === "ranking" ? await listUsers() : [];
   currentUsers = users;
   const drawParticipants = activeUser?.role === "admin" ? await listAssignedParticipants() : [];
+  currentDrawParticipants = drawParticipants;
   const userPredictions = activeUser
     ? currentPredictions.filter((item) => item.playerId === activeUser.id)
     : [];
@@ -301,6 +303,21 @@ async function refreshPanels(user) {
     await refreshAdminTeamPlayers();
     setAdminModule(adminActiveModule);
   }
+}
+
+function renderAdminViewOnly() {
+  resultSelectedMatchId = resolveResultSelectedMatchId();
+  renderAdmin(
+    currentUsers,
+    currentPredictions,
+    currentMatches,
+    resultSelectedMatchId,
+    currentDrawParticipants,
+    currentChallenges,
+    adminSelectedUserId
+  );
+  syncResultForm(resultSelectedMatchId);
+  setAdminModule(adminActiveModule);
 }
 
 function shouldRefreshForMatchClock() {
@@ -1615,6 +1632,11 @@ document.querySelector(".admin-tabs")?.addEventListener("click", (event) => {
 
   setAdminModule(button.dataset.adminTab, true);
 });
+
+document.querySelector("#adminUserSearch")?.addEventListener("input", renderAdminViewOnly);
+document.querySelector("#adminUserTeamFilter")?.addEventListener("change", renderAdminViewOnly);
+document.querySelector("#adminMatchSearch")?.addEventListener("input", renderAdminViewOnly);
+document.querySelector("#adminMatchStatusFilter")?.addEventListener("change", renderAdminViewOnly);
 
 document.querySelector("#adminUsersTable").addEventListener("click", async (event) => {
   const button = event.target.closest("[data-admin-select-user]");
