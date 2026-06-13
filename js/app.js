@@ -75,7 +75,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=repeat-scorers";
+} from "./ui/predictions.js?v=prediction-rounds";
 import { renderRanking } from "./ui/ranking.js?v=safe-text";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -127,7 +127,7 @@ let selectedMatchTeam = null;
 let selectedMatchWasManual = false;
 let isMatchClockRefreshRunning = false;
 let predictionViewMode = "pending";
-let predictionScopeMode = "favorite";
+let predictionScopeMode = "all";
 let predictionGroupCode = null;
 let resultSelectedMatchId = null;
 let currentTeamPlayers = [];

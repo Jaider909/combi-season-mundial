@@ -435,6 +435,49 @@ function getPredictionForMatch(predictions, playerId, matchId) {
   return predictions.find((item) => item.playerId === playerId && item.matchId === matchId);
 }
 
+function getMatchNumber(match) {
+  const matchNumber = Number(match.matchNumber);
+
+  return Number.isFinite(matchNumber) ? matchNumber : 999;
+}
+
+function sortMatchesBySchedule(matches) {
+  return [...matches].sort((a, b) => {
+    const dateDiff = new Date(a.date) - new Date(b.date);
+
+    if (dateDiff !== 0) {
+      return dateDiff;
+    }
+
+    return getMatchNumber(a) - getMatchNumber(b);
+  });
+}
+
+function getMatchRoundLabel(match) {
+  const matchNumber = getMatchNumber(match);
+
+  if (matchNumber >= 1 && matchNumber <= 72) {
+    return `Jornada ${Math.ceil(matchNumber / 24)}`;
+  }
+
+  return match.phase || "Fase final";
+}
+
+function groupMatchesByRound(matches) {
+  return sortMatchesBySchedule(matches).reduce((groups, match) => {
+    const label = getMatchRoundLabel(match);
+    const group = groups.find((item) => item.label === label);
+
+    if (group) {
+      group.matches.push(match);
+    } else {
+      groups.push({ label, matches: [match] });
+    }
+
+    return groups;
+  }, []);
+}
+
 export function renderPredictionControls(viewMode, groupCode, scopeMode = "favorite") {
   document.querySelectorAll("[data-prediction-view]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.predictionView === viewMode);
@@ -512,42 +555,55 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
     return;
   }
 
-  container.innerHTML = matches
-    .map((match) => {
-      const prediction = getPredictionForMatch(predictions, playerId, match.id);
-      const isClosed = match.status === "finished";
-      const isLocked = isLockedMatch(match);
-      const isAutoClosed = isAutoClosedMatch(match);
-      const isUnavailable = isLocked || isClosed || isAutoClosed;
-      const status = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
-      const selectedClass = match.id === selectedMatchId ? " is-selected" : "";
-      const savedClass = prediction ? " is-saved" : "";
-      const closedClass = isClosed || isAutoClosed ? " is-closed" : "";
-      const lockedClass = isLocked ? " is-locked" : "";
-      const predictionDetails = prediction
-        ? `
-            <div class="saved-prediction">
-              <strong>${prediction.homeScore} - ${prediction.awayScore}</strong>
-              <span>${prediction.homeScorer || "Sin goleadores"} · ${
-                prediction.awayScorer || "Sin goleadores"
-              }</span>
-            </div>
-          `
-        : '<div class="prediction-pending">Sin predicción guardada</div>';
-
-      return `
-        <article class="prediction-match-card${selectedClass}${savedClass}${closedClass}${lockedClass}" data-select-match="${match.id}" tabindex="0">
-          <div class="prediction-match-copy">
-            <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
-            <h4>${match.homeTeam} vs ${match.awayTeam}</h4>
-            <p>${match.phase} · ${isAutoClosed ? "cerrado por inicio" : match.status}</p>
-            ${predictionDetails}
+  container.innerHTML = groupMatchesByRound(matches)
+    .map(
+      (group) => `
+        <section class="prediction-round">
+          <h4>${escapeHtml(group.label)}</h4>
+          <div class="prediction-round-list">
+            ${group.matches
+              .map((match) => renderPredictionMatchCard(match, predictions, playerId, selectedMatchId))
+              .join("")}
           </div>
-          <button class="btn btn-secondary btn-full" type="button" data-select-match="${match.id}">
-            ${status}
-          </button>
-        </article>
-      `;
-    })
+        </section>
+      `
+    )
     .join("");
+}
+
+function renderPredictionMatchCard(match, predictions, playerId, selectedMatchId) {
+  const prediction = getPredictionForMatch(predictions, playerId, match.id);
+  const isClosed = match.status === "finished";
+  const isLocked = isLockedMatch(match);
+  const isAutoClosed = isAutoClosedMatch(match);
+  const isUnavailable = isLocked || isClosed || isAutoClosed;
+  const status = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
+  const selectedClass = match.id === selectedMatchId ? " is-selected" : "";
+  const savedClass = prediction ? " is-saved" : "";
+  const closedClass = isClosed || isAutoClosed ? " is-closed" : "";
+  const lockedClass = isLocked ? " is-locked" : "";
+  const predictionDetails = prediction
+    ? `
+        <div class="saved-prediction">
+          <strong>${prediction.homeScore} - ${prediction.awayScore}</strong>
+          <span>${prediction.homeScorer || "Sin goleadores"} · ${
+            prediction.awayScorer || "Sin goleadores"
+          }</span>
+        </div>
+      `
+    : '<div class="prediction-pending">Sin predicción guardada</div>';
+
+  return `
+    <article class="prediction-match-card${selectedClass}${savedClass}${closedClass}${lockedClass}" data-select-match="${match.id}" tabindex="0">
+      <div class="prediction-match-copy">
+        <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
+        <h4>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</h4>
+        <p>${escapeHtml(match.phase)} · ${isAutoClosed ? "cerrado por inicio" : escapeHtml(match.status)}</p>
+        ${predictionDetails}
+      </div>
+      <button class="btn btn-secondary btn-full" type="button" data-select-match="${match.id}">
+        ${status}
+      </button>
+    </article>
+  `;
 }

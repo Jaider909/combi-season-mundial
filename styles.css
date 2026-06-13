@@ -1649,9 +1649,32 @@ h3 {
 
 .prediction-matches-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.prediction-round {
+  display: grid;
+  gap: 10px;
+}
+
+.prediction-round h4 {
+  margin: 0;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.prediction-round-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
 }
 
 .prediction-workspace {
