@@ -75,7 +75,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=auto-close";
+} from "./ui/predictions.js?v=local-colombia-time";
 import { renderRanking } from "./ui/ranking.js?v=safe-text";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";

@@ -30,12 +30,24 @@ function formatMatchDate(date) {
     return "Fecha por definir";
   }
 
-  return new Intl.DateTimeFormat("es-CO", {
+  const matchDate = new Date(date);
+  const dateOptions = {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(date));
+  };
+  const localDate = new Intl.DateTimeFormat("es-CO", dateOptions).format(matchDate);
+  const colombiaDate = new Intl.DateTimeFormat("es-CO", {
+    ...dateOptions,
+    timeZone: "America/Bogota",
+  }).format(matchDate);
+
+  if (localDate === colombiaDate) {
+    return `${localDate} · hora Colombia`;
+  }
+
+  return `${localDate} · tu hora / COL ${colombiaDate}`;
 }
 
 function hasMatchStarted(match) {
