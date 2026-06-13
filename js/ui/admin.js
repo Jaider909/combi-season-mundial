@@ -1,3 +1,4 @@
+import { qualifiedTeams } from "../config/teams.js";
 import { escapeHtml, setText } from "./dom.js?v=safe-text";
 
 function formatDate(value) {
@@ -129,6 +130,179 @@ function getChallengeStatusLabel(status) {
   };
 
   return labels[status] || status;
+}
+
+function getPredictionMatch(prediction, matches) {
+  return getMatchById(matches, prediction.matchId);
+}
+
+function formatPredictionLine(prediction, matches) {
+  const match = getPredictionMatch(prediction, matches);
+  const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : "Partido no encontrado";
+
+  return `
+    <div class="admin-mini-row">
+      <span>
+        <strong>${escapeHtml(matchName)}</strong>
+        <br>${match ? `Partido ${match.matchNumber || "-"}` : ""}
+      </span>
+      <span>${prediction.homeScore} - ${prediction.awayScore}</span>
+      <span>${escapeHtml(prediction.homeScorer || "Sin goleadores")} / ${escapeHtml(
+        prediction.awayScorer || "Sin goleadores"
+      )}</span>
+      <span>${prediction.estimatedPoints || 0} pts</span>
+    </div>
+  `;
+}
+
+function formatChallengeLine(challenge, users, matches, selectedUserId) {
+  const match = getMatchById(matches, challenge.matchId);
+  const creator = getUserById(users, challenge.creatorPlayerId);
+  const opponent = getUserById(users, challenge.opponentPlayerId);
+  const otherUser =
+    challenge.creatorPlayerId === selectedUserId
+      ? opponent
+      : challenge.opponentPlayerId === selectedUserId
+        ? creator
+        : null;
+  const team =
+    challenge.creatorPlayerId === selectedUserId
+      ? challenge.creatorTeam
+      : challenge.opponentPlayerId === selectedUserId
+        ? challenge.opponentTeam
+        : "-";
+
+  return `
+    <div class="admin-mini-row">
+      <span>
+        <strong>${escapeHtml(match ? `${match.homeTeam} vs ${match.awayTeam}` : "Partido no encontrado")}</strong>
+        <br>${match ? `Partido ${match.matchNumber || "-"}` : ""}
+      </span>
+      <span>${escapeHtml(team || "-")}</span>
+      <span>${escapeHtml(otherUser?.alias || otherUser?.name || "Sin rival")}</span>
+      <span>${escapeHtml(getChallengeStatusLabel(challenge.status))}</span>
+    </div>
+  `;
+}
+
+function renderAdminUserDetail(user, predictions, matches, challenges, users) {
+  const detail = document.querySelector("#adminUserDetail");
+
+  if (!detail) {
+    return;
+  }
+
+  if (!user) {
+    detail.innerHTML = '<div class="empty-admin">Selecciona un jugador para revisar su actividad.</div>';
+    return;
+  }
+
+  const userPredictions = predictions.filter((prediction) => prediction.playerId === user.id);
+  const userChallenges = challenges.filter(
+    (challenge) => challenge.creatorPlayerId === user.id || challenge.opponentPlayerId === user.id
+  );
+  const isAdmin = user.role === "admin";
+
+  detail.innerHTML = `
+    <form class="admin-user-editor" id="adminUserEditForm" data-admin-user-form="${user.id}">
+      <div class="admin-user-heading">
+        <div>
+          <span>${escapeHtml(user.email)}</span>
+          <strong>${escapeHtml(user.alias || user.name)}</strong>
+        </div>
+        <span class="payment-chip ${isAdmin ? "is-success" : ""}">${escapeHtml(user.role || "player")}</span>
+      </div>
+      <label>
+        Nombre
+        <input name="name" type="text" value="${escapeHtml(user.name || "")}" required />
+      </label>
+      <label>
+        Alias
+        <input name="alias" type="text" value="${escapeHtml(user.alias || "")}" required />
+      </label>
+      <label>
+        WhatsApp
+        <input name="phone" type="text" value="${escapeHtml(user.phone || "")}" required />
+      </label>
+      <label>
+        Equipo
+        <select name="team">
+          ${[...new Set(qualifiedTeams.concat(user.team).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, "es"))
+            .map(
+              (team) => `
+                <option value="${escapeHtml(team)}" ${team === user.team ? "selected" : ""}>
+                  ${escapeHtml(team)}
+                </option>
+              `
+            )
+            .join("")}
+        </select>
+      </label>
+      <label>
+        Estado
+        <select name="paymentStatus">
+          ${["Activo", "Pendiente", "Inactivo"]
+            .map(
+              (status) => `
+                <option value="${status}" ${status === user.paymentStatus ? "selected" : ""}>
+                  ${status}
+                </option>
+              `
+            )
+            .join("")}
+        </select>
+      </label>
+      <div class="admin-user-actions">
+        <button class="mini-action" type="submit">Guardar cambios</button>
+        <button class="mini-action" type="button" data-admin-reset-password="${user.id}">
+          Restablecer contraseña
+        </button>
+        <button
+          class="mini-action mini-action-danger"
+          type="button"
+          data-admin-delete-user="${user.id}"
+          ${isAdmin ? "disabled" : ""}
+        >
+          Eliminar jugador
+        </button>
+      </div>
+    </form>
+    <div class="admin-user-activity">
+      <article>
+        <span>Predicciones</span>
+        <strong>${userPredictions.length}</strong>
+      </article>
+      <article>
+        <span>Retos</span>
+        <strong>${userChallenges.length}</strong>
+      </article>
+      <article>
+        <span>Puntos</span>
+        <strong>${user.points || 0}</strong>
+      </article>
+    </div>
+    <div class="admin-mini-table">
+      <h4>Predicciones del jugador</h4>
+      ${
+        userPredictions.length
+          ? userPredictions
+              .map((prediction) => formatPredictionLine(prediction, matches))
+              .join("")
+          : '<div class="empty-admin">Este jugador aún no tiene predicciones.</div>'
+      }
+    </div>
+    <div class="admin-mini-table">
+      <h4>Retos del jugador</h4>
+      ${
+        userChallenges.length
+          ? userChallenges
+              .map((challenge) => formatChallengeLine(challenge, users, matches, user.id))
+              .join("")
+          : '<div class="empty-admin">Este jugador aún no tiene retos.</div>'
+      }
+    </div>
+  `;
 }
 
 function renderDrawParticipants(users, participants = []) {
@@ -430,7 +604,8 @@ export function renderAdmin(
   matches = [],
   selectedMatchId = null,
   participants = [],
-  challenges = []
+  challenges = [],
+  selectedUserId = null
 ) {
   const adminUsersTable = document.querySelector("#adminUsersTable");
   const adminMatchesTable = document.querySelector("#adminMatchesTable");
@@ -438,6 +613,7 @@ export function renderAdmin(
   const average = users.length ? (predictions.length / users.length).toFixed(1) : "0";
   const sortedMatches = sortMatchesByNumber(matches);
   const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
+  const selectedUser = users.find((user) => user.id === selectedUserId) || null;
 
   setText("#adminTotalUsers", users.length);
   setText("#adminPendingPayments", users.length);
@@ -447,6 +623,7 @@ export function renderAdmin(
   renderDrawParticipants(users, participants);
   renderAdminChallenges(users, matches, challenges);
   renderAdminTodayMatches(matches, predictions);
+  renderAdminUserDetail(selectedUser, predictions, matches, challenges, users);
 
   resultMatchSelect.innerHTML = sortedMatches
     .map(
@@ -474,7 +651,10 @@ export function renderAdmin(
           <span>${escapeHtml(user.phone)}</span>
           <span>${escapeHtml(user.team)}</span>
           <span>${user.points || 0} pts<br>${countPredictions(predictions, user.id)} predicciones</span>
-          <span><span class="payment-chip">${escapeHtml(user.paymentStatus)}</span><br>${formatDate(user.registeredAt)}</span>
+          <span>
+            <span class="payment-chip">${escapeHtml(user.paymentStatus)}</span><br>${formatDate(user.registeredAt)}
+            <br><button class="mini-action" type="button" data-admin-select-user="${user.id}">Ver detalle</button>
+          </span>
         </div>
       `
     )

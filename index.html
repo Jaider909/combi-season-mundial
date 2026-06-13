@@ -789,6 +789,18 @@
           <div class="admin-table" id="adminUsersTable" aria-live="polite"></div>
         </div>
 
+        <div class="admin-panel" id="adminUserManager">
+          <div class="panel-header">
+            <div>
+              <span>Gestión de jugador</span>
+              <h3>Perfil, predicciones y retos</h3>
+            </div>
+          </div>
+          <div id="adminUserDetail" aria-live="polite">
+            <div class="empty-admin">Selecciona un jugador para revisar su actividad.</div>
+          </div>
+        </div>
+
         <div class="admin-panel">
           <div class="panel-header">
             <div>
@@ -921,6 +933,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=prediction-rounds"></script>
+    <script type="module" src="js/app.js?v=admin-user-manager"></script>
   </body>
 </html>

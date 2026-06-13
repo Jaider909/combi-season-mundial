@@ -1,4 +1,4 @@
-import { clearCurrentUser as clearLocalUser, getCurrentUser as getLocalUser, setCurrentUser } from "./local-user-repository.js?v=activate-session";
+import { clearCurrentUser as clearLocalUser, getCurrentUser as getLocalUser, setCurrentUser } from "./local-user-repository.js?v=admin-user-manager";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase-client.js";
 
 function fromPlayerRow(row) {
@@ -145,6 +145,51 @@ export async function updateUserPoints(playerId, points) {
   }
 
   const { error } = await client.from("players").update({ points }).eq("id", playerId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateUser(userId, patch) {
+  const client = await getSupabaseClient();
+
+  if (!client) {
+    return null;
+  }
+
+  const payload = {};
+
+  if ("name" in patch) payload.name = patch.name;
+  if ("alias" in patch) payload.alias = patch.alias;
+  if ("phone" in patch) payload.phone = patch.phone;
+  if ("email" in patch) payload.email = patch.email;
+  if ("team" in patch) payload.favorite_team = patch.team;
+  if ("paymentStatus" in patch) payload.payment_status = patch.paymentStatus;
+  if ("role" in patch) payload.role = patch.role;
+
+  const { data, error } = await client
+    .from("players")
+    .update(payload)
+    .eq("id", userId)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? fromPlayerRow(data) : null;
+}
+
+export async function deleteUser(userId) {
+  const client = await getSupabaseClient();
+
+  if (!client) {
+    return;
+  }
+
+  const { error } = await client.from("players").delete().eq("id", userId);
 
   if (error) {
     throw error;

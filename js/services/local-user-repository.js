@@ -57,3 +57,29 @@ export function updateUserPoints(playerId, points) {
     setCurrentUser({ ...currentUser, points });
   }
 }
+
+export function updateUser(userId, patch) {
+  const users = listUsers();
+  const nextUsers = users.map((user) => (user.id === userId ? { ...user, ...patch } : user));
+  const updatedUser = nextUsers.find((user) => user.id === userId) || null;
+  const currentUser = getCurrentUser();
+
+  writeJson(usersKey, nextUsers);
+
+  if (updatedUser && currentUser?.id === userId) {
+    setCurrentUser(updatedUser);
+  }
+
+  return updatedUser;
+}
+
+export function deleteUser(userId) {
+  const currentUser = getCurrentUser();
+  const users = listUsers().filter((user) => user.id !== userId);
+
+  writeJson(usersKey, users);
+
+  if (currentUser?.id === userId) {
+    clearCurrentUser();
+  }
+}

@@ -2393,6 +2393,110 @@ h3 {
   grid-template-columns: minmax(190px, 1.1fr) minmax(140px, 0.75fr) minmax(140px, 0.75fr) minmax(120px, 0.65fr) minmax(120px, 0.65fr) minmax(110px, 0.55fr);
 }
 
+.admin-user-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 14px;
+  background: #f7f5ed;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+}
+
+.admin-user-heading {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.admin-user-heading span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-heading strong {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.05;
+}
+
+.admin-user-editor label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-user-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-user-activity {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-user-activity article {
+  padding: 12px;
+  background: #f7f5ed;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+}
+
+.admin-user-activity span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-user-activity strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.6rem;
+}
+
+.admin-mini-table {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-mini-table h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-mini-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(80px, 0.35fr) minmax(180px, 1fr) minmax(80px, 0.35fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: #f7f5ed;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+}
+
+.admin-mini-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .draw-row.is-registered {
   border-color: rgba(25, 201, 130, 0.24);
 }
@@ -2644,6 +2748,7 @@ h3 {
   .team-player-row,
   .draw-row,
   .challenge-admin-row,
+  .admin-mini-row,
   .admin-match-summary {
     display: grid;
     grid-template-columns: 1fr;
@@ -2657,9 +2762,19 @@ h3 {
   }
 
   .admin-row span,
-  .admin-match-summary article {
+  .admin-match-summary article,
+  .admin-mini-row span {
     min-width: 0;
     overflow-wrap: anywhere;
+  }
+
+  .admin-user-editor,
+  .admin-user-activity {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-heading {
+    display: grid;
   }
 
   .result-form {

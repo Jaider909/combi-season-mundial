@@ -1,5 +1,5 @@
-import * as localRepository from "./local-user-repository.js?v=activate-session";
-import * as supabaseRepository from "./supabase-user-repository.js?v=admin-rpc-fix";
+import * as localRepository from "./local-user-repository.js?v=admin-user-manager";
+import * as supabaseRepository from "./supabase-user-repository.js?v=admin-user-manager";
 import { isSupabaseConfigured } from "./supabase-client.js";
 
 function repository() {
@@ -40,4 +40,12 @@ export function findUserByEmail(email) {
 
 export function updateUserPoints(playerId, points) {
   return repository().updateUserPoints(playerId, points);
+}
+
+export function updateUser(userId, patch) {
+  return repository().updateUser(userId, patch);
+}
+
+export function deleteUser(userId) {
+  return repository().deleteUser(userId);
 }

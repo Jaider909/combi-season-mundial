@@ -54,10 +54,12 @@ import {
   getCurrentUser,
   isCloudMode,
   listUsers,
+  deleteUser,
   saveUser,
+  updateUser,
   updateUserPoints,
-} from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=actionable-today-agenda";
+} from "./services/user-repository.js?v=admin-user-manager";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-user-manager";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
@@ -130,6 +132,7 @@ let predictionViewMode = "pending";
 let predictionScopeMode = "all";
 let predictionGroupCode = null;
 let resultSelectedMatchId = null;
+let adminSelectedUserId = null;
 let currentTeamPlayers = [];
 let adminSelectedPlayerTeam = "Colombia";
 let currentPlayersByTeam = {};
@@ -288,7 +291,8 @@ async function refreshPanels(user) {
     currentMatches,
     resultSelectedMatchId,
     drawParticipants,
-    currentChallenges
+    currentChallenges,
+    adminSelectedUserId
   );
   syncResultForm(resultSelectedMatchId);
 
@@ -1579,6 +1583,113 @@ async function handleAdminMatchTableClick(event) {
 
 document.querySelector("#adminMatchesTable").addEventListener("click", handleAdminMatchTableClick);
 document.querySelector("#adminTodayMatches").addEventListener("click", handleAdminMatchTableClick);
+
+document.querySelector("#adminUsersTable").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-admin-select-user]");
+
+  if (!button) {
+    return;
+  }
+
+  adminSelectedUserId = button.dataset.adminSelectUser;
+  await refreshPanels(await getCurrentUser());
+  document.querySelector("#adminUserManager")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.querySelector("#adminUserDetail").addEventListener("submit", async (event) => {
+  const form = event.target.closest("[data-admin-user-form]");
+
+  if (!form) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const userId = form.dataset.adminUserForm;
+  const user = currentUsers.find((item) => item.id === userId);
+
+  if (!user) {
+    showNote(resultNote, "No encontramos ese jugador para actualizar.", "warning");
+    return;
+  }
+
+  try {
+    const data = new FormData(form);
+    const updatedUser = await updateUser(userId, {
+      name: data.get("name")?.toString().trim(),
+      alias: data.get("alias")?.toString().trim(),
+      phone: data.get("phone")?.toString().trim(),
+      team: data.get("team")?.toString(),
+      paymentStatus: data.get("paymentStatus")?.toString(),
+    });
+    const active = await getCurrentUser();
+    await refreshPanels(active?.id === userId ? updatedUser || active : active);
+    showNote(resultNote, `Jugador actualizado: ${updatedUser?.alias || user.alias || user.name}.`, "success");
+  } catch (error) {
+    showError(resultNote, error);
+  }
+});
+
+document.querySelector("#adminUserDetail").addEventListener("click", async (event) => {
+  const resetButton = event.target.closest("[data-admin-reset-password]");
+  const deleteButton = event.target.closest("[data-admin-delete-user]");
+  const userId = resetButton?.dataset.adminResetPassword || deleteButton?.dataset.adminDeleteUser;
+
+  if (!userId) {
+    return;
+  }
+
+  const user = currentUsers.find((item) => item.id === userId);
+
+  if (!user) {
+    showNote(resultNote, "No encontramos ese jugador.", "warning");
+    return;
+  }
+
+  if (resetButton) {
+    try {
+      setButtonBusy(resetButton, true, "Enviando...");
+      await resetPasswordForEmail(user.email);
+      showNote(resultNote, `Correo de recuperación enviado a ${user.email}.`, "success");
+    } catch (error) {
+      showError(resultNote, error);
+    } finally {
+      setButtonBusy(resetButton, false);
+    }
+    return;
+  }
+
+  if (deleteButton) {
+    if (user.role === "admin") {
+      showNote(resultNote, "Por seguridad no puedes eliminar un administrador desde este panel.", "warning");
+      return;
+    }
+
+    const userPredictions = currentPredictions.filter((prediction) => prediction.playerId === user.id).length;
+    const userChallenges = currentChallenges.filter(
+      (challenge) => challenge.creatorPlayerId === user.id || challenge.opponentPlayerId === user.id
+    ).length;
+    const shouldDelete = window.confirm(
+      `Eliminar a ${user.alias || user.name}? Se borraran ${userPredictions} predicciones y se afectaran ${userChallenges} retos relacionados.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      setButtonBusy(deleteButton, true, "Eliminando...");
+      await deleteUser(user.id);
+      adminSelectedUserId = null;
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, `Jugador eliminado: ${user.alias || user.name}.`, "success");
+    } catch (error) {
+      showError(resultNote, error);
+    } finally {
+      setButtonBusy(deleteButton, false);
+    }
+  }
+});
 
 predictionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
