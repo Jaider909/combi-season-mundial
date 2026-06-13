@@ -197,7 +197,23 @@ function parseScorerInput(value) {
 }
 
 function writeScorerInput(input, scorers) {
-  input.value = [...new Set(scorers)].join(", ");
+  input.value = scorers.join(", ");
+}
+
+function getScorerOptions(players) {
+  return ["Autogol", ...players.filter((player) => player !== "Autogol")];
+}
+
+function countScorerSelections(selectedScorers, player) {
+  return selectedScorers.filter((scorer) => scorer === player).length;
+}
+
+function getRenderedScorerOptions(containerId) {
+  return Array.from(
+    document.querySelectorAll(`#${containerId} [data-prediction-scorer-name]`)
+  )
+    .map((item) => decodeURIComponent(item.dataset.predictionScorerName || ""))
+    .filter((item) => item && item !== "Autogol");
 }
 
 function renderPredictionScorerChips(containerId, fieldName, players, selectedScorers, disabled) {
@@ -207,15 +223,21 @@ function renderPredictionScorerChips(containerId, fieldName, players, selectedSc
     return;
   }
 
-  if (!players.length) {
+  const options = getScorerOptions(players);
+
+  if (!options.length) {
     container.innerHTML = '<span class="empty-scorers">Sin jugadores cargados</span>';
     return;
   }
 
-  const selected = new Set(selectedScorers);
-  container.innerHTML = players
+  const clearButton = selectedScorers.length
+    ? `<button class="scorer-chip scorer-chip-clear" type="button" data-clear-prediction-scorer-field="${fieldName}" ${disabled ? "disabled" : ""}>Limpiar</button>`
+    : "";
+
+  container.innerHTML = `${clearButton}${options
     .map((player) => {
-      const isSelected = selected.has(player);
+      const count = countScorerSelections(selectedScorers, player);
+      const isSelected = count > 0;
 
       return `
         <button
@@ -225,11 +247,11 @@ function renderPredictionScorerChips(containerId, fieldName, players, selectedSc
           data-prediction-scorer-name="${encodeURIComponent(player)}"
           ${disabled ? "disabled" : ""}
         >
-          ${escapeHtml(player)}
+          ${escapeHtml(player)}${count > 1 ? ` <span>x${count}</span>` : ""}
         </button>
       `;
     })
-    .join("");
+    .join("")}`;
 }
 
 function bindPredictionScorerChips(form) {
@@ -242,6 +264,25 @@ function bindPredictionScorerChips(form) {
     const chip = event.target.closest("[data-prediction-scorer-field]");
 
     if (!chip || chip.disabled) {
+      const clearButton = event.target.closest("[data-clear-prediction-scorer-field]");
+
+      if (!clearButton || clearButton.disabled) {
+        return;
+      }
+
+      event.preventDefault();
+      const fieldName = clearButton.dataset.clearPredictionScorerField;
+      const input = form.querySelector(`[name="${fieldName}"]`);
+
+      if (input) {
+        const containerId =
+          fieldName === "homeScorer" ? "homePredictionScorerChips" : "awayPredictionScorerChips";
+        const players = getRenderedScorerOptions(containerId);
+
+        writeScorerInput(input, []);
+        renderPredictionScorerChips(containerId, fieldName, players, [], false);
+      }
+
       return;
     }
 
@@ -255,12 +296,17 @@ function bindPredictionScorerChips(form) {
     }
 
     const selectedScorers = parseScorerInput(input.value);
-    const nextScorers = selectedScorers.includes(scorerName)
-      ? selectedScorers.filter((name) => name !== scorerName)
-      : [...selectedScorers, scorerName];
+    const nextScorers = [...selectedScorers, scorerName];
 
     writeScorerInput(input, nextScorers);
-    chip.classList.toggle("is-selected", nextScorers.includes(scorerName));
+    const containerId = fieldName === "homeScorer" ? "homePredictionScorerChips" : "awayPredictionScorerChips";
+    renderPredictionScorerChips(
+      containerId,
+      fieldName,
+      getRenderedScorerOptions(containerId),
+      nextScorers,
+      false
+    );
   });
 }
 

@@ -2161,6 +2161,26 @@ h3 {
   border-color: transparent;
 }
 
+.scorer-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  min-height: 22px;
+  margin-left: 6px;
+  padding: 0 6px;
+  color: var(--white);
+  background: var(--ink);
+  border-radius: 999px;
+  font-size: 0.68rem;
+}
+
+.scorer-chip-clear {
+  color: #7d2330;
+  background: #ffe3e1;
+  border-color: rgba(125, 35, 48, 0.18);
+}
+
 .scorer-chip:disabled {
   opacity: 0.55;
 }

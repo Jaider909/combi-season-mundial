@@ -46,7 +46,7 @@ import {
   settleChallengesForMatch,
   updateChallenge,
 } from "./services/challenge-repository.js?v=challenge-finance-polish";
-import { calculatePredictionPoints, sumPlayerPoints } from "./services/scoring-service.js?v=cumulative-scoring";
+import { calculatePredictionPoints, sumPlayerPoints } from "./services/scoring-service.js?v=own-goal-scoring";
 import {
   clearCurrentUser,
   activateUserSession,
@@ -75,7 +75,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=local-colombia-time";
+} from "./ui/predictions.js?v=repeat-scorers";
 import { renderRanking } from "./ui/ranking.js?v=safe-text";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -447,6 +447,20 @@ function writeSelectedScorers(fieldName, scorers) {
   resultForm.elements[fieldName].value = scorers.join(", ");
 }
 
+function getScorerOptions(players) {
+  return ["Autogol", ...players.filter((player) => player !== "Autogol")];
+}
+
+function countScorerSelections(selectedScorers, player) {
+  return selectedScorers.filter((scorer) => scorer === player).length;
+}
+
+function getRenderedResultScorerOptions(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} [data-scorer-name]`))
+    .map((item) => decodeURIComponent(item.dataset.scorerName || ""))
+    .filter((item) => item && item !== "Autogol");
+}
+
 function renderScorerChipGroup(containerId, fieldName, players, selectedScorers, disabled) {
   const container = document.querySelector(`#${containerId}`);
 
@@ -454,14 +468,21 @@ function renderScorerChipGroup(containerId, fieldName, players, selectedScorers,
     return;
   }
 
-  if (!players.length) {
+  const options = getScorerOptions(players);
+
+  if (!options.length) {
     container.innerHTML = '<span class="empty-scorers">Sin jugadores cargados</span>';
     return;
   }
 
-  container.innerHTML = players
+  const clearButton = selectedScorers.length
+    ? `<button class="scorer-chip scorer-chip-clear" type="button" data-clear-scorer-field="${fieldName}" ${disabled ? "disabled" : ""}>Limpiar</button>`
+    : "";
+
+  container.innerHTML = `${clearButton}${options
     .map((player) => {
-      const isSelected = selectedScorers.includes(player);
+      const count = countScorerSelections(selectedScorers, player);
+      const isSelected = count > 0;
 
       return `
         <button
@@ -471,11 +492,11 @@ function renderScorerChipGroup(containerId, fieldName, players, selectedScorers,
           data-scorer-name="${encodeURIComponent(player)}"
           ${disabled ? "disabled" : ""}
         >
-          ${escapeHtml(player)}
+          ${escapeHtml(player)}${count > 1 ? ` <span>x${count}</span>` : ""}
         </button>
       `;
     })
-    .join("");
+    .join("")}`;
 }
 
 function renderScorerChips(match) {
@@ -1398,22 +1419,44 @@ syncKnockoutButton.addEventListener("click", async () => {
 
 resultForm.addEventListener("click", (event) => {
   const chip = event.target.closest("[data-scorer-field]");
+  const clearButton = event.target.closest("[data-clear-scorer-field]");
 
-  if (!chip) {
+  if (!chip && !clearButton) {
     return;
   }
 
   event.preventDefault();
   event.stopPropagation();
+
+  if (clearButton) {
+    const fieldName = clearButton.dataset.clearScorerField;
+    const containerId = fieldName === "homeScorers" ? "homeScorerChips" : "awayScorerChips";
+
+    writeSelectedScorers(fieldName, []);
+    renderScorerChipGroup(
+      containerId,
+      fieldName,
+      getRenderedResultScorerOptions(containerId),
+      [],
+      false
+    );
+    return;
+  }
+
   const fieldName = chip.dataset.scorerField;
   const scorerName = decodeURIComponent(chip.dataset.scorerName || "");
   const selectedScorers = readSelectedScorers(fieldName);
-  const nextScorers = selectedScorers.includes(scorerName)
-    ? selectedScorers.filter((name) => name !== scorerName)
-    : [...selectedScorers, scorerName];
+  const nextScorers = [...selectedScorers, scorerName];
 
   writeSelectedScorers(fieldName, nextScorers);
-  renderScorerChips(currentMatches.find((item) => item.id === resultSelectedMatchId));
+  const containerId = fieldName === "homeScorers" ? "homeScorerChips" : "awayScorerChips";
+  renderScorerChipGroup(
+    containerId,
+    fieldName,
+    getRenderedResultScorerOptions(containerId),
+    nextScorers,
+    false
+  );
 });
 
 resultForm.addEventListener("submit", async (event) => {

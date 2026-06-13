@@ -17,9 +17,22 @@ function parsePredictedScorers(value) {
     .filter(Boolean);
 }
 
+function isOwnGoal(value) {
+  return normalizeName(value).startsWith("autogol");
+}
+
 function countMatchingScorers(players = [], predictedScorers) {
-  const realPlayers = new Set(players.map(normalizeName).filter(Boolean));
-  const uniquePredictions = new Set(parsePredictedScorers(predictedScorers).map(normalizeName));
+  const realPlayers = new Set(
+    players
+      .filter((player) => !isOwnGoal(player))
+      .map(normalizeName)
+      .filter(Boolean)
+  );
+  const uniquePredictions = new Set(
+    parsePredictedScorers(predictedScorers)
+      .filter((player) => !isOwnGoal(player))
+      .map(normalizeName)
+  );
 
   return [...uniquePredictions].filter((playerName) => realPlayers.has(playerName)).length;
 }
