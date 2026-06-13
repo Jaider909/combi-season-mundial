@@ -52,6 +52,10 @@ function sortMatchesByNumber(matches) {
   });
 }
 
+function sortMatchesByDate(matches) {
+  return [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
 function renderMatchActionButton(match) {
   const isFinished = match.status === "finished";
   const isLocked = match.status === "locked";
@@ -305,14 +309,13 @@ function renderAdminTodayMatches(matches, predictions) {
   }
 
   const todayKey = getBogotaDateKey(new Date());
-  const sortedMatches = sortMatchesByNumber(matches);
-  const todayMatches = sortedMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
+  const sortedMatches = sortMatchesByDate(matches);
+  const actionableMatches = sortedMatches.filter((match) => match.status !== "finished");
+  const todayMatches = actionableMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
   const isTodayView = todayMatches.length > 0;
   const quickMatches = isTodayView
     ? todayMatches
-    : sortedMatches
-        .filter((match) => match.status !== "finished" && new Date(match.date) >= new Date())
-        .slice(0, 5);
+    : actionableMatches.filter((match) => new Date(match.date) >= new Date()).slice(0, 5);
 
   if (!quickMatches.length) {
     container.innerHTML = "";

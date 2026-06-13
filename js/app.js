@@ -57,7 +57,7 @@ import {
   saveUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-rpc-fix";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=match-activity-order";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=actionable-today-agenda";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
