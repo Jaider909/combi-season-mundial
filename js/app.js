@@ -41,11 +41,12 @@ import {
 } from "./services/prediction-repository.js?v=prediction-timestamps";
 import {
   clearChallenges,
+  deleteChallenge,
   listChallenges,
   saveChallenge,
   settleChallengesForMatch,
   updateChallenge,
-} from "./services/challenge-repository.js?v=challenge-finance-polish";
+} from "./services/challenge-repository.js?v=admin-challenge-crud";
 import { calculatePredictionPoints, sumPlayerPoints } from "./services/scoring-service.js?v=own-goal-scoring";
 import {
   clearCurrentUser,
@@ -59,7 +60,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=prediction-timestamps";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-challenge-crud";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {
@@ -1367,6 +1368,121 @@ clearChallengesButton.addEventListener("click", async () => {
     showError(resultNote, error);
   } finally {
     setButtonBusy(clearChallengesButton, false);
+  }
+});
+
+document.querySelector("#adminChallengesTable")?.addEventListener("click", async (event) => {
+  const winnerButton = event.target.closest("[data-admin-challenge-winner]");
+  const drawButton = event.target.closest("[data-admin-challenge-draw]");
+  const reopenButton = event.target.closest("[data-admin-challenge-reopen]");
+  const cancelButton = event.target.closest("[data-admin-challenge-cancel]");
+  const deleteButton = event.target.closest("[data-admin-challenge-delete]");
+  const actionButton = winnerButton || drawButton || reopenButton || cancelButton || deleteButton;
+
+  if (!actionButton) {
+    return;
+  }
+
+  const challengeId =
+    winnerButton?.dataset.adminChallengeWinner ||
+    drawButton?.dataset.adminChallengeDraw ||
+    reopenButton?.dataset.adminChallengeReopen ||
+    cancelButton?.dataset.adminChallengeCancel ||
+    deleteButton?.dataset.adminChallengeDelete;
+  const challenge = currentChallenges.find((item) => item.id === challengeId);
+
+  if (!challenge) {
+    showNote(resultNote, "No encontramos ese reto.", "warning");
+    return;
+  }
+
+  const challengeMatch = currentMatches.find((match) => match.id === challenge.matchId);
+  const isEditableChallenge =
+    ["closed", "draw", "cancelled"].includes(challenge.status) ||
+    ["finished", "locked"].includes(challengeMatch?.status);
+
+  if (!isEditableChallenge) {
+    showNote(resultNote, "Solo puedes editar retos terminados desde el admin.", "warning");
+    return;
+  }
+
+  try {
+    setButtonBusy(actionButton, true, "Guardando...");
+
+    if (deleteButton) {
+      const shouldDelete = window.confirm(
+        "¿Eliminar este reto terminado? Esta acción no borra usuarios, partidos ni predicciones."
+      );
+
+      if (!shouldDelete) {
+        return;
+      }
+
+      await deleteChallenge(challenge.id);
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, "Reto terminado eliminado correctamente.", "success");
+      notifyApp("Reto eliminado", "El historial de retos fue actualizado.");
+      return;
+    }
+
+    if (reopenButton) {
+      const shouldReopen = window.confirm(
+        "¿Reabrir este reto? Volverá a quedar aceptado para poder recalcularlo cuando guardes el resultado."
+      );
+
+      if (!shouldReopen) {
+        return;
+      }
+
+      await updateChallenge(challenge.id, {
+        status: "accepted",
+        winnerPlayerId: null,
+        closedAt: null,
+      });
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, "Reto reabierto para recalcular.", "success");
+      return;
+    }
+
+    if (cancelButton) {
+      await updateChallenge(challenge.id, {
+        status: "cancelled",
+        closedAt: challenge.closedAt || new Date().toISOString(),
+      });
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, "Reto vencido y quitado de los activos.", "success");
+      return;
+    }
+
+    if (drawButton) {
+      await updateChallenge(challenge.id, {
+        status: "draw",
+        winnerPlayerId: null,
+        closedAt: challenge.closedAt || new Date().toISOString(),
+      });
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, "Reto marcado como empate para la app.", "success");
+      return;
+    }
+
+    const winnerPlayerId = winnerButton.dataset.winnerPlayer;
+
+    if (!winnerPlayerId) {
+      showNote(resultNote, "Este reto no tiene rival para asignar ganador.", "warning");
+      return;
+    }
+
+    await updateChallenge(challenge.id, {
+      status: "closed",
+      winnerPlayerId,
+      closedAt: challenge.closedAt || new Date().toISOString(),
+    });
+    await refreshPanels(await getCurrentUser());
+    showNote(resultNote, "Ganador del reto actualizado.", "success");
+  } catch (error) {
+    showError(resultNote, error);
+  } finally {
+    setButtonBusy(actionButton, false);
   }
 });
 

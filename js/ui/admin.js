@@ -161,6 +161,56 @@ function getChallengeStatusLabel(status) {
   return labels[status] || status;
 }
 
+function isFinishedChallenge(challenge, match) {
+  return ["closed", "draw", "cancelled"].includes(challenge.status) || ["finished", "locked"].includes(match?.status);
+}
+
+function renderAdminChallengeActions(challenge, opponent, match) {
+  if (!isFinishedChallenge(challenge, match)) {
+    return '<small class="admin-muted-line">Editable al terminar</small>';
+  }
+
+  const canPickOpponent = Boolean(opponent);
+  const canResolve = challenge.status !== "cancelled" && challenge.status !== "open";
+  const canReopen = ["closed", "draw"].includes(challenge.status);
+  const canCancel = challenge.status === "open";
+
+  return `
+    <div class="admin-row-actions">
+      ${canResolve
+        ? `
+          <button class="mini-action" type="button" data-admin-challenge-winner="${challenge.id}" data-winner-player="${challenge.creatorPlayerId}">
+            Gana creador
+          </button>
+          <button class="mini-action" type="button" data-admin-challenge-winner="${challenge.id}" data-winner-player="${challenge.opponentPlayerId || ""}" ${canPickOpponent ? "" : "disabled"}>
+            Gana rival
+          </button>
+          <button class="mini-action" type="button" data-admin-challenge-draw="${challenge.id}">
+            Empate app
+          </button>
+        `
+        : ""}
+      ${canReopen
+        ? `
+          <button class="mini-action" type="button" data-admin-challenge-reopen="${challenge.id}">
+            Reabrir
+          </button>
+        `
+        : ""}
+      ${canCancel
+        ? `
+          <button class="mini-action" type="button" data-admin-challenge-cancel="${challenge.id}">
+            Vencer reto
+          </button>
+        `
+        : ""}
+      <button class="mini-action danger-action" type="button" data-admin-challenge-delete="${challenge.id}">
+        Eliminar
+      </button>
+    </div>
+  `;
+}
+
 function getPredictionMatch(prediction, matches) {
   return getMatchById(matches, prediction.matchId);
 }
@@ -418,12 +468,9 @@ function renderAdminChallenges(users, matches, challenges = []) {
   const acceptedCount = activeChallenges.filter((challenge) => challenge.status === "accepted").length;
   const openCount = activeChallenges.filter((challenge) => challenge.status === "open").length;
   const closedCount = activeChallenges.filter((challenge) => ["closed", "draw"].includes(challenge.status)).length;
+  const cancelledCount = challenges.filter((challenge) => challenge.status === "cancelled").length;
   const totalStake = activeChallenges.reduce((sum, challenge) => sum + (challenge.stakeAmount || 0) * 2, 0);
   const closedChallenges = activeChallenges.filter((challenge) => ["closed", "draw"].includes(challenge.status));
-  const projectedFee = activeChallenges.reduce((sum, challenge) => {
-    const total = (challenge.stakeAmount || 0) * 2;
-    return sum + (challenge.status === "draw" ? total : Math.round(total * 0.1));
-  }, 0);
   const earnedFee = closedChallenges.reduce((sum, challenge) => {
     const total = (challenge.stakeAmount || 0) * 2;
     return sum + (challenge.status === "draw" ? total : Math.round(total * 0.1));
@@ -451,17 +498,17 @@ function renderAdminChallenges(users, matches, challenges = []) {
       <strong>${formatCurrency(earnedFee)}</strong>
     </article>
     <article>
-      <span>App proyectado</span>
-      <strong>${formatCurrency(projectedFee)}</strong>
+      <span>Cancelados</span>
+      <strong>${cancelledCount}</strong>
     </article>
   `;
 
-  if (!activeChallenges.length) {
+  if (!challenges.length) {
     table.innerHTML = '<div class="empty-admin">Aún no hay retos creados.</div>';
     return;
   }
 
-  const rows = activeChallenges
+  const rows = challenges
     .map((challenge) => {
       const match = getMatchById(matches, challenge.matchId);
       const creator = getUserById(users, challenge.creatorPlayerId);
@@ -482,6 +529,7 @@ function renderAdminChallenges(users, matches, challenges = []) {
           <span>${formatCurrency(challenge.stakeAmount)}<br>Bolsa ${formatCurrency(total)}</span>
           <span><span class="payment-chip">${escapeHtml(getChallengeStatusLabel(challenge.status))}</span><br>App ${formatCurrency(fee)}<br>Premio ${formatCurrency(payout)}</span>
           <span>${escapeHtml(winner?.alias || winner?.name || (challenge.status === "draw" ? "App" : "-"))}</span>
+          <span>${renderAdminChallengeActions(challenge, opponent, match)}</span>
         </div>
       `;
     })
@@ -495,6 +543,7 @@ function renderAdminChallenges(users, matches, challenges = []) {
       <span>Valor</span>
       <span>Estado</span>
       <span>Ganador</span>
+      <span>Acciones</span>
     </div>
     ${rows}
   `;

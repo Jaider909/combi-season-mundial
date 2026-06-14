@@ -2515,7 +2515,26 @@ h3 {
 }
 
 .challenge-admin-row {
-  grid-template-columns: minmax(190px, 1.1fr) minmax(140px, 0.75fr) minmax(140px, 0.75fr) minmax(120px, 0.65fr) minmax(120px, 0.65fr) minmax(110px, 0.55fr);
+  grid-template-columns: minmax(190px, 1.05fr) minmax(130px, 0.65fr) minmax(130px, 0.65fr) minmax(110px, 0.55fr) minmax(120px, 0.6fr) minmax(110px, 0.5fr) minmax(220px, 1fr);
+}
+
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-row-actions .mini-action {
+  min-height: 36px;
+  padding: 8px 12px;
+}
+
+.admin-muted-line {
+  display: block;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .admin-user-editor {

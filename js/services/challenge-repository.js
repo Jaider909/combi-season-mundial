@@ -122,6 +122,21 @@ export async function updateChallenge(challengeId, patch) {
   return data ? fromChallengeRow(data) : null;
 }
 
+export async function deleteChallenge(challengeId) {
+  if (!isSupabaseConfigured()) {
+    const challenges = readJson(challengesKey, []).filter((challenge) => challenge.id !== challengeId);
+    writeJson(challengesKey, challenges);
+    return;
+  }
+
+  const client = await getSupabaseClient();
+  const { error } = await client.from("challenges").delete().eq("id", challengeId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function clearChallenges() {
   if (!isSupabaseConfigured()) {
     const activeChallenges = readJson(challengesKey, []).filter(
