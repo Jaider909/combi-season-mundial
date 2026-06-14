@@ -2622,6 +2622,15 @@ h3 {
   overflow-wrap: anywhere;
 }
 
+.admin-mini-row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .draw-row.is-registered {
   border-color: rgba(25, 201, 130, 0.24);
 }

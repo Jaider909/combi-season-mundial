@@ -38,7 +38,7 @@ import {
   savePrediction,
   listPredictions,
   updatePredictionPoints,
-} from "./services/prediction-repository.js?v=delete-prediction";
+} from "./services/prediction-repository.js?v=prediction-timestamps";
 import {
   clearChallenges,
   listChallenges,
@@ -59,7 +59,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-ops-readiness";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=prediction-timestamps";
 import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
 import {

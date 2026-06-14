@@ -10,6 +10,20 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function formatPredictionTime(value) {
+  if (!value) {
+    return "Sin fecha registrada";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Sin fecha registrada";
+  }
+
+  return formatDate(date);
+}
+
 function getBogotaDateKey(value) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Bogota",
@@ -160,6 +174,7 @@ function formatPredictionLine(prediction, matches) {
       <span>
         <strong>${escapeHtml(matchName)}</strong>
         <br>${match ? `Partido ${match.matchNumber || "-"}` : ""}
+        <small>Guardada: ${escapeHtml(formatPredictionTime(prediction.savedAt))}</small>
       </span>
       <span>${prediction.homeScore} - ${prediction.awayScore}</span>
       <span>${escapeHtml(prediction.homeScorer || "Sin goleadores")} / ${escapeHtml(
@@ -591,6 +606,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
               <span>
                 <strong>${escapeHtml(user?.alias || "Jugador")}</strong>
                 <small>${escapeHtml(user?.email || "")}</small>
+                <small>Guardada: ${escapeHtml(formatPredictionTime(prediction.savedAt))}</small>
               </span>
               <span>${prediction.homeScore} - ${prediction.awayScore}</span>
               <span>${escapeHtml(prediction.homeScorer || "Sin goleador")} / ${escapeHtml(

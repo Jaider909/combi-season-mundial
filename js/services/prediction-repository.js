@@ -67,15 +67,22 @@ export async function savePrediction(prediction) {
   const existingIndex = predictions.findIndex(
     (item) => item.email === prediction.email && item.matchId === prediction.matchId
   );
+  const existingPrediction = existingIndex >= 0 ? predictions[existingIndex] : null;
+  const now = new Date().toISOString();
+  const nextPrediction = {
+    ...prediction,
+    savedAt: prediction.savedAt || existingPrediction?.savedAt || now,
+    updatedAt: now,
+  };
 
   if (existingIndex >= 0) {
-    predictions[existingIndex] = prediction;
+    predictions[existingIndex] = nextPrediction;
   } else {
-    predictions.unshift(prediction);
+    predictions.unshift(nextPrediction);
   }
 
   writeJson(predictionsKey, predictions);
-  return prediction;
+  return nextPrediction;
 }
 
 export async function deletePrediction(prediction) {
