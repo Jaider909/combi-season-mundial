@@ -47,6 +47,14 @@ function getMatchPredictionCount(predictions, matchId) {
   return predictions.filter((prediction) => prediction.matchId === matchId).length;
 }
 
+function getMissingPredictions(users, predictions, matchId) {
+  const predictedPlayerIds = new Set(
+    predictions.filter((prediction) => prediction.matchId === matchId).map((prediction) => prediction.playerId)
+  );
+
+  return users.filter((user) => user.role !== "admin" && !predictedPlayerIds.has(user.id));
+}
+
 function sortMatchesByNumber(matches) {
   return [...matches].sort((a, b) => {
     const numberA = Number(a.matchNumber);
@@ -493,6 +501,7 @@ function renderAdminTodayMatches(matches, predictions) {
   const sortedMatches = sortMatchesByDate(matches);
   const actionableMatches = sortedMatches.filter((match) => match.status !== "finished");
   const todayMatches = actionableMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
+  const allTodayMatches = sortedMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
   const isTodayView = todayMatches.length > 0;
   const quickMatches = isTodayView
     ? todayMatches
@@ -503,6 +512,14 @@ function renderAdminTodayMatches(matches, predictions) {
     return;
   }
 
+  const summarySource = isTodayView ? allTodayMatches : quickMatches;
+  const openCount = summarySource.filter((match) => match.status === "open").length;
+  const lockedCount = summarySource.filter((match) => match.status === "locked").length;
+  const finishedCount = summarySource.filter((match) => match.status === "finished").length;
+  const totalPredictions = summarySource.reduce(
+    (sum, match) => sum + getMatchPredictionCount(predictions, match.id),
+    0
+  );
   const rows = quickMatches
     .map((match) => renderMatchRow(match, getMatchPredictionCount(predictions, match.id)))
     .join("");
@@ -513,6 +530,28 @@ function renderAdminTodayMatches(matches, predictions) {
         <span>${isTodayView ? "Agenda de hoy" : "Próximos partidos"}</span>
         <h3>${isTodayView ? "Partidos para operar hoy" : "Siguientes partidos por preparar"}</h3>
       </div>
+    </div>
+    <div class="operation-summary">
+      <article>
+        <span>${isTodayView ? "Hoy" : "Próximos"}</span>
+        <strong>${summarySource.length}</strong>
+      </article>
+      <article>
+        <span>Abiertos</span>
+        <strong>${openCount}</strong>
+      </article>
+      <article>
+        <span>Cerrados</span>
+        <strong>${lockedCount}</strong>
+      </article>
+      <article>
+        <span>Finalizados</span>
+        <strong>${finishedCount}</strong>
+      </article>
+      <article>
+        <span>Predicciones</span>
+        <strong>${totalPredictions}</strong>
+      </article>
     </div>
     <div class="admin-table">
       <div class="admin-row match-admin-row header-row">
@@ -536,6 +575,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
   }
 
   const matchPredictions = predictions.filter((prediction) => prediction.matchId === match.id);
+  const missingUsers = getMissingPredictions(users, predictions, match.id);
   const score =
     match.status === "finished"
       ? `${match.homeScore} - ${match.awayScore}`
@@ -579,11 +619,32 @@ function renderSelectedMatchDetail(users, predictions, match) {
       </div>
       <div>
         <span>Predicciones</span>
-        <strong>${matchPredictions.length}</strong>
+        <strong>${matchPredictions.length}/${users.filter((user) => user.role !== "admin").length}</strong>
       </div>
       <div>
         <span>Goleadores</span>
         <strong>${escapeHtml(scorers)}</strong>
+      </div>
+    </div>
+    <div class="admin-match-readiness">
+      <article>
+        <span>Listos</span>
+        <strong>${matchPredictions.length}</strong>
+      </article>
+      <article>
+        <span>Faltan</span>
+        <strong>${missingUsers.length}</strong>
+      </article>
+      <div>
+        <span>Jugadores pendientes</span>
+        <strong>${
+          missingUsers.length
+            ? missingUsers
+                .slice(0, 12)
+                .map((user) => escapeHtml(user.alias || user.name))
+                .join(", ")
+            : "Todos predijeron"
+        }${missingUsers.length > 12 ? ` y ${missingUsers.length - 12} más` : ""}</strong>
       </div>
     </div>
     <div class="admin-prediction-table">

@@ -2026,9 +2026,7 @@ h3 {
 }
 
 .admin-tabs {
-  position: sticky;
-  top: 86px;
-  z-index: 7;
+  position: static;
   display: flex;
   gap: 8px;
   padding: 10px;
@@ -2076,8 +2074,15 @@ h3 {
 }
 
 .admin-module[data-admin-module="jugadores"] #adminUserManager {
-  position: sticky;
-  top: 78px;
+  position: static;
+}
+
+.admin-module[data-admin-module="jugadores"] .admin-mini-row {
+  grid-template-columns: 1fr;
+}
+
+.admin-module[data-admin-module="jugadores"] .admin-mini-row span {
+  overflow-wrap: anywhere;
 }
 
 .admin-stat,
@@ -2356,6 +2361,46 @@ h3 {
 
 .compact-header {
   margin-bottom: 0;
+}
+
+.operation-summary,
+.admin-match-readiness {
+  display: grid;
+  gap: 10px;
+}
+
+.operation-summary {
+  grid-template-columns: repeat(5, minmax(110px, 1fr));
+}
+
+.operation-summary article,
+.admin-match-readiness article,
+.admin-match-readiness div {
+  min-width: 0;
+  padding: 12px;
+  background: #f7f5ed;
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  border-radius: 8px;
+}
+
+.operation-summary span,
+.admin-match-readiness span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.operation-summary strong,
+.admin-match-readiness strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.admin-match-readiness {
+  grid-template-columns: repeat(2, minmax(90px, 0.25fr)) minmax(220px, 1fr);
 }
 
 .admin-match-summary {
@@ -2742,6 +2787,8 @@ h3 {
   .dashboard-progress,
   .draw-summary,
   .admin-grid,
+  .operation-summary,
+  .admin-match-readiness,
   .admin-match-summary,
   .player-actions,
   .challenge-form,
