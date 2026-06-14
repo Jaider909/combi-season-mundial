@@ -1,5 +1,6 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
 import { isPredictionClosedForPlayer } from "./predictions.js?v=auto-close";
+import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("es-CO", {
@@ -14,7 +15,7 @@ function formatMatch(match) {
     return "Partido no encontrado";
   }
 
-  return `Partido ${match.matchNumber || "-"} · ${match.homeTeam} vs ${match.awayTeam}`;
+  return `Partido ${match.matchNumber || "-"} · ${formatMatchLabel(match)}`;
 }
 
 function getPlayerName(users, playerId) {
@@ -46,8 +47,8 @@ function getChallengeShareUrl(challenge, match, creator) {
       : match.homeTeam
     : "el otro equipo";
   const text = [
-    `Reto COMBI SEASON: ${creator} va con ${challenge.creatorTeam}.`,
-    match ? `Partido: ${match.homeTeam} vs ${match.awayTeam}.` : "",
+    `Reto COMBI SEASON: ${creator} va con ${formatTeamLabel(challenge.creatorTeam)}.`,
+    match ? `Partido: ${formatMatchLabel(match)}.` : "",
     `Valor: ${formatCurrency(challenge.stakeAmount)} por jugador. Bolsa: ${formatCurrency(total)}.`,
     `Acepta el reto con ${opponentTeam}: ${appUrl}`,
   ]
@@ -154,7 +155,7 @@ export function renderChallengeTeamOptions(matches = [], activeUser = null) {
     .map(
       (team) => `
         <option value="${escapeHtml(team)}" ${team === activeUser?.team ? "selected" : ""}>
-          ${escapeHtml(team)}
+          ${escapeHtml(formatTeamLabel(team))}
         </option>
       `
     )
@@ -254,9 +255,9 @@ function renderChallengeCard(challenge, matches, users, activeUser, mode) {
         )}</span>
         <h4>${escapeHtml(formatMatch(match))}</h4>
         <div class="challenge-versus">
-          <span><strong>${escapeHtml(creator)}</strong><small>${escapeHtml(challenge.creatorTeam)}</small></span>
+          <span><strong>${escapeHtml(creator)}</strong><small>${escapeHtml(formatTeamLabel(challenge.creatorTeam))}</small></span>
           <em>vs</em>
-          <span><strong>${escapeHtml(opponent)}</strong><small>${escapeHtml(challenge.opponentTeam || otherTeam || "-")}</small></span>
+          <span><strong>${escapeHtml(opponent)}</strong><small>${escapeHtml(formatTeamLabel(challenge.opponentTeam || otherTeam || "-"))}</small></span>
         </div>
         <p>${escapeHtml(outcome)}</p>
       </div>
@@ -280,7 +281,7 @@ function renderChallengeCard(challenge, matches, users, activeUser, mode) {
         }
         ${
           canAccept
-            ? `<button class="btn btn-secondary" type="button" data-accept-challenge="${challenge.id}" data-opponent-team="${escapeHtml(otherTeam)}">Aceptar ${escapeHtml(otherTeam)}</button>`
+            ? `<button class="btn btn-secondary" type="button" data-accept-challenge="${challenge.id}" data-opponent-team="${escapeHtml(otherTeam)}">Aceptar ${escapeHtml(formatTeamLabel(otherTeam))}</button>`
             : ""
         }
         ${

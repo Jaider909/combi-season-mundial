@@ -1,5 +1,6 @@
 import { qualifiedTeams } from "../config/teams.js";
 import { escapeHtml, setText } from "./dom.js?v=safe-text";
+import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("es-CO", {
@@ -118,7 +119,7 @@ function renderMatchRow(match, total) {
   return `
     <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
       <span><strong>Partido ${match.matchNumber || "-"}</strong><br>${formatDate(match.date)}</span>
-      <span>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</span>
+      <span>${escapeHtml(formatMatchLabel(match))}</span>
       <span>${escapeHtml(match.phase)}</span>
       <span>${total} predicciones</span>
       <span>
@@ -217,7 +218,7 @@ function getPredictionMatch(prediction, matches) {
 
 function formatPredictionLine(prediction, matches) {
   const match = getPredictionMatch(prediction, matches);
-  const matchName = match ? `${match.homeTeam} vs ${match.awayTeam}` : "Partido no encontrado";
+  const matchName = match ? formatMatchLabel(match) : "Partido no encontrado";
 
   return `
     <div class="admin-mini-row">
@@ -255,7 +256,7 @@ function formatChallengeLine(challenge, users, matches, selectedUserId) {
   return `
     <div class="admin-mini-row">
       <span>
-        <strong>${escapeHtml(match ? `${match.homeTeam} vs ${match.awayTeam}` : "Partido no encontrado")}</strong>
+        <strong>${escapeHtml(match ? formatMatchLabel(match) : "Partido no encontrado")}</strong>
         <br>${match ? `Partido ${match.matchNumber || "-"}` : ""}
       </span>
       <span>${escapeHtml(team || "-")}</span>
@@ -312,7 +313,7 @@ function renderAdminUserDetail(user, predictions, matches, challenges, users) {
             .map(
               (team) => `
                 <option value="${escapeHtml(team)}" ${team === user.team ? "selected" : ""}>
-                  ${escapeHtml(team)}
+                  ${escapeHtml(formatTeamLabel(team))}
                 </option>
               `
             )
@@ -430,7 +431,7 @@ function renderDrawParticipants(users, participants = []) {
 
       return `
         <div class="admin-row draw-row ${isRegistered ? "is-registered" : "is-pending"}">
-          <span><strong>${escapeHtml(participant.name)}</strong><br>${escapeHtml(participant.team)}</span>
+          <span><strong>${escapeHtml(participant.name)}</strong><br>${escapeHtml(formatTeamLabel(participant.team))}</span>
           <span>${escapeHtml(participant.email || "Sin correo")}</span>
           <span>
             <span class="payment-chip ${isRegistered ? "is-success" : "is-muted"}">
@@ -521,11 +522,11 @@ function renderAdminChallenges(users, matches, challenges = []) {
       return `
         <div class="admin-row challenge-admin-row">
           <span>
-            <strong>${escapeHtml(match ? `${match.homeTeam} vs ${match.awayTeam}` : "Partido no encontrado")}</strong>
+            <strong>${escapeHtml(match ? formatMatchLabel(match) : "Partido no encontrado")}</strong>
             <br>${match ? `Partido ${match.matchNumber || "-"}` : ""}
           </span>
-          <span>${escapeHtml(creator?.alias || creator?.name || "Jugador")}<br>${escapeHtml(challenge.creatorTeam)}</span>
-          <span>${escapeHtml(opponent?.alias || opponent?.name || "Sin rival")}<br>${escapeHtml(challenge.opponentTeam || "-")}</span>
+          <span>${escapeHtml(creator?.alias || creator?.name || "Jugador")}<br>${escapeHtml(formatTeamLabel(challenge.creatorTeam))}</span>
+          <span>${escapeHtml(opponent?.alias || opponent?.name || "Sin rival")}<br>${escapeHtml(formatTeamLabel(challenge.opponentTeam || "-"))}</span>
           <span>${formatCurrency(challenge.stakeAmount)}<br>Bolsa ${formatCurrency(total)}</span>
           <span><span class="payment-chip">${escapeHtml(getChallengeStatusLabel(challenge.status))}</span><br>App ${formatCurrency(fee)}<br>Premio ${formatCurrency(payout)}</span>
           <span>${escapeHtml(winner?.alias || winner?.name || (challenge.status === "draw" ? "App" : "-"))}</span>
@@ -672,7 +673,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
     <div class="admin-match-summary">
       <div>
         <span>Partido seleccionado</span>
-        <strong>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</strong>
+        <strong>${escapeHtml(formatMatchLabel(match))}</strong>
       </div>
       <div>
         <span>Estado</span>
@@ -775,7 +776,7 @@ export function renderAdmin(
   setText("#adminPendingPayments", users.length);
   setText("#adminTotalPredictions", predictions.length);
   setText("#adminPredictionAverage", average);
-  setText("#adminTopTeam", getTopTeam(users));
+  setText("#adminTopTeam", formatTeamLabel(getTopTeam(users)));
   renderDrawParticipants(users, participants);
   renderAdminChallenges(users, matches, challenges);
   renderAdminTodayMatches(matches, predictions);
@@ -793,7 +794,7 @@ export function renderAdmin(
         .map(
           (team) => `
             <option value="${escapeHtml(team)}" ${team === currentTeamValue ? "selected" : ""}>
-              ${escapeHtml(team)}
+              ${escapeHtml(formatTeamLabel(team))}
             </option>
           `
         )
@@ -805,7 +806,7 @@ export function renderAdmin(
     .map(
       (match) => `
         <option value="${match.id}" ${match.id === selectedMatchId ? "selected" : ""}>
-          Partido ${match.matchNumber || "-"} · ${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}
+          Partido ${match.matchNumber || "-"} · ${escapeHtml(formatMatchLabel(match))}
         </option>
       `
     )
@@ -828,7 +829,7 @@ export function renderAdmin(
           <span><strong>${escapeHtml(user.alias)}</strong><br>${escapeHtml(user.name)}</span>
           <span>${escapeHtml(user.email)}</span>
           <span>${escapeHtml(user.phone)}</span>
-          <span>${escapeHtml(user.team)}</span>
+          <span>${escapeHtml(formatTeamLabel(user.team))}</span>
           <span>${user.points || 0} pts<br>${countPredictions(predictions, user.id)} predicciones</span>
           <span>
             <span class="payment-chip">${escapeHtml(user.paymentStatus)}</span><br>${formatDate(user.registeredAt)}

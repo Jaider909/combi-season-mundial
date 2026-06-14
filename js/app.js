@@ -9,6 +9,7 @@ import {
   updateTeamPlayer,
 } from "./services/team-player-repository.js?v=match-roster-guard";
 import { findGroupByTeam, worldCupGroups } from "./config/groups.js";
+import { formatTeamLabel, formatMatchLabel } from "./config/team-flags.js?v=team-flags";
 import { isAdminEmail } from "./config/admins.js";
 import { startCountdown } from "./countdown.js";
 import {
@@ -60,15 +61,15 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-challenge-crud";
-import { renderDashboard } from "./ui/dashboard.js?v=safe-text";
-import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=safe-text";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=team-flags";
+import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
+import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=expired-challenges";
-import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=safe-text";
+} from "./ui/challenges.js?v=team-flags";
+import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=team-flags";
 import {
   renderFavoriteTeamMatches,
   getVisiblePredictionMatches,
@@ -78,8 +79,8 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-rounds";
-import { renderRanking } from "./ui/ranking.js?v=safe-text";
+} from "./ui/predictions.js?v=team-flags";
+import { renderRanking } from "./ui/ranking.js?v=team-flags";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
 import { escapeHtml } from "./ui/dom.js?v=safe-text";
@@ -353,7 +354,7 @@ function renderAdminTeamPlayers() {
     .map(
       (team) => `
         <option value="${team}" ${team === adminSelectedPlayerTeam ? "selected" : ""}>
-          ${team}
+          ${formatTeamLabel(team)}
         </option>
       `
     )
@@ -379,7 +380,7 @@ function renderAdminTeamPlayers() {
       .map(
         (player) => `
           <div class="admin-row team-player-row">
-            <span><strong>${escapeHtml(player.name)}</strong><br>${escapeHtml(player.team)}</span>
+            <span><strong>${escapeHtml(player.name)}</strong><br>${escapeHtml(formatTeamLabel(player.team))}</span>
             <span>${escapeHtml(player.position || "-")}</span>
             <span>${escapeHtml(player.club || "-")}</span>
             <span>
@@ -456,10 +457,10 @@ function syncResultForm(matchId) {
   const isLocked = match.status === "locked";
   resultNote.textContent =
     isLocked
-      ? `Predicciones cerradas: ${match.homeTeam} vs ${match.awayTeam}. Puedes guardar resultado al finalizar.`
+      ? `Predicciones cerradas: ${formatMatchLabel(match)}. Puedes guardar resultado al finalizar.`
       : match.status === "finished"
-      ? `Resultado cargado: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}.`
-      : `Partido abierto: ${match.homeTeam} vs ${match.awayTeam}.`;
+      ? `Resultado cargado: ${formatTeamLabel(match.homeTeam)} ${match.homeScore} - ${match.awayScore} ${formatTeamLabel(match.awayTeam)}.`
+      : `Partido abierto: ${formatMatchLabel(match)}.`;
 }
 
 function readSelectedScorers(fieldName) {
@@ -646,7 +647,7 @@ function renderAvailableTeamOptions(teams) {
   teams.forEach((team) => {
     const option = document.createElement("option");
     option.value = team;
-    option.textContent = team;
+    option.textContent = formatTeamLabel(team);
     favoriteTeam.append(option);
   });
 }
@@ -680,7 +681,7 @@ async function updateAssignedTeamPreview(email) {
   if (participant) {
     assignedTeamPreview.innerHTML = `
       <span>Selección asignada</span>
-      <strong>${escapeHtml(participant.team)} · ${escapeHtml(participant.name)}</strong>
+      <strong>${escapeHtml(formatTeamLabel(participant.team))} · ${escapeHtml(participant.name)}</strong>
     `;
     setAvailableTeamFieldVisible(false);
     return;
@@ -1686,8 +1687,8 @@ async function handleAdminMatchTableClick(event) {
       };
       await updateMatchResult(matchId, lockedMatch);
       await refreshPanels(await getCurrentUser());
-      showNote(resultNote, `Predicciones cerradas para ${match.homeTeam} vs ${match.awayTeam}.`, "success");
-      notifyApp("Predicciones cerradas", `${match.homeTeam} vs ${match.awayTeam}`);
+      showNote(resultNote, `Predicciones cerradas para ${formatMatchLabel(match)}.`, "success");
+      notifyApp("Predicciones cerradas", formatMatchLabel(match));
     } catch (error) {
       showError(resultNote, error);
     } finally {
@@ -1946,7 +1947,7 @@ predictionForm.addEventListener("submit", async (event) => {
         "Predicción guardada. Ya te dejamos el siguiente partido pendiente listo.",
         "success"
       );
-      notifyApp("Predicción guardada", `${submittedMatch.homeTeam} vs ${submittedMatch.awayTeam}`);
+      notifyApp("Predicción guardada", formatMatchLabel(submittedMatch));
       scrollToPredictionEditor();
       return;
     }
@@ -1984,7 +1985,7 @@ predictionForm.addEventListener("submit", async (event) => {
       "Predicción guardada correctamente.",
       "success"
     );
-    notifyApp("Predicción guardada", `${submittedMatch.homeTeam} vs ${submittedMatch.awayTeam}`);
+    notifyApp("Predicción guardada", formatMatchLabel(submittedMatch));
   } catch (error) {
     showError(document.querySelector("#predictionSummary"), error);
   } finally {

@@ -1,3 +1,5 @@
+import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
+
 export function renderPredictionSummary(prediction, match) {
   const summary = document.querySelector("#predictionSummary");
 
@@ -7,13 +9,13 @@ export function renderPredictionSummary(prediction, match) {
   }
 
   if (!prediction) {
-    summary.textContent = `Aún no has guardado predicción para ${match.homeTeam} vs ${match.awayTeam}.`;
+    summary.textContent = `Aún no has guardado predicción para ${formatMatchLabel(match)}.`;
     return;
   }
 
   const homeScorer = prediction.homeScorer || "sin goleador";
   const awayScorer = prediction.awayScorer || "sin goleador";
-  summary.textContent = `${match.homeTeam} ${prediction.homeScore} - ${prediction.awayScore} ${match.awayTeam}. Goleadores: ${homeScorer} / ${awayScorer}. Puntos estimados: ${prediction.estimatedPoints}.`;
+  summary.textContent = `${formatTeamLabel(match.homeTeam)} ${prediction.homeScore} - ${prediction.awayScore} ${formatTeamLabel(match.awayTeam)}. Goleadores: ${homeScorer} / ${awayScorer}. Puntos estimados: ${prediction.estimatedPoints}.`;
 }
 
 function escapeHtml(value) {
@@ -108,7 +110,7 @@ export function renderSelectedMatchDetail(match, prediction) {
     <div class="selected-match-heading">
       <div>
         <span>Partido ${match.matchNumber || "-"}</span>
-        <strong>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</strong>
+        <strong>${escapeHtml(formatMatchLabel(match))}</strong>
       </div>
       <em class="${isClosed || isAutoClosed ? "is-closed" : ""} ${isLocked ? "is-locked" : ""}">${statusLabel}</em>
     </div>
@@ -138,7 +140,7 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
   }
 
   if (!matches.length) {
-    container.innerHTML = `<p class="empty-group">Aún no hay partidos cargados para ${team}. El administrador debe cargar el calendario de ese grupo.</p>`;
+    container.innerHTML = `<p class="empty-group">Aún no hay partidos cargados para ${escapeHtml(formatTeamLabel(team))}. El administrador debe cargar el calendario de ese grupo.</p>`;
     return;
   }
 
@@ -168,7 +170,7 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
         <article class="fixture-item">
           <div>
             <span class="fixture-date">${formatMatchDate(match.date)}</span>
-            <strong class="fixture-teams">${match.homeTeam} vs ${match.awayTeam}</strong>
+            <strong class="fixture-teams">${escapeHtml(formatMatchLabel(match))}</strong>
           </div>
           <em class="fixture-status">${stateLabel}</em>
           <a class="fixture-action" href="#predicciones" data-dashboard-match="${match.id}">${actionLabel}</a>
@@ -341,14 +343,14 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
   deleteButton.classList.toggle("is-hidden", !prediction);
   deleteButton.disabled = !prediction;
 
-  document.querySelector("#predictionModule").textContent = `${match.homeTeam} vs ${match.awayTeam}`;
+  document.querySelector("#predictionModule").textContent = formatMatchLabel(match);
   document.querySelector("#predictionEditingNote").textContent = prediction
-    ? `Editando predicción guardada para ${match.homeTeam} vs ${match.awayTeam}.`
-    : `Creando predicción para ${match.homeTeam} vs ${match.awayTeam}.`;
-  document.querySelector("#homeScoreLabel").textContent = `Goles ${match.homeTeam}`;
-  document.querySelector("#awayScoreLabel").textContent = `Goles ${match.awayTeam}`;
-  document.querySelector("#homeScorerLabel").textContent = `Goleadores ${match.homeTeam}`;
-  document.querySelector("#awayScorerLabel").textContent = `Goleadores ${match.awayTeam}`;
+    ? `Editando predicción guardada para ${formatMatchLabel(match)}.`
+    : `Creando predicción para ${formatMatchLabel(match)}.`;
+  document.querySelector("#homeScoreLabel").textContent = `Goles ${formatTeamLabel(match.homeTeam)}`;
+  document.querySelector("#awayScoreLabel").textContent = `Goles ${formatTeamLabel(match.awayTeam)}`;
+  document.querySelector("#homeScorerLabel").textContent = `Goleadores ${formatTeamLabel(match.homeTeam)}`;
+  document.querySelector("#awayScorerLabel").textContent = `Goleadores ${formatTeamLabel(match.awayTeam)}`;
   homeScorerInput.placeholder = `Ej: jugador 1, jugador 2`;
   awayScorerInput.placeholder = `Ej: jugador 1, jugador 2`;
   renderPlayerOptions("homeScorerOptions", homePlayers);
@@ -547,7 +549,9 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
       closed: "Todavía no hay partidos cerrados en este filtro.",
       all:
         context.scopeMode === "favorite"
-          ? `Aún no hay partidos cargados para ${context.favoriteTeam || "tu selección"}.`
+          ? `Aún no hay partidos cargados para ${
+              context.favoriteTeam ? formatTeamLabel(context.favoriteTeam) : "tu selección"
+            }.`
           : "Aún no hay partidos cargados para este filtro.",
     };
     const message = messages[context.viewMode] || "Aún no hay partidos cargados para este filtro.";
@@ -597,7 +601,7 @@ function renderPredictionMatchCard(match, predictions, playerId, selectedMatchId
     <article class="prediction-match-card${selectedClass}${savedClass}${closedClass}${lockedClass}" data-select-match="${match.id}" tabindex="0">
       <div class="prediction-match-copy">
         <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
-        <h4>${escapeHtml(match.homeTeam)} vs ${escapeHtml(match.awayTeam)}</h4>
+        <h4>${escapeHtml(formatMatchLabel(match))}</h4>
         <p>${escapeHtml(match.phase)} · ${isAutoClosed ? "cerrado por inicio" : escapeHtml(match.status)}</p>
         ${predictionDetails}
       </div>

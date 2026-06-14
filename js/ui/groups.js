@@ -1,4 +1,5 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
+import { formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function isFinishedMatch(match) {
   return (
@@ -85,7 +86,7 @@ function renderStandingRows(group, favoriteTeam, matches = []) {
       (standing, index) => `
         <div class="group-row ${standing.team === favoriteTeam ? "is-favorite" : ""}">
           <span>${index + 1}</span>
-          <strong>${escapeHtml(standing.team)}</strong>
+          <strong>${escapeHtml(formatTeamLabel(standing.team))}</strong>
           <span>${standing.played}</span>
           <span>${standing.wins}</span>
           <span>${standing.draws}</span>
@@ -139,7 +140,7 @@ export function renderAllGroups(groups, favoriteTeam, matches = []) {
               (standing, index) => `
                 <div class="${standing.team === favoriteTeam ? "is-favorite" : ""}">
                   <span>${index + 1}</span>
-                  <strong>${escapeHtml(standing.team)}</strong>
+                  <strong>${escapeHtml(formatTeamLabel(standing.team))}</strong>
                   <em>${standing.points} pts</em>
                 </div>
               `

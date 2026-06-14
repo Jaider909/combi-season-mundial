@@ -1,4 +1,5 @@
 import { setText } from "./dom.js?v=safe-text";
+import { formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 export function renderDashboard(user, stats = {}) {
   const dashboardEmpty = document.querySelector("#dashboardEmpty");
@@ -16,9 +17,9 @@ export function renderDashboard(user, stats = {}) {
   setText("#dashboardTitle", `Hola, ${user.name}`);
   setText(
     "#dashboardSubtitle",
-    `${user.alias} juega con ${user.team}. Revisa los partidos pendientes y ajusta tus predicciones antes del cierre.`
+    `${user.alias} juega con ${formatTeamLabel(user.team)}. Revisa los partidos pendientes y ajusta tus predicciones antes del cierre.`
   );
-  setText("#dashboardTeam", user.team);
+  setText("#dashboardTeam", formatTeamLabel(user.team));
   setText("#dashboardAlias", user.alias);
   setText("#dashboardName", user.name);
   setText("#dashboardPhone", user.phone);

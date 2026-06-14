@@ -1,4 +1,5 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
+import { formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function countPredictions(predictions, playerId) {
   return predictions.filter((prediction) => prediction.playerId === playerId).length;
@@ -37,7 +38,7 @@ function renderSpotlight(sortedUsers, predictions, currentUser) {
     <article>
       <span>Líder actual</span>
       <strong>${leader ? escapeHtml(leader.alias) : "-"}</strong>
-      <small>${leader ? `${leader.points || 0} pts · ${escapeHtml(leader.team)}` : "Sin jugadores"}</small>
+      <small>${leader ? `${leader.points || 0} pts · ${escapeHtml(formatTeamLabel(leader.team))}` : "Sin jugadores"}</small>
     </article>
     <article class="${currentIndex >= 0 ? "is-current" : ""}">
       <span>Tu posición</span>
@@ -77,7 +78,7 @@ export function renderRanking(users, predictions, currentUser = null) {
             ${escapeHtml(user.alias)}
             <small>${escapeHtml(user.name)} · ${predictionCount} predicciones</small>
           </strong>
-          <span>${escapeHtml(user.team)}</span>
+          <span>${escapeHtml(formatTeamLabel(user.team))}</span>
           <span>${scoredCount} aciertos</span>
           <strong>${user.points || 0}</strong>
         </div>

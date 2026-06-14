@@ -1,4 +1,5 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
+import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function formatDate(value) {
   if (!value) {
@@ -26,7 +27,7 @@ function userLabel(user) {
 }
 
 function matchLabel(match) {
-  return match ? `${match.homeTeam} vs ${match.awayTeam}` : "partido";
+  return match ? formatMatchLabel(match) : "partido";
 }
 
 function getChallengeEvents(challenges, matches, users) {
@@ -43,7 +44,7 @@ function getChallengeEvents(challenges, matches, users) {
         type: "Reto",
         date: challenge.createdAt,
         title: `${userLabel(creator)} lanzó un reto`,
-        detail: `${matchLabel(match)} · va con ${challenge.creatorTeam}`,
+        detail: `${matchLabel(match)} · va con ${formatTeamLabel(challenge.creatorTeam)}`,
       },
     ];
 
@@ -52,7 +53,7 @@ function getChallengeEvents(challenges, matches, users) {
         type: "Reto aceptado",
         date: challenge.acceptedAt,
         title: `${userLabel(opponent)} aceptó un reto`,
-        detail: `${matchLabel(match)} · va con ${challenge.opponentTeam}`,
+        detail: `${matchLabel(match)} · va con ${formatTeamLabel(challenge.opponentTeam)}`,
       });
     }
 
@@ -91,7 +92,7 @@ function getResultEvents(matches) {
       type: "Resultado",
       date: match.date,
       title: `Resultado cerrado`,
-      detail: `${match.homeTeam} ${match.homeScore}-${match.awayScore} ${match.awayTeam}`,
+      detail: `${formatTeamLabel(match.homeTeam)} ${match.homeScore}-${match.awayScore} ${formatTeamLabel(match.awayTeam)}`,
     }));
 }
 
