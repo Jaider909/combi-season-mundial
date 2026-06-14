@@ -2866,10 +2866,23 @@ h3 {
     max-width: 100%;
     padding-bottom: 10px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav a,
+  .nav-logout,
+  .session-badge {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.86rem;
   }
 
   .session-badge {
-    max-width: 170px;
+    max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -3039,6 +3052,44 @@ h3 {
   .selected-match-heading,
   .prediction-match-card {
     grid-template-columns: 1fr;
+  }
+
+  .prediction-match-card {
+    min-height: 0;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .prediction-match-card h4 {
+    font-size: 1.04rem;
+    line-height: 1.28;
+  }
+
+  .prediction-match-card .btn {
+    min-height: 46px;
+  }
+
+  .saved-prediction,
+  .prediction-pending {
+    width: 100%;
+  }
+
+  .saved-prediction span {
+    overflow-wrap: anywhere;
+  }
+
+  .prediction-form,
+  .challenge-form,
+  .signup-form {
+    min-width: 0;
+  }
+
+  .challenge-card,
+  .leaderboard-row,
+  .dashboard-panel,
+  .prediction-match-card,
+  .selected-match-detail {
+    overflow-wrap: anywhere;
   }
 
   .selected-match-heading {

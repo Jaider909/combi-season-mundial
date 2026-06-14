@@ -576,16 +576,18 @@ function getFormNumber(form, fieldName, fallback = 0) {
 
 function scrollToPredictionEditor() {
   const target = document.querySelector("#predictionEditor") || predictionForm;
-  const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
-  const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 18;
+  const getOffsetTop = () => {
+    const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+    return Math.max(target.getBoundingClientRect().top + window.scrollY - headerHeight - 18, 0);
+  };
 
-  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
   predictionForm.classList.add("is-focused");
+  window.scrollTo({ top: getOffsetTop(), behavior: "smooth" });
   window.setTimeout(() => predictionForm.classList.remove("is-focused"), 1400);
-  window.setTimeout(() => {
-    const nextTop = target.getBoundingClientRect().top + window.scrollY - headerHeight - 18;
-    window.scrollTo({ top: Math.max(nextTop, 0), behavior: "smooth" });
-  }, 120);
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top: getOffsetTop(), behavior: "smooth" });
+  });
+  window.setTimeout(() => window.scrollTo({ top: getOffsetTop(), behavior: "smooth" }), 180);
 }
 
 function resolveVisibleSelectedMatch(visibleMatches) {
