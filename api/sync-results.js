@@ -128,6 +128,26 @@ async function supabaseRequest(path, options = {}) {
   return response.json();
 }
 
+async function patchMatch(matchId, payload) {
+  try {
+    return await supabaseRequest(`matches?id=eq.${encodeURIComponent(matchId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    if (!/result_source|result_review_status|result_synced_at/.test(error.message || "")) {
+      throw error;
+    }
+
+    const { result_source, result_review_status, result_synced_at, ...fallbackPayload } = payload;
+
+    return supabaseRequest(`matches?id=eq.${encodeURIComponent(matchId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(fallbackPayload),
+    });
+  }
+}
+
 function fromMatchRow(row) {
   return {
     id: row.id,
@@ -141,6 +161,9 @@ function fromMatchRow(row) {
     homeScorers: row.home_scorers || [],
     awayScorers: row.away_scorers || [],
     status: row.status,
+    resultSource: row.result_source,
+    resultReviewStatus: row.result_review_status,
+    resultSyncedAt: row.result_synced_at,
   };
 }
 
@@ -225,10 +248,7 @@ async function lockDueMatches(matches) {
   const lockedIds = [];
 
   for (const match of openMatches) {
-    await supabaseRequest(`matches?id=eq.${encodeURIComponent(match.id)}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: "locked" }),
-    });
+    await patchMatch(match.id, { status: "locked" });
     match.status = "locked";
     lockedIds.push(match.matchNumber || match.id);
   }
@@ -353,15 +373,15 @@ async function updateMatchWithFixture(match, fixture) {
     return { updated: false, reason: "sin_eventos_de_gol" };
   }
 
-  const updatedRows = await supabaseRequest(`matches?id=eq.${encodeURIComponent(match.id)}`, {
-    method: "PATCH",
-    body: JSON.stringify({
+  const updatedRows = await patchMatch(match.id, {
       home_score: homeScore,
       away_score: awayScore,
       home_scorers: homeScorers,
       away_scorers: awayScorers,
       status: "finished",
-    }),
+      result_source: "automatic",
+      result_review_status: "needs_review",
+      result_synced_at: new Date().toISOString(),
   });
   const updatedMatch = fromMatchRow(updatedRows[0]);
   const predictionRows = await supabaseRequest(

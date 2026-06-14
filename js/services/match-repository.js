@@ -17,6 +17,9 @@ function fromMatchRow(row) {
     venue: row.venue,
     city: row.city,
     source: row.source,
+    resultSource: row.result_source,
+    resultReviewStatus: row.result_review_status,
+    resultSyncedAt: row.result_synced_at,
   };
 }
 
@@ -45,19 +48,48 @@ export async function updateMatchResult(matchId, result) {
 
   const client = await getSupabaseClient();
   await assertAdminSession(client);
+  const payload = {
+    home_score: result.homeScore ?? null,
+    away_score: result.awayScore ?? null,
+    home_scorers: result.homeScorers || [],
+    away_scorers: result.awayScorers || [],
+    status: result.status || "finished",
+  };
 
-  const { data, error } = await client
+  if (result.resultSource) {
+    payload.result_source = result.resultSource;
+  }
+
+  if (result.resultReviewStatus) {
+    payload.result_review_status = result.resultReviewStatus;
+  }
+
+  if (result.resultSyncedAt) {
+    payload.result_synced_at = result.resultSyncedAt;
+  }
+
+  let { data, error } = await client
     .from("matches")
-    .update({
-      home_score: result.homeScore ?? null,
-      away_score: result.awayScore ?? null,
-      home_scorers: result.homeScorers || [],
-      away_scorers: result.awayScorers || [],
-      status: result.status || "finished",
-    })
+    .update(payload)
     .eq("id", matchId)
     .select()
     .maybeSingle();
+
+  if (error && /result_source|result_review_status|result_synced_at/.test(error.message || "")) {
+    delete payload.result_source;
+    delete payload.result_review_status;
+    delete payload.result_synced_at;
+
+    const fallbackResult = await client
+      .from("matches")
+      .update(payload)
+      .eq("id", matchId)
+      .select()
+      .maybeSingle();
+
+    data = fallbackResult.data;
+    error = fallbackResult.error;
+  }
 
   if (error) {
     throw error;

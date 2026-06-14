@@ -2698,6 +2698,11 @@ h3 {
   background: #d9f8eb;
 }
 
+.payment-chip.is-warning {
+  color: #7a4b00;
+  background: #fff0c2;
+}
+
 .payment-chip.is-muted {
   color: #586371;
   background: #e9ecef;

@@ -26,6 +26,18 @@ En Vercel, proyecto `combi-season-mundial`, agrega:
 
 ## Activacion en Supabase
 
+Primero ejecuta la metadata visual de revision:
+
+`supabase/2026-06-14-result-review-metadata.sql`
+
+Esto permite que el admin muestre:
+
+- `Manual / Revisado`
+- `Automático / Pendiente revisión`
+- Boton `Marcar resultado revisado` en el detalle del partido.
+
+Luego programa el cron:
+
 Ejecuta en Supabase SQL Editor:
 
 `supabase/2026-06-14-schedule-result-sync.sql`
@@ -50,3 +62,5 @@ Debe responder JSON con:
 ## Regla importante
 
 La automatizacion no reemplaza al admin. El admin sigue siendo la autoridad final para corregir marcador, goleadores, autogoles, dobletes y tripletes.
+
+Si el admin guarda el resultado antes que el job automatico, el partido queda `finished` y la automatizacion ya no lo vuelve a tocar.

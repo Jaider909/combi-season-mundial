@@ -1641,6 +1641,8 @@ resultForm.addEventListener("submit", async (event) => {
       homeScorers: parseScorerList(data.get("homeScorers")),
       awayScorers: parseScorerList(data.get("awayScorers")),
       status: "finished",
+      resultSource: "manual",
+      resultReviewStatus: "reviewed",
     };
     await updateMatchResult(matchId, updatedMatch);
     const recalculated = await recalculateMatchPoints(updatedMatch);
@@ -1668,6 +1670,35 @@ resultMatchSelect.addEventListener("change", (event) => {
 async function handleAdminMatchTableClick(event) {
   const lockButton = event.target.closest("[data-lock-match]");
   const button = event.target.closest("[data-reopen-match]");
+  const reviewButton = event.target.closest("[data-review-match]");
+
+  if (reviewButton) {
+    const matchId = reviewButton.dataset.reviewMatch;
+    const match = currentMatches.find((item) => item.id === matchId);
+
+    if (!match) {
+      showNote(resultNote, "No encontramos ese partido para revisar.", "warning");
+      return;
+    }
+
+    try {
+      setButtonBusy(reviewButton, true, "Marcando...");
+      resultSelectedMatchId = matchId;
+      await updateMatchResult(matchId, {
+        ...match,
+        status: "finished",
+        resultSource: match.resultSource || "manual",
+        resultReviewStatus: "reviewed",
+      });
+      await refreshPanels(await getCurrentUser());
+      showNote(resultNote, `Resultado revisado para ${formatMatchLabel(match)}.`, "success");
+    } catch (error) {
+      showError(resultNote, error);
+    } finally {
+      setButtonBusy(reviewButton, false);
+    }
+    return;
+  }
 
   if (lockButton) {
     const matchId = lockButton.dataset.lockMatch;
@@ -1741,6 +1772,7 @@ async function handleAdminMatchTableClick(event) {
 
 document.querySelector("#adminMatchesTable").addEventListener("click", handleAdminMatchTableClick);
 document.querySelector("#adminTodayMatches").addEventListener("click", handleAdminMatchTableClick);
+document.querySelector("#adminMatchDetail").addEventListener("click", handleAdminMatchTableClick);
 
 document.querySelector(".admin-tabs")?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-admin-tab]");

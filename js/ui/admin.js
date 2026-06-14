@@ -115,6 +115,48 @@ function renderMatchActionButton(match) {
   `;
 }
 
+function getResultSourceLabel(match) {
+  if (match.resultSource === "automatic") {
+    return "Automático";
+  }
+
+  if (match.resultSource === "manual" || match.status === "finished") {
+    return "Manual";
+  }
+
+  return "Sin resultado";
+}
+
+function getResultReviewLabel(match) {
+  if (match.resultReviewStatus === "reviewed") {
+    return "Revisado";
+  }
+
+  if (match.resultReviewStatus === "needs_review" || match.resultSource === "automatic") {
+    return "Pendiente revisión";
+  }
+
+  if (match.status === "finished") {
+    return "Revisado";
+  }
+
+  return "Pendiente";
+}
+
+function getResultReviewClass(match) {
+  const label = getResultReviewLabel(match);
+
+  if (label === "Revisado") {
+    return " is-success";
+  }
+
+  if (label === "Pendiente revisión") {
+    return " is-warning";
+  }
+
+  return " is-muted";
+}
+
 function renderMatchRow(match, total) {
   return `
     <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
@@ -124,6 +166,11 @@ function renderMatchRow(match, total) {
       <span>${total} predicciones</span>
       <span>
         <span class="payment-chip">${escapeHtml(match.status)}</span>
+        ${match.status === "finished"
+          ? `<span class="payment-chip${getResultReviewClass(match)}">${escapeHtml(
+              getResultSourceLabel(match)
+            )} · ${escapeHtml(getResultReviewLabel(match))}</span>`
+          : ""}
         ${renderMatchActionButton(match)}
       </span>
     </div>
@@ -646,6 +693,8 @@ function renderSelectedMatchDetail(users, predictions, match) {
       ? `${match.homeScore} - ${match.awayScore}`
       : "Sin resultado";
   const scorers = [...(match.homeScorers || []), ...(match.awayScorers || [])].join(", ") || "Sin goleadores";
+  const resultSource = getResultSourceLabel(match);
+  const reviewStatus = getResultReviewLabel(match);
   const rows = matchPredictions.length
     ? matchPredictions
         .map((prediction) => {
@@ -691,7 +740,23 @@ function renderSelectedMatchDetail(users, predictions, match) {
         <span>Goleadores</span>
         <strong>${escapeHtml(scorers)}</strong>
       </div>
+      <div>
+        <span>Origen</span>
+        <strong>
+          <span class="payment-chip">${escapeHtml(resultSource)}</span>
+          <span class="payment-chip${getResultReviewClass(match)}">${escapeHtml(reviewStatus)}</span>
+        </strong>
+      </div>
     </div>
+    ${match.status === "finished" && reviewStatus !== "Revisado"
+      ? `
+        <div class="admin-row-actions admin-review-actions">
+          <button class="mini-action" type="button" data-review-match="${match.id}">
+            Marcar resultado revisado
+          </button>
+        </div>
+      `
+      : ""}
     <div class="admin-match-readiness">
       <article>
         <span>Listos</span>
