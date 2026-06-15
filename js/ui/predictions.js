@@ -202,8 +202,31 @@ function writeScorerInput(input, scorers) {
   input.value = scorers.join(", ");
 }
 
+function getPlayerName(player) {
+  return typeof player === "string" ? player : player?.name || "";
+}
+
+function getPlayerNumber(player) {
+  return typeof player === "string" ? null : player?.shirtNumber ?? null;
+}
+
+function formatScorerOption(player) {
+  const name = getPlayerName(player);
+  const number = getPlayerNumber(player);
+
+  return {
+    name,
+    shirtNumber: number,
+    label: number ? `#${number} ${name}` : name,
+  };
+}
+
 function getScorerOptions(players) {
-  return ["Autogol", ...players.filter((player) => player !== "Autogol")];
+  const options = players
+    .map(formatScorerOption)
+    .filter((player) => player.name && player.name !== "Autogol");
+
+  return [{ name: "Autogol", shirtNumber: null, label: "Autogol" }, ...options];
 }
 
 function countScorerSelections(selectedScorers, player) {
@@ -214,8 +237,13 @@ function getRenderedScorerOptions(containerId) {
   return Array.from(
     document.querySelectorAll(`#${containerId} [data-prediction-scorer-name]`)
   )
-    .map((item) => decodeURIComponent(item.dataset.predictionScorerName || ""))
-    .filter((item) => item && item !== "Autogol");
+    .map((item) => ({
+      name: decodeURIComponent(item.dataset.predictionScorerName || ""),
+      shirtNumber: item.dataset.predictionScorerNumber
+        ? Number(item.dataset.predictionScorerNumber)
+        : null,
+    }))
+    .filter((item) => item.name && item.name !== "Autogol");
 }
 
 function renderPredictionScorerChips(containerId, fieldName, players, selectedScorers, disabled) {
@@ -238,7 +266,7 @@ function renderPredictionScorerChips(containerId, fieldName, players, selectedSc
 
   container.innerHTML = `${clearButton}${options
     .map((player) => {
-      const count = countScorerSelections(selectedScorers, player);
+      const count = countScorerSelections(selectedScorers, player.name);
       const isSelected = count > 0;
 
       return `
@@ -246,10 +274,11 @@ function renderPredictionScorerChips(containerId, fieldName, players, selectedSc
           class="scorer-chip ${isSelected ? "is-selected" : ""}"
           type="button"
           data-prediction-scorer-field="${fieldName}"
-          data-prediction-scorer-name="${encodeURIComponent(player)}"
+          data-prediction-scorer-name="${encodeURIComponent(player.name)}"
+          ${player.shirtNumber ? `data-prediction-scorer-number="${player.shirtNumber}"` : ""}
           ${disabled ? "disabled" : ""}
         >
-          ${escapeHtml(player)}${count > 1 ? ` <span>x${count}</span>` : ""}
+          ${escapeHtml(player.label)}${count > 1 ? ` <span>x${count}</span>` : ""}
         </button>
       `;
     })

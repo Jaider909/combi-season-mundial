@@ -18,7 +18,10 @@ function fromTeamPlayerRow(row) {
 
 function fallbackMap() {
   return Object.fromEntries(
-    Object.entries(fallbackTeamPlayers).map(([team, players]) => [team, [...players]])
+    Object.entries(fallbackTeamPlayers).map(([team, players]) => [
+      team,
+      players.map((player) => ({ name: player, shirtNumber: null })),
+    ])
   );
 }
 
@@ -28,7 +31,10 @@ function groupPlayers(rows) {
       summary[row.team] = [];
     }
 
-    summary[row.team].push(row.name);
+    summary[row.team].push({
+      name: row.name,
+      shirtNumber: row.shirt_number ?? row.shirtNumber ?? null,
+    });
     return summary;
   }, {});
 }
@@ -36,10 +42,11 @@ function groupPlayers(rows) {
 async function fetchTeamPlayersPage(client, from, to) {
   const { data, error } = await client
     .from("team_players")
-    .select("team, name, position, is_featured")
+    .select("team, name, position, shirt_number, is_featured")
     .eq("active", true)
     .order("team", { ascending: true })
     .order("is_featured", { ascending: false })
+    .order("shirt_number", { ascending: true })
     .order("name", { ascending: true })
     .range(from, to);
 
@@ -106,7 +113,7 @@ export async function listPlayersForTeams(teams = []) {
     const client = await getSupabaseClient();
     const { data, error } = await client
       .from("team_players")
-      .select("team, name, position, is_featured")
+      .select("team, name, position, shirt_number, is_featured")
       .eq("active", true)
       .in("team", uniqueTeams)
       .order("team", { ascending: true })

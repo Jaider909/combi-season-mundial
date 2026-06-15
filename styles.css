@@ -2507,7 +2507,7 @@ h3 {
 }
 
 .team-player-row {
-  grid-template-columns: minmax(220px, 1.2fr) minmax(110px, 0.6fr) minmax(130px, 0.7fr) minmax(100px, 0.45fr) minmax(110px, 0.45fr);
+  grid-template-columns: minmax(46px, 0.25fr) minmax(220px, 1.2fr) minmax(110px, 0.6fr) minmax(130px, 0.7fr) minmax(100px, 0.45fr) minmax(110px, 0.45fr);
 }
 
 .draw-row {

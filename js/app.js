@@ -7,7 +7,7 @@ import {
   listTeamPlayersForAdmin,
   saveTeamPlayer,
   updateTeamPlayer,
-} from "./services/team-player-repository.js?v=match-roster-guard";
+} from "./services/team-player-repository.js?v=player-numbers";
 import { findGroupByTeam, worldCupGroups } from "./config/groups.js";
 import { formatTeamLabel, formatMatchLabel } from "./config/team-flags.js?v=team-flags";
 import { isAdminEmail } from "./config/admins.js";
@@ -79,7 +79,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=team-flags";
+} from "./ui/predictions.js?v=player-numbers";
 import { renderRanking } from "./ui/ranking.js?v=team-flags";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -370,6 +370,7 @@ function renderAdminTeamPlayers() {
 
   table.innerHTML = `
     <div class="admin-row team-player-row header-row">
+      <span>#</span>
       <span>Jugador</span>
       <span>Posición</span>
       <span>Club</span>
@@ -380,6 +381,7 @@ function renderAdminTeamPlayers() {
       .map(
         (player) => `
           <div class="admin-row team-player-row">
+            <span>${player.shirtNumber || "-"}</span>
             <span><strong>${escapeHtml(player.name)}</strong><br>${escapeHtml(formatTeamLabel(player.team))}</span>
             <span>${escapeHtml(player.position || "-")}</span>
             <span>${escapeHtml(player.club || "-")}</span>
@@ -472,8 +474,31 @@ function writeSelectedScorers(fieldName, scorers) {
   resultForm.elements[fieldName].value = scorers.join(", ");
 }
 
+function getPlayerName(player) {
+  return typeof player === "string" ? player : player?.name || "";
+}
+
+function getPlayerNumber(player) {
+  return typeof player === "string" ? null : player?.shirtNumber ?? null;
+}
+
+function formatScorerOption(player) {
+  const name = getPlayerName(player);
+  const number = getPlayerNumber(player);
+
+  return {
+    name,
+    shirtNumber: number,
+    label: number ? `#${number} ${name}` : name,
+  };
+}
+
 function getScorerOptions(players) {
-  return ["Autogol", ...players.filter((player) => player !== "Autogol")];
+  const options = players
+    .map(formatScorerOption)
+    .filter((player) => player.name && player.name !== "Autogol");
+
+  return [{ name: "Autogol", shirtNumber: null, label: "Autogol" }, ...options];
 }
 
 function countScorerSelections(selectedScorers, player) {
@@ -482,8 +507,11 @@ function countScorerSelections(selectedScorers, player) {
 
 function getRenderedResultScorerOptions(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} [data-scorer-name]`))
-    .map((item) => decodeURIComponent(item.dataset.scorerName || ""))
-    .filter((item) => item && item !== "Autogol");
+    .map((item) => ({
+      name: decodeURIComponent(item.dataset.scorerName || ""),
+      shirtNumber: item.dataset.scorerNumber ? Number(item.dataset.scorerNumber) : null,
+    }))
+    .filter((item) => item.name && item.name !== "Autogol");
 }
 
 function renderScorerChipGroup(containerId, fieldName, players, selectedScorers, disabled) {
@@ -506,7 +534,7 @@ function renderScorerChipGroup(containerId, fieldName, players, selectedScorers,
 
   container.innerHTML = `${clearButton}${options
     .map((player) => {
-      const count = countScorerSelections(selectedScorers, player);
+      const count = countScorerSelections(selectedScorers, player.name);
       const isSelected = count > 0;
 
       return `
@@ -514,10 +542,11 @@ function renderScorerChipGroup(containerId, fieldName, players, selectedScorers,
           class="scorer-chip ${isSelected ? "is-selected" : ""}"
           type="button"
           data-scorer-field="${fieldName}"
-          data-scorer-name="${encodeURIComponent(player)}"
+          data-scorer-name="${encodeURIComponent(player.name)}"
+          ${player.shirtNumber ? `data-scorer-number="${player.shirtNumber}"` : ""}
           ${disabled ? "disabled" : ""}
         >
-          ${escapeHtml(player)}${count > 1 ? ` <span>x${count}</span>` : ""}
+          ${escapeHtml(player.label)}${count > 1 ? ` <span>x${count}</span>` : ""}
         </button>
       `;
     })
