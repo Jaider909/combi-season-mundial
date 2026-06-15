@@ -457,7 +457,7 @@ function syncResultForm(matchId) {
   const isLocked = match.status === "locked";
   resultNote.textContent =
     isLocked
-      ? `Predicciones cerradas: ${formatMatchLabel(match)}. Puedes guardar resultado al finalizar.`
+      ? `Predicciones cerradas: ${formatMatchLabel(match)}. Como admin puedes guardar o corregir resultado sin reabrir predicciones.`
       : match.status === "finished"
       ? `Resultado cargado: ${formatTeamLabel(match.homeTeam)} ${match.homeScore} - ${match.awayScore} ${formatTeamLabel(match.awayTeam)}.`
       : `Partido abierto: ${formatMatchLabel(match)}.`;
@@ -531,20 +531,19 @@ function renderScorerChips(match) {
     return;
   }
 
-  const disabled = match.status === "locked";
   renderScorerChipGroup(
     "homeScorerChips",
     "homeScorers",
     getPlayersForTeam(currentPlayersByTeam, match.homeTeam),
     readSelectedScorers("homeScorers"),
-    disabled
+    false
   );
   renderScorerChipGroup(
     "awayScorerChips",
     "awayScorers",
     getPlayersForTeam(currentPlayersByTeam, match.awayTeam),
     readSelectedScorers("awayScorers"),
-    disabled
+    false
   );
 }
 

@@ -110,7 +110,7 @@ function renderMatchActionButton(match) {
       data-reopen-match="${match.id}"
       ${isFinished || isLocked ? "" : "disabled"}
     >
-      Reabrir predicciones
+      Reabrir para jugadores
     </button>
   `;
 }
