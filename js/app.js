@@ -77,9 +77,10 @@ import {
   renderPredictionControls,
   renderPredictionForm,
   renderPredictionMatchList,
+  renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=live-status";
+} from "./ui/predictions.js?v=prediction-transparency";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -271,6 +272,7 @@ async function refreshPanels(user) {
     getPlayersForTeam(currentPlayersByTeam, selectedMatch?.awayTeam)
   );
   renderPredictionSummary(prediction, selectedMatch);
+  renderMatchPredictionsPanel(selectedMatch, users, currentPredictions, activeUser);
   renderChallengeForm(currentMatches, activeUser);
   renderChallenges(currentChallenges, currentMatches, users, activeUser);
   renderFavoriteTeamMatches(favoriteMatches, activeUser?.team, currentPredictions, activeUser?.id);

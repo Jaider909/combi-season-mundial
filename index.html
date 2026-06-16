@@ -688,6 +688,7 @@
                   <p class="prediction-summary" id="predictionSummary" role="status">
                     Aún no has guardado predicción para este partido.
                   </p>
+                  <section class="match-predictions-panel" id="matchPredictionsPanel" aria-live="polite"></section>
                   <div class="scoring-rules">
                     <span>Marcador exacto: +8</span>
                     <span>Ganador acertado: +3</span>
@@ -989,6 +990,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=live-status"></script>
+    <script type="module" src="js/app.js?v=prediction-transparency"></script>
   </body>
 </html>

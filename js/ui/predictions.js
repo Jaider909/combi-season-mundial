@@ -60,6 +60,127 @@ function formatMatchDate(date) {
   return `${localDate} · tu hora / COL ${colombiaDate}`;
 }
 
+function formatPredictionTime(value) {
+  if (!value) {
+    return "Sin fecha registrada";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Sin fecha registrada";
+  }
+
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function getPredictionForPlayer(predictions, playerId, matchId) {
+  return predictions.find((item) => item.playerId === playerId && item.matchId === matchId);
+}
+
+function getPlayerLabel(user) {
+  return user?.alias || user?.name || "Jugador";
+}
+
+function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurrentUser) {
+  const statusLabel = prediction ? "Guardada" : "Pendiente";
+  const statusClass = prediction ? "is-saved" : "is-pending";
+  const score = shouldReveal && prediction
+    ? `${prediction.homeScore} - ${prediction.awayScore}`
+    : prediction
+      ? "Oculto hasta el inicio"
+      : "-";
+  const scorers = shouldReveal && prediction
+    ? `${prediction.homeScorer || "Sin goleadores"} / ${prediction.awayScorer || "Sin goleadores"}`
+    : prediction
+      ? "Se revela al iniciar"
+      : "-";
+  const points = match?.status === "finished" && prediction
+    ? `${prediction.estimatedPoints || 0} pts`
+    : prediction
+      ? "Pendiente"
+      : "-";
+
+  return `
+    <div class="match-prediction-row ${prediction ? "has-prediction" : "is-missing"} ${isCurrentUser ? "is-current-user" : ""}">
+      <span>
+        <strong>${escapeHtml(getPlayerLabel(user))}${isCurrentUser ? '<em class="current-player-badge">Tú</em>' : ""}</strong>
+        <small>${escapeHtml(formatTeamLabel(user?.team || "Sin equipo definido"))}</small>
+      </span>
+      <span><em class="prediction-state-chip ${statusClass}">${statusLabel}</em></span>
+      <span>${escapeHtml(score)}</span>
+      <span>${escapeHtml(scorers)}</span>
+      <span>${prediction ? escapeHtml(formatPredictionTime(prediction.savedAt)) : "-"}</span>
+      <strong>${escapeHtml(points)}</strong>
+    </div>
+  `;
+}
+
+export function renderMatchPredictionsPanel(match, users = [], predictions = [], currentUser = null) {
+  const panel = document.querySelector("#matchPredictionsPanel");
+
+  if (!panel) {
+    return;
+  }
+
+  if (!match) {
+    panel.innerHTML = "";
+    return;
+  }
+
+  const shouldReveal = isPredictionClosedForPlayer(match);
+  const playerUsers = users
+    .filter((user) => user?.id)
+    .sort((a, b) => getPlayerLabel(a).localeCompare(getPlayerLabel(b), "es"));
+  const savedCount = playerUsers.filter((user) =>
+    getPredictionForPlayer(predictions, user.id, match.id)
+  ).length;
+  const pendingCount = Math.max(playerUsers.length - savedCount, 0);
+  const statusCopy = shouldReveal
+    ? "Predicciones reveladas porque el partido ya está cerrado para edición."
+    : "Antes del inicio solo se muestra quién ya predijo y quién falta.";
+
+  panel.innerHTML = `
+    <div class="match-predictions-header">
+      <div>
+        <span>Transparencia del partido</span>
+        <h4>Predicciones de jugadores</h4>
+        <p>${escapeHtml(statusCopy)}</p>
+      </div>
+      <div class="match-predictions-counts">
+        <span>${savedCount} guardadas</span>
+        <span>${pendingCount} pendientes</span>
+      </div>
+    </div>
+    <div class="match-predictions-table">
+      <div class="match-prediction-row header-row">
+        <span>Jugador</span>
+        <span>Estado</span>
+        <span>Marcador</span>
+        <span>Goleadores</span>
+        <span>Guardada</span>
+        <span>Puntos</span>
+      </div>
+      ${playerUsers
+        .map((user) =>
+          renderPredictionAuditRow(
+            user,
+            getPredictionForPlayer(predictions, user.id, match.id),
+            match,
+            shouldReveal,
+            currentUser?.id === user.id
+          )
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 export function renderSelectedMatchDetail(match, prediction) {
   const detail = document.querySelector("#selectedMatchDetail");
 
