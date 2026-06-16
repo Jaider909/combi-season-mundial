@@ -80,7 +80,7 @@ import {
   renderPredictionSummary,
   renderSelectedMatchDetail,
 } from "./ui/predictions.js?v=player-numbers";
-import { renderRanking } from "./ui/ranking.js?v=team-flags";
+import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
 import { escapeHtml } from "./ui/dom.js?v=safe-text";

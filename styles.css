@@ -833,8 +833,11 @@ h3 {
 }
 
 .leaderboard-row.is-current-user {
-  border-color: rgba(231, 255, 111, 0.58);
-  background: rgba(231, 255, 111, 0.12);
+  border-color: rgba(231, 255, 111, 0.82);
+  background:
+    linear-gradient(90deg, rgba(231, 255, 111, 0.2), rgba(25, 201, 130, 0.1)),
+    rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(231, 255, 111, 0.12), 0 18px 44px rgba(231, 255, 111, 0.08);
 }
 
 .leaderboard-row small {
@@ -843,6 +846,65 @@ h3 {
   color: rgba(255, 255, 255, 0.52);
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.rank-cell {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.rank-badge {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.1rem;
+  font-weight: 950;
+  box-shadow: inset 0 -8px 18px rgba(6, 17, 31, 0.12);
+}
+
+.rank-badge.rank-gold {
+  background: linear-gradient(145deg, #fff4a6, #e7ff6f 45%, #d4a93d);
+}
+
+.rank-badge.rank-silver {
+  background: linear-gradient(145deg, #ffffff, #d9dee8 50%, #9da9ba);
+}
+
+.rank-badge.rank-bronze {
+  background: linear-gradient(145deg, #ffe1be, #c78648 52%, #8e552d);
+}
+
+.rank-badge.rank-plain {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rank-cell small {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.68rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.current-player-badge {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 4px 9px;
+  color: var(--ink);
+  border-radius: 999px;
+  background: var(--lime);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 950;
+  vertical-align: middle;
 }
 
 .header-row {

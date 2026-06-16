@@ -23,6 +23,17 @@ function getSortedUsers(users, predictions) {
   });
 }
 
+function getRankMeta(index) {
+  const rank = index + 1;
+  const topRanks = {
+    1: { label: "Campeón", className: "rank-gold" },
+    2: { label: "Subcampeón", className: "rank-silver" },
+    3: { label: "Tercer lugar", className: "rank-bronze" },
+  };
+
+  return topRanks[rank] || { label: `#${rank}`, className: "rank-plain" };
+}
+
 function renderSpotlight(sortedUsers, predictions, currentUser) {
   const spotlight = document.querySelector("#rankingSpotlight");
   const totalPredictions = predictions.length;
@@ -70,12 +81,17 @@ export function renderRanking(users, predictions, currentUser = null) {
       const predictionCount = countPredictions(predictions, user.id);
       const scoredCount = countScoredPredictions(predictions, user.id);
       const currentClass = currentUser?.id === user.id ? " is-current-user" : "";
+      const rankMeta = getRankMeta(index);
 
       return `
         <div class="leaderboard-row${currentClass}">
-          <span>${String(index + 1).padStart(2, "0")}</span>
+          <div class="rank-cell">
+            <span class="rank-badge ${rankMeta.className}">${index + 1}</span>
+            <small>${rankMeta.label}</small>
+          </div>
           <strong>
             ${escapeHtml(user.alias)}
+            ${currentClass ? '<em class="current-player-badge">Tú</em>' : ""}
             <small>${escapeHtml(user.name)} · ${predictionCount} predicciones</small>
           </strong>
           <span>${escapeHtml(formatTeamLabel(user.team))}</span>
