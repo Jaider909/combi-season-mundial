@@ -27,7 +27,7 @@ values
   (16, '2026-06-15T19:00:00+00:00', 'Grupo G', 'G', 'Bélgica', 'Egipto', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (17, '2026-06-16T19:00:00+00:00', 'Grupo I', 'I', 'Francia', 'Senegal', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (18, '2026-06-16T22:00:00+00:00', 'Grupo I', 'I', 'Irak', 'Noruega', 'open', 'FIFA World Cup 2026 official schedule PDF'),
-  (19, '2026-06-18T01:00:00+00:00', 'Grupo J', 'J', 'Argentina', 'Argelia', 'open', 'FIFA World Cup 2026 official schedule PDF'),
+  (19, '2026-06-17T01:00:00+00:00', 'Grupo J', 'J', 'Argentina', 'Argelia', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (20, '2026-06-17T04:00:00+00:00', 'Grupo J', 'J', 'Austria', 'Jordania', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (21, '2026-06-17T23:00:00+00:00', 'Grupo L', 'L', 'Ghana', 'Panamá', 'open', 'FIFA World Cup 2026 official schedule PDF'),
   (22, '2026-06-17T20:00:00+00:00', 'Grupo L', 'L', 'Inglaterra', 'Croacia', 'open', 'FIFA World Cup 2026 official schedule PDF'),
