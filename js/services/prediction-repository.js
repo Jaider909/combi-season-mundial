@@ -13,7 +13,9 @@ function fromPredictionRow(row) {
     homeScorer: row.predicted_home_scorer,
     awayScorer: row.predicted_away_scorer,
     estimatedPoints: row.points_awarded,
-    savedAt: row.created_at,
+    savedAt: row.updated_at || row.created_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at || row.created_at,
   };
 }
 

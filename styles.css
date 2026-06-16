@@ -1702,10 +1702,10 @@ h3 {
 
 .match-prediction-row {
   display: grid;
-  grid-template-columns: minmax(170px, 1.1fr) 100px 110px minmax(180px, 1fr) 120px 80px;
+  grid-template-columns: minmax(170px, 1.1fr) 100px 110px minmax(180px, 1fr) minmax(150px, 0.8fr) 80px;
   gap: 12px;
   align-items: center;
-  min-width: 860px;
+  min-width: 920px;
   padding: 12px;
   color: var(--white);
   background: rgba(255, 255, 255, 0.07);
@@ -1739,6 +1739,36 @@ h3 {
 
 .match-prediction-row strong {
   overflow-wrap: anywhere;
+}
+
+.prediction-time-cell strong {
+  display: block;
+  font-size: 0.94rem;
+  line-height: 1.2;
+}
+
+.match-prediction-row .prediction-time-chip {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 5px;
+  padding: 5px 8px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.match-prediction-row .prediction-time-chip.is-valid {
+  color: #042414;
+  background: #39ff9d;
+}
+
+.match-prediction-row .prediction-time-chip.is-warning {
+  color: #ffd4d4;
+  background: rgba(255, 95, 95, 0.2);
 }
 
 .delete-prediction-button {

@@ -79,6 +79,50 @@ function formatPredictionTime(value) {
   }).format(date);
 }
 
+function getPredictionAuditTime(prediction) {
+  return prediction?.updatedAt || prediction?.savedAt || prediction?.createdAt || null;
+}
+
+function wasPredictionBeforeClose(prediction, match) {
+  const auditTime = getPredictionAuditTime(prediction);
+
+  if (!auditTime || !match?.date) {
+    return null;
+  }
+
+  const savedTime = new Date(auditTime).getTime();
+  const closeTime = new Date(match.date).getTime();
+
+  if (Number.isNaN(savedTime) || Number.isNaN(closeTime)) {
+    return null;
+  }
+
+  return savedTime <= closeTime;
+}
+
+function getPredictionTimingView(prediction, match) {
+  const wasBeforeClose = wasPredictionBeforeClose(prediction, match);
+
+  if (wasBeforeClose === null) {
+    return {
+      className: "is-unknown",
+      label: "Hora sin validar",
+    };
+  }
+
+  if (wasBeforeClose) {
+    return {
+      className: "is-valid",
+      label: "Antes del partido",
+    };
+  }
+
+  return {
+    className: "is-warning",
+    label: "Después del inicio",
+  };
+}
+
 function getPredictionForPlayer(predictions, playerId, matchId) {
   return predictions.find((item) => item.playerId === playerId && item.matchId === matchId);
 }
@@ -90,6 +134,7 @@ function getPlayerLabel(user) {
 function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurrentUser) {
   const statusLabel = prediction ? "Guardada" : "Pendiente";
   const statusClass = prediction ? "is-saved" : "is-pending";
+  const timingView = prediction ? getPredictionTimingView(prediction, match) : null;
   const score = shouldReveal && prediction
     ? `${prediction.homeScore} - ${prediction.awayScore}`
     : prediction
@@ -115,7 +160,11 @@ function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurre
       <span><em class="prediction-state-chip ${statusClass}">${statusLabel}</em></span>
       <span>${escapeHtml(score)}</span>
       <span>${escapeHtml(scorers)}</span>
-      <span>${prediction ? escapeHtml(formatPredictionTime(prediction.savedAt)) : "-"}</span>
+      <span class="prediction-time-cell">${
+        prediction
+          ? `<strong>${escapeHtml(formatPredictionTime(getPredictionAuditTime(prediction)))}</strong><small class="prediction-time-chip ${timingView.className}">${escapeHtml(timingView.label)}</small>`
+          : "-"
+      }</span>
       <strong>${escapeHtml(points)}</strong>
     </div>
   `;
@@ -133,7 +182,8 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
     return;
   }
 
-  const shouldReveal = isPredictionClosedForPlayer(match);
+  const predictionsAreLocked = isPredictionClosedForPlayer(match);
+  const shouldReveal = true;
   const playerUsers = users
     .filter((user) => user?.id)
     .sort((a, b) => getPlayerLabel(a).localeCompare(getPlayerLabel(b), "es"));
@@ -141,9 +191,9 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
     getPredictionForPlayer(predictions, user.id, match.id)
   ).length;
   const pendingCount = Math.max(playerUsers.length - savedCount, 0);
-  const statusCopy = shouldReveal
-    ? "Predicciones reveladas porque el partido ya está cerrado para edición."
-    : "Antes del inicio solo se muestra quién ya predijo y quién falta.";
+  const statusCopy = predictionsAreLocked
+    ? "Predicciones visibles para transparencia. La hora confirma si quedaron antes del inicio del partido."
+    : "Predicciones visibles en tiempo real. La hora confirma si fueron guardadas antes del inicio del partido.";
 
   panel.innerHTML = `
     <div class="match-predictions-header">
@@ -163,7 +213,7 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
         <span>Estado</span>
         <span>Marcador</span>
         <span>Goleadores</span>
-        <span>Guardada</span>
+        <span>Último guardado</span>
         <span>Puntos</span>
       </div>
       ${playerUsers
