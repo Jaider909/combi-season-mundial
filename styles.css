@@ -1275,6 +1275,15 @@ h3 {
   white-space: nowrap;
 }
 
+.fixture-status.is-live {
+  color: #39ff9d;
+}
+
+.fixture-status.is-finished,
+.fixture-status.is-locked {
+  color: rgba(255, 255, 255, 0.58);
+}
+
 .fixture-action {
   display: inline-grid;
   min-height: 36px;
@@ -1800,6 +1809,61 @@ h3 {
 .selected-match-heading em.is-closed {
   color: var(--white);
   background: rgba(255, 255, 255, 0.14);
+}
+
+.match-state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--lime);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.match-state-badge.is-live {
+  color: #042414;
+  background: #39ff9d;
+  box-shadow: 0 0 0 4px rgba(57, 255, 157, 0.12);
+}
+
+.match-state-badge.is-live::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+
+.match-state-badge.is-finished,
+.match-state-badge.is-locked,
+.match-state-badge.is-muted {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.match-state-badge.is-saved {
+  background: #dffb70;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
 .selected-match-meta {
@@ -2432,7 +2496,7 @@ h3 {
 }
 
 .operation-summary {
-  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  grid-template-columns: repeat(6, minmax(100px, 1fr));
 }
 
 .operation-summary article,
@@ -2766,6 +2830,23 @@ h3 {
 }
 
 .payment-chip.is-muted {
+  color: #586371;
+  background: #e9ecef;
+}
+
+.payment-chip.match-state-chip.is-open {
+  color: #075534;
+  background: #d9f8eb;
+}
+
+.payment-chip.match-state-chip.is-live {
+  color: #042414;
+  background: #39ff9d;
+  box-shadow: 0 0 0 3px rgba(57, 255, 157, 0.14);
+}
+
+.payment-chip.match-state-chip.is-finished,
+.payment-chip.match-state-chip.is-locked {
   color: #586371;
   background: #e9ecef;
 }

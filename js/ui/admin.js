@@ -1,6 +1,7 @@
 import { qualifiedTeams } from "../config/teams.js";
 import { escapeHtml, setText } from "./dom.js?v=safe-text";
 import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
+import { getMatchStatusView, isLiveMatch } from "./match-status.js?v=live-status";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("es-CO", {
@@ -158,6 +159,8 @@ function getResultReviewClass(match) {
 }
 
 function renderMatchRow(match, total) {
+  const statusView = getMatchStatusView(match);
+
   return `
     <div class="admin-row match-admin-row" data-admin-select-match="${match.id}">
       <span><strong>Partido ${match.matchNumber || "-"}</strong><br>${formatDate(match.date)}</span>
@@ -165,7 +168,7 @@ function renderMatchRow(match, total) {
       <span>${escapeHtml(match.phase)}</span>
       <span>${total} predicciones</span>
       <span>
-        <span class="payment-chip">${escapeHtml(match.status)}</span>
+        <span class="payment-chip match-state-chip ${statusView.className}">${escapeHtml(statusView.label)}</span>
         ${match.status === "finished"
           ? `<span class="payment-chip${getResultReviewClass(match)}">${escapeHtml(
               getResultSourceLabel(match)
@@ -625,7 +628,8 @@ function renderAdminTodayMatches(matches, predictions) {
   }
 
   const summarySource = isTodayView ? allTodayMatches : quickMatches;
-  const openCount = summarySource.filter((match) => match.status === "open").length;
+  const liveCount = summarySource.filter((match) => isLiveMatch(match)).length;
+  const openCount = summarySource.filter((match) => match.status === "open" && !isLiveMatch(match)).length;
   const lockedCount = summarySource.filter((match) => match.status === "locked").length;
   const finishedCount = summarySource.filter((match) => match.status === "finished").length;
   const totalPredictions = summarySource.reduce(
@@ -651,6 +655,10 @@ function renderAdminTodayMatches(matches, predictions) {
       <article>
         <span>Abiertos</span>
         <strong>${openCount}</strong>
+      </article>
+      <article>
+        <span>En vivo</span>
+        <strong>${liveCount}</strong>
       </article>
       <article>
         <span>Cerrados</span>
@@ -695,6 +703,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
   const scorers = [...(match.homeScorers || []), ...(match.awayScorers || [])].join(", ") || "Sin goleadores";
   const resultSource = getResultSourceLabel(match);
   const reviewStatus = getResultReviewLabel(match);
+  const statusView = getMatchStatusView(match);
   const rows = matchPredictions.length
     ? matchPredictions
         .map((prediction) => {
@@ -726,7 +735,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
       </div>
       <div>
         <span>Estado</span>
-        <strong>${escapeHtml(match.status)}</strong>
+        <strong><span class="payment-chip match-state-chip ${statusView.className}">${escapeHtml(statusView.label)}</span></strong>
       </div>
       <div>
         <span>Resultado</span>

@@ -1,4 +1,12 @@
 import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
+import {
+  getMatchStatusView,
+  isLiveMatch,
+  isLockedMatch,
+  isPredictionClosedForPlayer,
+} from "./match-status.js?v=live-status";
+
+export { isPredictionClosedForPlayer };
 
 export function renderPredictionSummary(prediction, match) {
   const summary = document.querySelector("#predictionSummary");
@@ -52,28 +60,6 @@ function formatMatchDate(date) {
   return `${localDate} · tu hora / COL ${colombiaDate}`;
 }
 
-function hasMatchStarted(match) {
-  const matchTime = new Date(match?.date).getTime();
-
-  return Number.isFinite(matchTime) && matchTime <= Date.now();
-}
-
-function isLockedMatch(match) {
-  return match?.status === "locked";
-}
-
-export function isPredictionClosedForPlayer(match) {
-  if (!match) {
-    return true;
-  }
-
-  return match.status === "finished" || isLockedMatch(match) || hasMatchStarted(match);
-}
-
-function isAutoClosedMatch(match) {
-  return match?.status === "open" && hasMatchStarted(match);
-}
-
 export function renderSelectedMatchDetail(match, prediction) {
   const detail = document.querySelector("#selectedMatchDetail");
 
@@ -90,16 +76,17 @@ export function renderSelectedMatchDetail(match, prediction) {
 
   const isClosed = match.status === "finished";
   const isLocked = isLockedMatch(match);
-  const isAutoClosed = isAutoClosedMatch(match);
+  const isLive = isLiveMatch(match);
+  const statusView = getMatchStatusView(match);
   const statusLabel = isLocked
     ? "Cerrado por admin"
     : isClosed
-      ? "Cerrado"
-      : isAutoClosed
-        ? "Cerrado por inicio"
+      ? "Finalizado"
+      : isLive
+        ? "En vivo"
         : prediction
           ? "Predicción guardada"
-          : "Abierto";
+          : statusView.label;
   const predictionCopy = prediction
     ? `${prediction.homeScore} - ${prediction.awayScore} · Local: ${
         prediction.homeScorer || "Sin goleadores"
@@ -112,7 +99,7 @@ export function renderSelectedMatchDetail(match, prediction) {
         <span>Partido ${match.matchNumber || "-"}</span>
         <strong>${escapeHtml(formatMatchLabel(match))}</strong>
       </div>
-      <em class="${isClosed || isAutoClosed ? "is-closed" : ""} ${isLocked ? "is-locked" : ""}">${statusLabel}</em>
+      <em class="match-state-badge ${statusView.className} ${prediction && !isPredictionClosedForPlayer(match) ? "is-saved" : ""}">${statusLabel}</em>
     </div>
     <div class="selected-match-meta">
       <div>
@@ -153,17 +140,18 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
         );
         const isClosed = match.status === "finished";
         const isLocked = isLockedMatch(match);
-        const isAutoClosed = isAutoClosedMatch(match);
-        const isUnavailable = isLocked || isClosed || isAutoClosed;
+        const isLive = isLiveMatch(match);
+        const isUnavailable = isLocked || isClosed || isLive;
+        const statusView = getMatchStatusView(match);
         const stateLabel = isLocked
           ? "Cerrado"
           : isClosed
             ? "Finalizado"
-            : isAutoClosed
-              ? "Cerrado por inicio"
+            : isLive
+              ? "En vivo"
               : prediction
                 ? "Guardada"
-                : "Pendiente";
+                : statusView.label;
         const actionLabel = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
 
         return `
@@ -172,7 +160,7 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
             <span class="fixture-date">${formatMatchDate(match.date)}</span>
             <strong class="fixture-teams">${escapeHtml(formatMatchLabel(match))}</strong>
           </div>
-          <em class="fixture-status">${stateLabel}</em>
+          <em class="fixture-status ${statusView.className}">${stateLabel}</em>
           <a class="fixture-action" href="#predicciones" data-dashboard-match="${match.id}">${actionLabel}</a>
         </article>
       `;
@@ -188,7 +176,9 @@ function renderPlayerOptions(listId, players) {
     return;
   }
 
-  datalist.innerHTML = players.map((player) => `<option value="${player}"></option>`).join("");
+  datalist.innerHTML = players
+    .map((player) => `<option value="${escapeHtml(getPlayerName(player))}"></option>`)
+    .join("");
 }
 
 function parseScorerInput(value) {
@@ -432,7 +422,7 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
       "Las predicciones de este partido están cerradas por el administrador.";
   }
 
-  if (match.status === "finished" || isAutoClosedMatch(match)) {
+  if (match.status === "finished" || isLiveMatch(match)) {
     form.classList.add("is-disabled");
     deleteButton.classList.add("is-hidden");
     deleteButton.disabled = true;
@@ -608,12 +598,13 @@ function renderPredictionMatchCard(match, predictions, playerId, selectedMatchId
   const prediction = getPredictionForMatch(predictions, playerId, match.id);
   const isClosed = match.status === "finished";
   const isLocked = isLockedMatch(match);
-  const isAutoClosed = isAutoClosedMatch(match);
-  const isUnavailable = isLocked || isClosed || isAutoClosed;
+  const isLive = isLiveMatch(match);
+  const isUnavailable = isLocked || isClosed || isLive;
+  const statusView = getMatchStatusView(match);
   const status = isUnavailable ? "Ver detalle" : prediction ? "Editar" : "Predecir";
   const selectedClass = match.id === selectedMatchId ? " is-selected" : "";
   const savedClass = prediction ? " is-saved" : "";
-  const closedClass = isClosed || isAutoClosed ? " is-closed" : "";
+  const closedClass = isClosed || isLive ? " is-closed" : "";
   const lockedClass = isLocked ? " is-locked" : "";
   const predictionDetails = prediction
     ? `
@@ -631,7 +622,7 @@ function renderPredictionMatchCard(match, predictions, playerId, selectedMatchId
       <div class="prediction-match-copy">
         <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
         <h4>${escapeHtml(formatMatchLabel(match))}</h4>
-        <p>${escapeHtml(match.phase)} · ${isAutoClosed ? "cerrado por inicio" : escapeHtml(match.status)}</p>
+        <p>${escapeHtml(match.phase)} · <em class="match-state-badge ${statusView.className}">${escapeHtml(statusView.label)}</em></p>
         ${predictionDetails}
       </div>
       <button class="btn btn-secondary btn-full" type="button" data-select-match="${match.id}">

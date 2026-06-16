@@ -61,14 +61,14 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=team-flags";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=live-status";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=team-flags";
+} from "./ui/challenges.js?v=live-status";
 import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=team-flags";
 import {
   renderFavoriteTeamMatches,
@@ -79,7 +79,7 @@ import {
   renderPredictionMatchList,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=player-numbers";
+} from "./ui/predictions.js?v=live-status";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
