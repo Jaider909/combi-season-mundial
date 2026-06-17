@@ -5,7 +5,7 @@ import {
   isLiveMatch,
   isLockedMatch,
   isPredictionClosedForPlayer,
-} from "./match-status.js?v=live-status";
+} from "./match-status.js?v=admin-open";
 
 export { isPredictionClosedForPlayer };
 

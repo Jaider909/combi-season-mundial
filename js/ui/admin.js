@@ -1,7 +1,7 @@
 import { qualifiedTeams } from "../config/teams.js";
 import { escapeHtml, setText } from "./dom.js?v=safe-text";
 import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
-import { getMatchStatusView, isLiveMatch } from "./match-status.js?v=live-status";
+import { getMatchStatusView, isLiveMatch } from "./match-status.js?v=admin-open";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("es-CO", {
@@ -92,7 +92,7 @@ function renderMatchActionButton(match) {
   const isFinished = match.status === "finished";
   const isLocked = match.status === "locked";
 
-  if (match.status === "open") {
+  if (match.status === "open" || match.status === "admin_open") {
     return `
       <button
         class="mini-action mini-action-danger"
@@ -630,6 +630,7 @@ function renderAdminTodayMatches(matches, predictions) {
   const summarySource = isTodayView ? allTodayMatches : quickMatches;
   const liveCount = summarySource.filter((match) => isLiveMatch(match)).length;
   const openCount = summarySource.filter((match) => match.status === "open" && !isLiveMatch(match)).length;
+  const adminOpenCount = summarySource.filter((match) => match.status === "admin_open").length;
   const lockedCount = summarySource.filter((match) => match.status === "locked").length;
   const finishedCount = summarySource.filter((match) => match.status === "finished").length;
   const totalPredictions = summarySource.reduce(
@@ -654,7 +655,7 @@ function renderAdminTodayMatches(matches, predictions) {
       </article>
       <article>
         <span>Abiertos</span>
-        <strong>${openCount}</strong>
+        <strong>${openCount + adminOpenCount}</strong>
       </article>
       <article>
         <span>En vivo</span>

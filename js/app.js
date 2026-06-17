@@ -62,14 +62,14 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-transparency";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-open-predictions";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=live-status";
+} from "./ui/challenges.js?v=prediction-admin-open";
 import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=team-flags";
 import {
   renderFavoriteTeamMatches,
@@ -81,7 +81,7 @@ import {
   renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-transparency";
+} from "./ui/predictions.js?v=prediction-admin-open";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -1855,12 +1855,16 @@ async function handleAdminMatchTableClick(event) {
         awayScore: null,
         homeScorers: [],
         awayScorers: [],
-        status: "open",
+        status: "admin_open",
       };
       await updateMatchResult(matchId, reopenedMatch);
       const recalculated = await recalculateMatchPoints(reopenedMatch);
       await refreshPanels(await getCurrentUser());
-      showNote(resultNote, `Partido reabierto. ${recalculated} predicciones volvieron a 0 puntos.`, "success");
+      showNote(
+        resultNote,
+        `Partido reabierto manualmente para jugadores. ${recalculated} predicciones volvieron a 0 puntos.`,
+        "success"
+      );
     } catch (error) {
       showError(resultNote, error);
     } finally {
