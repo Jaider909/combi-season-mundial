@@ -872,6 +872,10 @@
               <select name="matchId" id="resultMatchSelect" required></select>
             </label>
             <label>
+              Fecha y hora
+              <input name="matchDate" type="datetime-local" required />
+            </label>
+            <label>
               Goles local
               <input name="homeScore" type="number" min="0" max="20" value="0" required />
             </label>
@@ -889,6 +893,9 @@
               <input name="awayScorers" type="hidden" />
               <div class="scorer-chip-panel" id="awayScorerChips"></div>
             </label>
+            <button class="btn btn-secondary match-schedule-button" id="saveMatchScheduleButton" type="button">
+              Guardar horario y abrir
+            </button>
             <button class="btn btn-primary" type="submit">Guardar resultado y puntos</button>
           </form>
           <p class="form-note admin-note" id="resultNote" role="status"></p>
@@ -990,6 +997,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=prediction-audit"></script>
+    <script type="module" src="js/app.js?v=admin-schedule-transparency"></script>
   </body>
 </html>

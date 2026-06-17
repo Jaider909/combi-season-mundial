@@ -68,7 +68,7 @@ function getMissingPredictions(users, predictions, matchId) {
     predictions.filter((prediction) => prediction.matchId === matchId).map((prediction) => prediction.playerId)
   );
 
-  return users.filter((user) => user.role !== "admin" && !predictedPlayerIds.has(user.id));
+  return users.filter((user) => user?.id && !predictedPlayerIds.has(user.id));
 }
 
 function sortMatchesByNumber(matches) {

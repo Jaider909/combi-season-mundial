@@ -1,6 +1,7 @@
 import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 import {
   getMatchStatusView,
+  hasMatchStarted,
   isLiveMatch,
   isLockedMatch,
   isPredictionClosedForPlayer,
@@ -131,7 +132,87 @@ function getPlayerLabel(user) {
   return user?.alias || user?.name || "Jugador";
 }
 
-function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurrentUser) {
+function getWinnerSide(homeScore, awayScore) {
+  const home = Number(homeScore);
+  const away = Number(awayScore);
+
+  if (!Number.isFinite(home) || !Number.isFinite(away)) {
+    return null;
+  }
+
+  if (home === away) {
+    return "draw";
+  }
+
+  return home > away ? "home" : "away";
+}
+
+function getScorerNames(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeScorer(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function countMatchingScorers(realScorers = [], predictedScorers) {
+  const realSet = new Set(
+    realScorers
+      .map(normalizeScorer)
+      .filter((item) => item && item !== "autogol")
+  );
+  const predictedSet = new Set(
+    getScorerNames(predictedScorers)
+      .map(normalizeScorer)
+      .filter((item) => item && item !== "autogol")
+  );
+
+  return [...predictedSet].filter((item) => realSet.has(item)).length;
+}
+
+function getPredictionExplanation(prediction, match) {
+  if (!prediction || match?.status !== "finished") {
+    return "-";
+  }
+
+  const reasons = [];
+  const exactScore =
+    Number(prediction.homeScore) === Number(match.homeScore) &&
+    Number(prediction.awayScore) === Number(match.awayScore);
+  const winnerMatches =
+    getWinnerSide(prediction.homeScore, prediction.awayScore) ===
+    getWinnerSide(match.homeScore, match.awayScore);
+  const scorerMatches =
+    countMatchingScorers(match.homeScorers, prediction.homeScorer) +
+    countMatchingScorers(match.awayScorers, prediction.awayScorer);
+
+  if (exactScore) {
+    reasons.push("Marcador exacto");
+  }
+
+  if (winnerMatches) {
+    reasons.push("Ganador acertado");
+  }
+
+  if (scorerMatches > 0) {
+    reasons.push(`Goleador acertado x${scorerMatches}`);
+  }
+
+  return reasons.length ? reasons.join(" · ") : "Sin puntos";
+}
+
+function renderPredictionAuditRow(user, prediction, match, shouldReveal, isFinal, isCurrentUser) {
   const statusLabel = prediction ? "Guardada" : "Pendiente";
   const statusClass = prediction ? "is-saved" : "is-pending";
   const timingView = prediction ? getPredictionTimingView(prediction, match) : null;
@@ -150,6 +231,7 @@ function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurre
     : prediction
       ? "Pendiente"
       : "-";
+  const explanation = isFinal && prediction ? getPredictionExplanation(prediction, match) : "-";
 
   return `
     <div class="match-prediction-row ${prediction ? "has-prediction" : "is-missing"} ${isCurrentUser ? "is-current-user" : ""}">
@@ -165,6 +247,7 @@ function renderPredictionAuditRow(user, prediction, match, shouldReveal, isCurre
           ? `<strong>${escapeHtml(formatPredictionTime(getPredictionAuditTime(prediction)))}</strong><small class="prediction-time-chip ${timingView.className}">${escapeHtml(timingView.label)}</small>`
           : "-"
       }</span>
+      <span class="prediction-points-reason">${escapeHtml(explanation)}</span>
       <strong>${escapeHtml(points)}</strong>
     </div>
   `;
@@ -183,7 +266,8 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
   }
 
   const predictionsAreLocked = isPredictionClosedForPlayer(match);
-  const shouldReveal = true;
+  const shouldReveal = match.status === "finished" || hasMatchStarted(match);
+  const isFinal = match.status === "finished";
   const playerUsers = users
     .filter((user) => user?.id)
     .sort((a, b) => getPlayerLabel(a).localeCompare(getPlayerLabel(b), "es"));
@@ -191,9 +275,16 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
     getPredictionForPlayer(predictions, user.id, match.id)
   ).length;
   const pendingCount = Math.max(playerUsers.length - savedCount, 0);
-  const statusCopy = predictionsAreLocked
-    ? "Predicciones visibles para transparencia. La hora confirma si quedaron antes del inicio del partido."
-    : "Predicciones visibles en tiempo real. La hora confirma si fueron guardadas antes del inicio del partido.";
+  const statusCopy = isFinal
+    ? "Resumen final con resultado real, puntos y explicación de cada predicción."
+    : shouldReveal
+      ? "El partido ya inició: las predicciones se revelan con marcador, goleadores y hora de guardado."
+      : predictionsAreLocked
+        ? "Predicciones cerradas por admin. Se ve quién guardó y quién falta, sin revelar marcador todavía."
+        : "Antes del inicio solo se muestra quién ya guardó y quién falta, sin revelar marcador.";
+  const resultSummary = isFinal
+    ? `<div class="match-real-result">Resultado real: <strong>${escapeHtml(formatTeamLabel(match.homeTeam))} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${escapeHtml(formatTeamLabel(match.awayTeam))}</strong></div>`
+    : "";
 
   panel.innerHTML = `
     <div class="match-predictions-header">
@@ -203,10 +294,12 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
         <p>${escapeHtml(statusCopy)}</p>
       </div>
       <div class="match-predictions-counts">
+        <span>${playerUsers.length} jugadores</span>
         <span>${savedCount} guardadas</span>
         <span>${pendingCount} pendientes</span>
       </div>
     </div>
+    ${resultSummary}
     <div class="match-predictions-table">
       <div class="match-prediction-row header-row">
         <span>Jugador</span>
@@ -214,6 +307,7 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
         <span>Marcador</span>
         <span>Goleadores</span>
         <span>Último guardado</span>
+        <span>Explicación</span>
         <span>Puntos</span>
       </div>
       ${playerUsers
@@ -223,6 +317,7 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
             getPredictionForPlayer(predictions, user.id, match.id),
             match,
             shouldReveal,
+            isFinal,
             currentUser?.id === user.id
           )
         )
@@ -488,7 +583,9 @@ function bindPredictionScorerChips(form) {
     }
 
     const selectedScorers = parseScorerInput(input.value);
-    const nextScorers = [...selectedScorers, scorerName];
+    const nextScorers = selectedScorers.includes(scorerName)
+      ? selectedScorers.filter((item) => item !== scorerName)
+      : [...selectedScorers, scorerName];
 
     writeScorerInput(input, nextScorers);
     const containerId = fieldName === "homeScorer" ? "homePredictionScorerChips" : "awayPredictionScorerChips";

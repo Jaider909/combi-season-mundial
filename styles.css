@@ -1694,6 +1694,15 @@ h3 {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.match-real-result {
+  padding: 12px;
+  color: var(--white);
+  background: rgba(57, 255, 157, 0.14);
+  border: 1px solid rgba(57, 255, 157, 0.3);
+  border-radius: 8px;
+  font-weight: 850;
+}
+
 .match-predictions-table {
   display: grid;
   gap: 8px;
@@ -1702,10 +1711,10 @@ h3 {
 
 .match-prediction-row {
   display: grid;
-  grid-template-columns: minmax(170px, 1.1fr) 100px 110px minmax(180px, 1fr) minmax(150px, 0.8fr) 80px;
+  grid-template-columns: minmax(170px, 1.1fr) 100px 110px minmax(180px, 1fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) 80px;
   gap: 12px;
   align-items: center;
-  min-width: 920px;
+  min-width: 1080px;
   padding: 12px;
   color: var(--white);
   background: rgba(255, 255, 255, 0.07);
@@ -1739,6 +1748,13 @@ h3 {
 
 .match-prediction-row strong {
   overflow-wrap: anywhere;
+}
+
+.prediction-points-reason {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.86rem;
+  font-weight: 850;
+  line-height: 1.25;
 }
 
 .prediction-time-cell strong {
@@ -2434,17 +2450,25 @@ h3 {
   grid-column: span 4;
 }
 
-.result-form label:nth-of-type(2),
-.result-form label:nth-of-type(3) {
+.result-form label:nth-of-type(2) {
+  grid-column: span 3;
+}
+
+.result-form label:nth-of-type(3),
+.result-form label:nth-of-type(4) {
   grid-column: span 2;
 }
 
-.result-form label:nth-of-type(4),
-.result-form label:nth-of-type(5) {
+.result-form label:nth-of-type(5),
+.result-form label:nth-of-type(6) {
   grid-column: span 6;
 }
 
-.result-form .btn {
+.result-form .match-schedule-button {
+  grid-column: 4 / span 3;
+}
+
+.result-form .btn:not(.match-schedule-button) {
   grid-column: 9 / span 4;
   min-height: 56px;
   border-radius: 999px;
@@ -3127,7 +3151,9 @@ h3 {
   .result-form label:nth-of-type(3),
   .result-form label:nth-of-type(4),
   .result-form label:nth-of-type(5),
-  .result-form .btn {
+  .result-form label:nth-of-type(6),
+  .result-form .btn,
+  .result-form .match-schedule-button {
     grid-column: auto;
   }
 }
@@ -3266,7 +3292,8 @@ h3 {
     gap: 10px;
   }
 
-  .result-form .btn {
+  .result-form .btn,
+  .result-form .match-schedule-button {
     width: 100%;
     min-height: 52px;
   }

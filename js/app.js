@@ -30,7 +30,8 @@ import {
   listMatches,
   updateMatchTeams,
   updateMatchResult,
-} from "./services/match-repository.js?v=admin-session-guard";
+  updateMatchSchedule,
+} from "./services/match-repository.js?v=admin-schedule-control";
 import { buildKnockoutUpdates } from "./services/knockout-service.js";
 import {
   countPredictionsForPlayer,
@@ -61,7 +62,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=live-status";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-transparency";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
@@ -80,7 +81,7 @@ import {
   renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-audit";
+} from "./ui/predictions.js?v=prediction-transparency";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -101,6 +102,7 @@ const resultForm = document.querySelector("#resultForm");
 const teamPlayerForm = document.querySelector("#teamPlayerForm");
 const syncKnockoutButton = document.querySelector("#syncKnockoutButton");
 const clearChallengesButton = document.querySelector("#clearChallengesButton");
+const saveMatchScheduleButton = document.querySelector("#saveMatchScheduleButton");
 const predictionSubmitButton = predictionForm.querySelector('button[type="submit"]');
 const challengeSubmitButton = challengeForm.querySelector('button[type="submit"]');
 const resultSubmitButton = resultForm.querySelector('button[type="submit"]');
@@ -431,6 +433,31 @@ function resolveResultSelectedMatchId() {
   return currentMatches[0]?.id || null;
 }
 
+function toDatetimeLocalValue(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+}
+
+function fromDatetimeLocalValue(value) {
+  const date = new Date(value);
+
+  if (!value || Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
+}
+
 function syncResultForm(matchId) {
   const match = currentMatches.find((item) => item.id === matchId);
 
@@ -445,6 +472,11 @@ function syncResultForm(matchId) {
   }
 
   resultMatchSelect.value = match.id;
+  resultForm.elements.matchDate.value = toDatetimeLocalValue(match.date);
+  if (saveMatchScheduleButton && !saveMatchScheduleButton.dataset.originalText) {
+    saveMatchScheduleButton.textContent =
+      match.status === "finished" ? "Guardar horario" : "Guardar horario y abrir";
+  }
   resultForm.elements.homeScore.value = Number.isFinite(Number(match.homeScore))
     ? Number(match.homeScore)
     : 0;
@@ -1637,7 +1669,9 @@ resultForm.addEventListener("click", (event) => {
   const fieldName = chip.dataset.scorerField;
   const scorerName = decodeURIComponent(chip.dataset.scorerName || "");
   const selectedScorers = readSelectedScorers(fieldName);
-  const nextScorers = [...selectedScorers, scorerName];
+  const nextScorers = selectedScorers.includes(scorerName)
+    ? selectedScorers.filter((item) => item !== scorerName)
+    : [...selectedScorers, scorerName];
 
   writeSelectedScorers(fieldName, nextScorers);
   const containerId = fieldName === "homeScorers" ? "homeScorerChips" : "awayScorerChips";
@@ -1688,6 +1722,51 @@ resultForm.addEventListener("submit", async (event) => {
     showError(resultNote, error);
   } finally {
     setButtonBusy(resultSubmitButton, false);
+  }
+});
+
+saveMatchScheduleButton?.addEventListener("click", async () => {
+  const data = new FormData(resultForm);
+  const matchId = data.get("matchId")?.toString();
+  const matchDate = fromDatetimeLocalValue(data.get("matchDate")?.toString());
+  const match = currentMatches.find((item) => item.id === matchId);
+
+  if (!match) {
+    showNote(resultNote, "Selecciona un partido válido para cambiar el horario.", "warning");
+    return;
+  }
+
+  if (!matchDate) {
+    showNote(resultNote, "Elige una fecha y hora válida.", "warning");
+    return;
+  }
+
+  try {
+    setButtonBusy(saveMatchScheduleButton, true, "Guardando...");
+    resultSelectedMatchId = matchId;
+    const shouldOpenForPlayers = match.status !== "finished";
+    await updateMatchSchedule(matchId, {
+      date: matchDate,
+      status: shouldOpenForPlayers ? "open" : match.status,
+    });
+    await refreshPanels(await getCurrentUser());
+    const updatedDate = new Intl.DateTimeFormat("es-CO", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(matchDate));
+    showNote(
+      resultNote,
+      `${formatMatchLabel(match)} quedó programado para ${updatedDate}.${
+        shouldOpenForPlayers ? " Si estaba cerrado, volvió a quedar abierto para jugadores." : ""
+      }`,
+      "success"
+    );
+  } catch (error) {
+    showError(resultNote, error);
+  } finally {
+    setButtonBusy(saveMatchScheduleButton, false);
   }
 });
 

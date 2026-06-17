@@ -151,6 +151,39 @@ export async function updateMatchTeams(matchId, patch) {
   return fromMatchRow(data);
 }
 
+export async function updateMatchSchedule(matchId, patch) {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  const client = await getSupabaseClient();
+  await assertAdminSession(client);
+  const payload = {
+    match_date: patch.date,
+  };
+
+  if (patch.status) {
+    payload.status = patch.status;
+  }
+
+  const { data, error } = await client
+    .from("matches")
+    .update(payload)
+    .eq("id", matchId)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error("Supabase no permitió actualizar el horario. Revisa la policy de update en matches.");
+  }
+
+  return fromMatchRow(data);
+}
+
 export function getMatchesForTeam(matches, team) {
   if (!team || team === "Sin equipo definido") {
     return [];
