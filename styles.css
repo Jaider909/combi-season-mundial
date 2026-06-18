@@ -2464,6 +2464,10 @@ h3 {
   min-height: 46px;
   margin-top: 8px;
   border-radius: 999px;
+  color: var(--ink);
+  background: var(--lime);
+  border: 1px solid rgba(6, 17, 31, 0.08);
+  box-shadow: 0 12px 26px rgba(231, 255, 111, 0.22);
 }
 
 .result-form label:nth-of-type(2),
