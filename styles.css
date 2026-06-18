@@ -2450,22 +2450,30 @@ h3 {
   grid-column: span 4;
 }
 
-.result-form label:nth-of-type(2) {
+.result-form .match-schedule-control {
   grid-column: span 3;
 }
 
-.result-form label:nth-of-type(3),
-.result-form label:nth-of-type(4) {
-  grid-column: span 2;
-}
-
-.result-form label:nth-of-type(5),
-.result-form label:nth-of-type(6) {
-  grid-column: span 6;
+.result-form .match-schedule-control label {
+  display: grid;
+  gap: 8px;
 }
 
 .result-form .match-schedule-button {
-  grid-column: 4 / span 3;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 8px;
+  border-radius: 999px;
+}
+
+.result-form label:nth-of-type(2),
+.result-form label:nth-of-type(3) {
+  grid-column: span 2;
+}
+
+.result-form label:nth-of-type(4),
+.result-form label:nth-of-type(5) {
+  grid-column: span 6;
 }
 
 .result-form .btn:not(.match-schedule-button) {
@@ -2475,6 +2483,7 @@ h3 {
 }
 
 .result-form label,
+.match-schedule-control,
 .team-player-toolbar label,
 .team-player-form label {
   display: grid;
@@ -3147,11 +3156,11 @@ h3 {
   }
 
   .result-form label:nth-of-type(1),
-  .result-form label:nth-of-type(2),
   .result-form label:nth-of-type(3),
   .result-form label:nth-of-type(4),
   .result-form label:nth-of-type(5),
   .result-form label:nth-of-type(6),
+  .result-form .match-schedule-control,
   .result-form .btn,
   .result-form .match-schedule-button {
     grid-column: auto;

@@ -473,10 +473,6 @@ function syncResultForm(matchId) {
 
   resultMatchSelect.value = match.id;
   resultForm.elements.matchDate.value = toDatetimeLocalValue(match.date);
-  if (saveMatchScheduleButton && !saveMatchScheduleButton.dataset.originalText) {
-    saveMatchScheduleButton.textContent =
-      match.status === "finished" ? "Guardar horario" : "Guardar horario y abrir";
-  }
   resultForm.elements.homeScore.value = Number.isFinite(Number(match.homeScore))
     ? Number(match.homeScore)
     : 0;
