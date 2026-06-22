@@ -69,7 +69,7 @@ import {
   renderChallengeForm,
   renderChallenges,
   renderChallengeTeamOptions,
-} from "./ui/challenges.js?v=prediction-admin-open";
+} from "./ui/challenges.js?v=prediction-compact-closed";
 import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=team-flags";
 import {
   renderFavoriteTeamMatches,
@@ -81,7 +81,7 @@ import {
   renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=prediction-admin-open";
+} from "./ui/predictions.js?v=prediction-compact-closed";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";

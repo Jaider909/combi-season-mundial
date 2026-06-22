@@ -1,5 +1,5 @@
 import { escapeHtml } from "./dom.js?v=safe-text";
-import { isPredictionClosedForPlayer } from "./predictions.js?v=prediction-admin-open";
+import { isPredictionClosedForPlayer } from "./predictions.js?v=prediction-compact-closed";
 import { formatMatchLabel, formatTeamLabel } from "../config/team-flags.js?v=team-flags";
 
 function formatCurrency(value) {

@@ -1907,6 +1907,93 @@ h3 {
   gap: 12px;
 }
 
+.prediction-list-block {
+  display: grid;
+  gap: 12px;
+}
+
+.prediction-list-block + .prediction-list-block {
+  margin-top: 10px;
+}
+
+.prediction-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.prediction-list-heading span {
+  font-size: 0.82rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.prediction-list-heading strong {
+  display: inline-flex;
+  min-width: 36px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  background: var(--lime);
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.prediction-compact-list {
+  display: grid;
+  gap: 8px;
+}
+
+.prediction-compact-match {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(120px, 0.7fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 12px;
+  background: rgba(6, 17, 31, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.prediction-compact-match.is-selected {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px rgba(231, 255, 111, 0.1);
+}
+
+.prediction-compact-match span,
+.prediction-compact-match small {
+  display: block;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.prediction-compact-match strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--white);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.prediction-compact-match .btn {
+  min-height: 42px;
+  padding-inline: 16px;
+  color: var(--ink);
+  background: var(--lime);
+}
+
 .prediction-workspace {
   display: flex;
   flex-direction: column;
@@ -3329,6 +3416,15 @@ h3 {
 
   .match-predictions-counts {
     justify-content: flex-start;
+  }
+
+  .prediction-compact-match {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .prediction-compact-match .btn {
+    width: 100%;
   }
 
   .match-predictions-table {

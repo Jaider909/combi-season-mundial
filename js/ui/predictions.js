@@ -846,7 +846,45 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
     return;
   }
 
-  container.innerHTML = groupMatchesByRound(matches)
+  if (context.viewMode === "all") {
+    const activeMatches = matches.filter((match) => !isPredictionClosedForPlayer(match));
+    const closedMatches = matches.filter((match) => isPredictionClosedForPlayer(match));
+    const activeMarkup = activeMatches.length
+      ? renderPredictionRoundGroups(activeMatches, predictions, playerId, selectedMatchId)
+      : '<p class="empty-group">No hay partidos abiertos en este filtro.</p>';
+    const closedMarkup = closedMatches.length
+      ? renderCompactPredictionList(closedMatches, predictions, playerId, selectedMatchId)
+      : '<p class="empty-group">No hay partidos cerrados en este filtro.</p>';
+
+    container.innerHTML = `
+      <section class="prediction-list-block">
+        <div class="prediction-list-heading">
+          <span>Para jugar</span>
+          <strong>${activeMatches.length}</strong>
+        </div>
+        ${activeMarkup}
+      </section>
+      <section class="prediction-list-block">
+        <div class="prediction-list-heading">
+          <span>Cerrados y jugados</span>
+          <strong>${closedMatches.length}</strong>
+        </div>
+        ${closedMarkup}
+      </section>
+    `;
+    return;
+  }
+
+  if (context.viewMode === "closed") {
+    container.innerHTML = renderCompactPredictionList(matches, predictions, playerId, selectedMatchId);
+    return;
+  }
+
+  container.innerHTML = renderPredictionRoundGroups(matches, predictions, playerId, selectedMatchId);
+}
+
+function renderPredictionRoundGroups(matches, predictions, playerId, selectedMatchId) {
+  return groupMatchesByRound(matches)
     .map(
       (group) => `
         <section class="prediction-round">
@@ -860,6 +898,45 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
       `
     )
     .join("");
+}
+
+function renderCompactPredictionList(matches, predictions, playerId, selectedMatchId) {
+  return groupMatchesByRound(matches)
+    .map(
+      (group) => `
+        <section class="prediction-round prediction-round-compact">
+          <h4>${escapeHtml(group.label)}</h4>
+          <div class="prediction-compact-list">
+            ${group.matches
+              .map((match) => renderCompactPredictionMatch(match, predictions, playerId, selectedMatchId))
+              .join("")}
+          </div>
+        </section>
+      `
+    )
+    .join("");
+}
+
+function renderCompactPredictionMatch(match, predictions, playerId, selectedMatchId) {
+  const prediction = getPredictionForMatch(predictions, playerId, match.id);
+  const statusView = getMatchStatusView(match);
+  const selectedClass = match.id === selectedMatchId ? " is-selected" : "";
+  const result = match.status === "finished" ? `${match.homeScore ?? "-"} - ${match.awayScore ?? "-"}` : statusView.label;
+  const savedLabel = prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : "Sin predicción";
+
+  return `
+    <article class="prediction-compact-match${selectedClass}" data-select-match="${match.id}" tabindex="0">
+      <div>
+        <span>Partido ${match.matchNumber || "-"} · ${formatMatchDate(match.date)}</span>
+        <strong>${escapeHtml(formatMatchLabel(match))}</strong>
+      </div>
+      <div>
+        <em class="match-state-badge ${statusView.className}">${escapeHtml(result)}</em>
+        <small>${escapeHtml(savedLabel)}</small>
+      </div>
+      <button class="btn btn-secondary" type="button" data-select-match="${match.id}">Ver detalle</button>
+    </article>
+  `;
 }
 
 function renderPredictionMatchCard(match, predictions, playerId, selectedMatchId) {
