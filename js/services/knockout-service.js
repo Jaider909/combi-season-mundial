@@ -48,12 +48,16 @@ function applyResult(standing, goalsFor, goalsAgainst) {
 }
 
 function getGroupMatches(group, matches) {
-  return matches.filter(
-    (match) =>
+  return matches.filter((match) => {
+    const matchNumber = Number(match.matchNumber);
+    const isGroupStage = !Number.isFinite(matchNumber) || matchNumber <= 72;
+
+    return (
       match.groupCode === group.id ||
       match.phase === `Grupo ${group.id}` ||
-      (group.teams.includes(match.homeTeam) && group.teams.includes(match.awayTeam))
-  );
+      (isGroupStage && group.teams.includes(match.homeTeam) && group.teams.includes(match.awayTeam))
+    );
+  });
 }
 
 function getGroupStandings(group, matches) {

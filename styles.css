@@ -2380,6 +2380,106 @@ h3 {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.final-path {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.final-path-header {
+  margin-bottom: 0;
+}
+
+.path-section {
+  display: grid;
+  gap: 12px;
+}
+
+.path-section h4 {
+  margin: 0;
+  color: var(--lime);
+  font-size: 0.95rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.path-groups-grid,
+.path-rounds-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.path-group,
+.path-round {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  background: rgba(6, 17, 31, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.path-group h5,
+.path-round h5 {
+  margin: 0 0 4px;
+  color: var(--white);
+  font-size: 0.92rem;
+}
+
+.path-group div,
+.path-match {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.path-group div {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+}
+
+.path-match {
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+}
+
+.path-match div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.path-group strong,
+.path-match strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.path-group strong.is-favorite-team,
+.path-match strong.is-favorite-team {
+  color: var(--lime);
+}
+
+.path-group span,
+.path-match span,
+.path-match small {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 900;
+}
+
+.path-group em,
+.path-match em,
+.path-group small {
+  color: rgba(255, 255, 255, 0.58);
+  font-style: normal;
+  font-weight: 900;
+}
+
 .admin-section {
   color: var(--ink);
   background: #f7f5ed;
@@ -3622,6 +3722,15 @@ h3 {
   .group-row span:nth-child(5),
   .group-row span:nth-child(6) {
     display: none;
+  }
+
+  .path-groups-grid,
+  .path-rounds-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .path-match {
+    grid-template-columns: 1fr;
   }
 
   .footer {

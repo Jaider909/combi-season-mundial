@@ -64,7 +64,7 @@ import {
 } from "./services/user-repository.js?v=admin-user-manager";
 import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-sync-knockout-panel";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
-import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
+import { renderAllGroups, renderTournamentPath, renderUserGroup } from "./ui/groups.js?v=final-path-groups";
 import {
   renderChallengeForm,
   renderChallenges,
@@ -292,6 +292,7 @@ async function refreshPanels(user) {
   );
   renderUserGroup(findGroupByTeam(activeUser?.team), activeUser?.team, currentMatches);
   renderAllGroups(worldCupGroups, activeUser?.team, currentMatches);
+  renderTournamentPath(worldCupGroups, activeUser?.team, currentMatches);
   renderRanking(users, currentPredictions, activeUser);
   resultSelectedMatchId = resolveResultSelectedMatchId();
   renderAdmin(
