@@ -3389,7 +3389,28 @@ h3 {
   }
 
   .result-form {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .result-form > *,
+  .result-form label,
+  .result-form .match-schedule-control,
+  .result-form .match-schedule-control label {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .result-form input,
+  .result-form select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .result-form .btn,
