@@ -615,6 +615,9 @@ function renderAdminTodayMatches(matches, predictions) {
   const todayKey = getBogotaDateKey(new Date());
   const sortedMatches = sortMatchesByDate(matches);
   const actionableMatches = sortedMatches.filter((match) => match.status !== "finished");
+  const pendingToCloseMatches = actionableMatches
+    .filter((match) => isLiveMatch(match) || match.status === "locked")
+    .slice(0, 8);
   const todayMatches = actionableMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
   const allTodayMatches = sortedMatches.filter((match) => getBogotaDateKey(match.date) === todayKey);
   const isTodayView = todayMatches.length > 0;
@@ -640,8 +643,34 @@ function renderAdminTodayMatches(matches, predictions) {
   const rows = quickMatches
     .map((match) => renderMatchRow(match, getMatchPredictionCount(predictions, match.id)))
     .join("");
+  const pendingRows = pendingToCloseMatches
+    .map((match) => renderMatchRow(match, getMatchPredictionCount(predictions, match.id)))
+    .join("");
+  const pendingPanel = pendingToCloseMatches.length
+    ? `
+      <div class="admin-close-queue">
+        <div class="panel-header compact-header">
+          <div>
+            <span>Resultados pendientes</span>
+            <h3>Partidos por cerrar</h3>
+          </div>
+        </div>
+        <div class="admin-table">
+          <div class="admin-row match-admin-row header-row">
+            <span>Fecha</span>
+            <span>Partido</span>
+            <span>Grupo</span>
+            <span>Actividad</span>
+            <span>Estado</span>
+          </div>
+          ${pendingRows}
+        </div>
+      </div>
+    `
+    : "";
 
   container.innerHTML = `
+    ${pendingPanel}
     <div class="panel-header compact-header">
       <div>
         <span>${isTodayView ? "Agenda de hoy" : "Próximos partidos"}</span>

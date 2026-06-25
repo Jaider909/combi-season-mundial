@@ -62,7 +62,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-open-predictions";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-close-queue";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
