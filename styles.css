@@ -2631,20 +2631,40 @@ h3 {
 }
 
 .knockout-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
+  padding: 14px;
   margin-bottom: 14px;
+  background: #f7f5ed;
+  border: 1px solid rgba(6, 17, 31, 0.12);
+  border-radius: 8px;
+}
+
+.knockout-toolbar strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .knockout-toolbar span {
+  display: block;
+  margin-top: 3px;
   color: var(--muted);
   font-size: 0.84rem;
   font-weight: 800;
 }
 
 .admin-sync-knockout-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  min-width: 190px;
+  min-height: 48px;
+  opacity: 1 !important;
   color: var(--ink);
   background: var(--lime);
   border-color: rgba(6, 17, 31, 0.08);
@@ -3355,6 +3375,15 @@ h3 {
   .admin-panel {
     min-width: 0;
     padding: 14px;
+  }
+
+  .knockout-toolbar {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .knockout-toolbar .admin-sync-knockout-button {
+    width: 100%;
   }
 
   .admin-table {
