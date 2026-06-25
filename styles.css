@@ -2644,6 +2644,13 @@ h3 {
   font-weight: 800;
 }
 
+.admin-sync-knockout-button {
+  color: var(--ink);
+  background: var(--lime);
+  border-color: rgba(6, 17, 31, 0.08);
+  box-shadow: 0 10px 22px rgba(231, 255, 111, 0.24);
+}
+
 .scorer-chip-panel {
   display: flex;
   flex-wrap: wrap;

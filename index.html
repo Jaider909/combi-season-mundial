@@ -17,7 +17,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=app-icon" />
     <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png?v=app-icon" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png?v=app-icon" />
-    <link rel="stylesheet" href="styles.css?v=admin-mobile-form-fix" />
+    <link rel="stylesheet" href="styles.css?v=admin-sync-knockout-visible" />
     <script defer src="/_vercel/insights/script.js"></script>
     <script>
       window.si =
@@ -859,9 +859,12 @@
               <span>Actividad</span>
               <h3>Predicciones por partido</h3>
             </div>
+            <button class="mini-action admin-sync-knockout-button" type="button" data-sync-knockout>
+              Actualizar cruces
+            </button>
           </div>
           <div class="knockout-toolbar">
-            <button class="btn btn-secondary" id="syncKnockoutButton" type="button">
+            <button class="btn btn-secondary admin-sync-knockout-button" id="syncKnockoutButton" type="button" data-sync-knockout>
               Actualizar cruces de eliminación
             </button>
             <span>Usa resultados cerrados para rellenar partidos 73-104.</span>
@@ -1000,6 +1003,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=admin-close-queue"></script>
+    <script type="module" src="js/app.js?v=admin-sync-knockout-visible"></script>
   </body>
 </html>

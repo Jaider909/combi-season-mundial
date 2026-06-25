@@ -62,7 +62,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-close-queue";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-sync-knockout-visible";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderUserGroup } from "./ui/groups.js?v=team-flags";
 import {
@@ -1609,9 +1609,9 @@ adminTeamPlayersTable.addEventListener("click", async (event) => {
   }
 });
 
-syncKnockoutButton.addEventListener("click", async () => {
+async function handleSyncKnockout(button = syncKnockoutButton) {
   try {
-    setButtonBusy(syncKnockoutButton, true, "Actualizando...");
+    setButtonBusy(button, true, "Actualizando...");
     const updates = buildKnockoutUpdates(currentMatches);
 
     if (!updates.length) {
@@ -1632,8 +1632,12 @@ syncKnockoutButton.addEventListener("click", async () => {
   } catch (error) {
     showError(resultNote, error);
   } finally {
-    setButtonBusy(syncKnockoutButton, false);
+    setButtonBusy(button, false);
   }
+}
+
+document.querySelectorAll("[data-sync-knockout]").forEach((button) => {
+  button.addEventListener("click", () => handleSyncKnockout(button));
 });
 
 resultForm.addEventListener("click", (event) => {
