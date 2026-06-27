@@ -178,12 +178,22 @@ async function refreshPanels(user) {
 
   try {
     currentMatches = await listMatches();
+  } catch (error) {
+    console.warn("No se pudieron cargar partidos.", error);
+    currentMatches = [];
+  }
+
+  try {
     currentPredictions = activeUser ? await listPredictions() : [];
+  } catch (error) {
+    console.warn("No se pudieron cargar predicciones.", error);
+    currentPredictions = [];
+  }
+
+  try {
     currentChallenges = activeUser ? await listChallenges() : [];
   } catch (error) {
-    console.warn("No se pudieron cargar partidos, predicciones o retos.", error);
-    currentMatches = [];
-    currentPredictions = [];
+    console.warn("No se pudieron cargar retos.", error);
     currentChallenges = [];
   }
 
@@ -616,6 +626,25 @@ function parseScorerList(value) {
 
 function normalizeScorerInput(value) {
   return parseScorerList(value).join(", ");
+}
+
+function upsertCurrentPrediction(prediction) {
+  if (!prediction?.playerId || !prediction?.matchId) {
+    return;
+  }
+
+  const existingIndex = currentPredictions.findIndex(
+    (item) => item.playerId === prediction.playerId && item.matchId === prediction.matchId
+  );
+
+  if (existingIndex >= 0) {
+    currentPredictions[existingIndex] = {
+      ...currentPredictions[existingIndex],
+      ...prediction,
+    };
+  } else {
+    currentPredictions.unshift(prediction);
+  }
 }
 
 function getFormValue(form, fieldName, fallback = "") {
@@ -2076,7 +2105,13 @@ predictionForm.addEventListener("submit", async (event) => {
     setButtonBusy(predictionSubmitButton, true, "Guardando...");
     const shouldContinuePendingFlow = predictionViewMode === "pending";
     prediction.estimatedPoints = estimatePredictionPoints(prediction);
-    await savePrediction(prediction);
+    const persistedPrediction = await savePrediction(prediction);
+
+    if (!persistedPrediction?.playerId || !persistedPrediction?.matchId) {
+      throw new Error("Supabase no confirmó la predicción guardada.");
+    }
+
+    upsertCurrentPrediction(persistedPrediction);
 
     selectedMatch = submittedMatch;
     selectedMatchWasManual = true;
@@ -2085,7 +2120,9 @@ predictionForm.addEventListener("submit", async (event) => {
     const savedPrediction =
       currentPredictions.find(
         (item) => item.playerId === user.id && item.matchId === submittedMatch.id
-      ) || prediction;
+      ) || persistedPrediction;
+    upsertCurrentPrediction(savedPrediction);
+    renderSelectedMatchDetail(submittedMatch, savedPrediction);
 
     if (shouldContinuePendingFlow && selectedMatch?.id && selectedMatch.id !== submittedMatch.id) {
       showNote(
