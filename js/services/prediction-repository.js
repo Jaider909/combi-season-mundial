@@ -2,6 +2,7 @@ import { readJson, writeJson } from "./storage.js";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase-client.js";
 
 const predictionsKey = "combiSeasonPredictions";
+const pageSize = 1000;
 
 function fromPredictionRow(row) {
   return {
@@ -25,13 +26,31 @@ export async function listPredictions() {
   }
 
   const client = await getSupabaseClient();
-  const { data, error } = await client.from("predictions").select("*");
+  const rows = [];
+  let from = 0;
 
-  if (error) {
-    throw error;
+  while (true) {
+    const { data, error } = await client
+      .from("predictions")
+      .select("*")
+      .order("updated_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...data);
+
+    if (data.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
   }
 
-  return data.map(fromPredictionRow);
+  return rows.map(fromPredictionRow);
 }
 
 export function listLocalPredictions() {
@@ -75,8 +94,8 @@ export async function savePrediction(prediction) {
     }
 
     if (
-      savedPrediction.playerId !== prediction.playerId ||
-      savedPrediction.matchId !== prediction.matchId
+      String(savedPrediction.playerId) !== String(prediction.playerId) ||
+      String(savedPrediction.matchId) !== String(prediction.matchId)
     ) {
       throw new Error("Supabase respondió una predicción diferente a la solicitada.");
     }
@@ -183,11 +202,15 @@ export function getLocalPredictionForUser(email, matchId) {
 export function getPredictionForPlayer(predictions, playerId, matchId) {
   return (
     predictions.find(
-      (prediction) => prediction.playerId === playerId && prediction.matchId === matchId
+      (prediction) =>
+        String(prediction.playerId || "") === String(playerId || "") &&
+        String(prediction.matchId || "") === String(matchId || "")
     ) || null
   );
 }
 
 export function countPredictionsForPlayer(predictions, playerId) {
-  return predictions.filter((prediction) => prediction.playerId === playerId).length;
+  return predictions.filter(
+    (prediction) => String(prediction.playerId || "") === String(playerId || "")
+  ).length;
 }

@@ -40,7 +40,7 @@ import {
   savePrediction,
   listPredictions,
   updatePredictionPoints,
-} from "./services/prediction-repository.js?v=prediction-visible-confirm";
+} from "./services/prediction-repository.js?v=prediction-pagination";
 import {
   clearChallenges,
   deleteChallenge,
