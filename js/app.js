@@ -40,7 +40,7 @@ import {
   savePrediction,
   listPredictions,
   updatePredictionPoints,
-} from "./services/prediction-repository.js?v=prediction-audit";
+} from "./services/prediction-repository.js?v=prediction-save-verify";
 import {
   clearChallenges,
   deleteChallenge,
@@ -1102,11 +1102,13 @@ async function getActivePlayer() {
 
   const localUser = await getCurrentUser();
 
-  if (localUser?.email?.toLowerCase() === sessionUser.email.toLowerCase()) {
+  if (localUser?.email?.toLowerCase() === sessionUser.email.toLowerCase() && localUser.id) {
     return localUser;
   }
 
-  return (await findUserByEmail(sessionUser.email)) || (await createPlayerFromAuth(sessionUser));
+  const cloudUser = (await findUserByEmail(sessionUser.email)) || (await createPlayerFromAuth(sessionUser));
+  await activateUserSession(cloudUser);
+  return cloudUser;
 }
 
 startCountdown("#countdown");

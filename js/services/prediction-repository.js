@@ -39,9 +39,13 @@ export function listLocalPredictions() {
 }
 
 export async function savePrediction(prediction) {
+  if (isSupabaseConfigured() && !prediction.playerId) {
+    throw new Error("Tu sesión no está vinculada al jugador. Cierra sesión e ingresa de nuevo.");
+  }
+
   if (isSupabaseConfigured() && prediction.playerId) {
     const client = await getSupabaseClient();
-    const { data, error } = await client
+    const { error } = await client
       .from("predictions")
       .upsert(
         {
@@ -54,15 +58,19 @@ export async function savePrediction(prediction) {
           points_awarded: prediction.estimatedPoints || 0,
         },
         { onConflict: "player_id,match_id" }
-      )
-      .select()
-      .single();
+      );
 
     if (error) {
       throw error;
     }
 
-    return fromPredictionRow(data);
+    const savedPrediction = await findPredictionForPlayer(prediction.playerId, prediction.matchId);
+
+    if (!savedPrediction) {
+      throw new Error("Supabase recibió la predicción, pero no quedó visible al consultar.");
+    }
+
+    return savedPrediction;
   }
 
   const predictions = listLocalPredictions();
@@ -85,6 +93,26 @@ export async function savePrediction(prediction) {
 
   writeJson(predictionsKey, predictions);
   return nextPrediction;
+}
+
+export async function findPredictionForPlayer(playerId, matchId) {
+  if (!isSupabaseConfigured()) {
+    return getPredictionForPlayer(listLocalPredictions(), playerId, matchId);
+  }
+
+  const client = await getSupabaseClient();
+  const { data, error } = await client
+    .from("predictions")
+    .select("*")
+    .eq("player_id", playerId)
+    .eq("match_id", matchId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? fromPredictionRow(data) : null;
 }
 
 export async function deletePrediction(prediction) {
