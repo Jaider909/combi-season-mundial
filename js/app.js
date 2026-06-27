@@ -81,7 +81,7 @@ import {
   renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=saved-includes-closed";
+} from "./ui/predictions.js?v=canonical-player-predictions";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
@@ -172,7 +172,24 @@ async function hydrateSession() {
 }
 
 async function refreshPanels(user) {
-  const activeUser = user === undefined ? await getCurrentUser() : await user;
+  let activeUser = user === undefined ? await getCurrentUser() : await user;
+
+  if (isCloudMode()) {
+    const sessionUser = await getSessionUser();
+
+    if (sessionUser?.email) {
+      const cloudUser = await findUserByEmail(sessionUser.email);
+
+      if (cloudUser) {
+        activeUser = cloudUser;
+        await activateUserSession(cloudUser);
+      }
+    } else {
+      activeUser = null;
+      await clearCurrentUser();
+    }
+  }
+
   renderSessionNav(activeUser);
   renderRoute(activeUser);
 
@@ -221,16 +238,15 @@ async function refreshPanels(user) {
   }
   const prediction =
     activeUser && selectedMatch
-      ? currentPredictions.find(
-          (item) => item.playerId === activeUser.id && item.matchId === selectedMatch.id
-        ) || getLocalPredictionForUser(activeUser.email, selectedMatch.id)
+      ? findCurrentPrediction(activeUser.id, selectedMatch.id) ||
+        getLocalPredictionForUser(activeUser.email, selectedMatch.id)
       : null;
   const users = activeUser || getInitialRoute() === "ranking" ? await listUsers() : [];
   currentUsers = users;
   const drawParticipants = activeUser?.role === "admin" ? await listAssignedParticipants() : [];
   currentDrawParticipants = drawParticipants;
   const userPredictions = activeUser
-    ? currentPredictions.filter((item) => item.playerId === activeUser.id)
+    ? currentPredictions.filter((item) => sameId(item.playerId, activeUser.id))
     : [];
   const favoriteMatchIds = new Set(favoriteMatches.map((match) => match.id));
   const savedFavoritePredictions = userPredictions.filter((item) =>
@@ -240,7 +256,7 @@ async function refreshPanels(user) {
   const pendingFavoritePredictions = favoriteMatches.filter(
     (match) =>
       !isPredictionClosedForPlayer(match) &&
-      !userPredictions.some((predictionItem) => predictionItem.matchId === match.id)
+      !userPredictions.some((predictionItem) => sameId(predictionItem.matchId, match.id))
   ).length;
   const sortedUsers = [...users].sort((a, b) => {
     if ((b.points || 0) !== (a.points || 0)) {
@@ -628,13 +644,25 @@ function normalizeScorerInput(value) {
   return parseScorerList(value).join(", ");
 }
 
+function sameId(left, right) {
+  return String(left || "") === String(right || "");
+}
+
+function findCurrentPrediction(playerId, matchId) {
+  return (
+    currentPredictions.find(
+      (item) => sameId(item.playerId, playerId) && sameId(item.matchId, matchId)
+    ) || null
+  );
+}
+
 function upsertCurrentPrediction(prediction) {
   if (!prediction?.playerId || !prediction?.matchId) {
     return;
   }
 
   const existingIndex = currentPredictions.findIndex(
-    (item) => item.playerId === prediction.playerId && item.matchId === prediction.matchId
+    (item) => sameId(item.playerId, prediction.playerId) && sameId(item.matchId, prediction.matchId)
   );
 
   if (existingIndex >= 0) {
@@ -1034,7 +1062,7 @@ function estimatePredictionPoints(prediction) {
 }
 
 async function recalculateMatchPoints(match) {
-  const matchPredictions = currentPredictions.filter((prediction) => prediction.matchId === match.id);
+  const matchPredictions = currentPredictions.filter((prediction) => sameId(prediction.matchId, match.id));
 
   for (const prediction of matchPredictions) {
     const points = calculatePredictionPoints(prediction, match);
@@ -2015,7 +2043,7 @@ document.querySelector("#adminUserDetail").addEventListener("click", async (even
       return;
     }
 
-    const userPredictions = currentPredictions.filter((prediction) => prediction.playerId === user.id).length;
+    const userPredictions = currentPredictions.filter((prediction) => sameId(prediction.playerId, user.id)).length;
     const userChallenges = currentChallenges.filter(
       (challenge) => challenge.creatorPlayerId === user.id || challenge.opponentPlayerId === user.id
     ).length;
@@ -2140,9 +2168,8 @@ predictionForm.addEventListener("submit", async (event) => {
     );
     await refreshPanels(user);
     const savedPrediction =
-      currentPredictions.find(
-        (item) => item.playerId === persistedPrediction.playerId && item.matchId === persistedPrediction.matchId
-      ) || persistedPrediction;
+      findCurrentPrediction(persistedPrediction.playerId, persistedPrediction.matchId) ||
+      persistedPrediction;
     upsertCurrentPrediction(savedPrediction);
     selectedMatch = submittedMatch;
     selectedMatchWasManual = true;
@@ -2224,7 +2251,7 @@ deletePredictionButton.addEventListener("click", async () => {
   }
 
   const prediction = currentPredictions.find(
-    (item) => item.playerId === user.id && item.matchId === selectedMatch.id
+    (item) => sameId(item.playerId, user.id) && sameId(item.matchId, selectedMatch.id)
   );
 
   if (!prediction) {

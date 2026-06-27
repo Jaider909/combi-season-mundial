@@ -84,6 +84,10 @@ function getPredictionAuditTime(prediction) {
   return prediction?.updatedAt || prediction?.savedAt || prediction?.createdAt || null;
 }
 
+function sameId(left, right) {
+  return String(left || "") === String(right || "");
+}
+
 function wasPredictionBeforeClose(prediction, match) {
   const auditTime = getPredictionAuditTime(prediction);
 
@@ -125,7 +129,9 @@ function getPredictionTimingView(prediction, match) {
 }
 
 function getPredictionForPlayer(predictions, playerId, matchId) {
-  return predictions.find((item) => item.playerId === playerId && item.matchId === matchId);
+  return predictions.find(
+    (item) => sameId(item.playerId, playerId) && sameId(item.matchId, matchId)
+  );
 }
 
 function getPlayerLabel(user) {
@@ -401,9 +407,7 @@ export function renderFavoriteTeamMatches(matches, team, predictions = [], playe
     .slice(0, 4)
     .map(
       (match) => {
-        const prediction = predictions.find(
-          (item) => item.playerId === playerId && item.matchId === match.id
-        );
+        const prediction = getPredictionForPlayer(predictions, playerId, match.id);
         const isClosed = match.status === "finished";
         const isLocked = isLockedMatch(match);
         const isLive = isLiveMatch(match);
@@ -721,7 +725,9 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
 }
 
 function getPredictionForMatch(predictions, playerId, matchId) {
-  return predictions.find((item) => item.playerId === playerId && item.matchId === matchId);
+  return predictions.find(
+    (item) => sameId(item.playerId, playerId) && sameId(item.matchId, matchId)
+  );
 }
 
 function getMatchNumber(match) {
