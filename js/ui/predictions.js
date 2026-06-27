@@ -813,9 +813,7 @@ export function getVisiblePredictionMatches(
 
   if (viewMode === "saved") {
     return scopedMatches.filter(
-      (match) =>
-        !isPredictionClosedForPlayer(match) &&
-        getPredictionForMatch(predictions, playerId, match.id)
+      (match) => getPredictionForMatch(predictions, playerId, match.id)
     );
   }
 
