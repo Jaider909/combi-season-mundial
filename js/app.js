@@ -40,7 +40,7 @@ import {
   savePrediction,
   listPredictions,
   updatePredictionPoints,
-} from "./services/prediction-repository.js?v=prediction-cloud-player-fix";
+} from "./services/prediction-repository.js?v=prediction-visible-confirm";
 import {
   clearChallenges,
   deleteChallenge,
@@ -2117,12 +2117,36 @@ predictionForm.addEventListener("submit", async (event) => {
     selectedMatch = submittedMatch;
     selectedMatchWasManual = true;
     selectedMatchTeam = user.team;
+    renderSelectedMatchDetail(submittedMatch, persistedPrediction);
+    renderPredictionSummary(persistedPrediction, submittedMatch);
+    renderPredictionMatchList(
+      getVisiblePredictionMatches(
+        currentMatches,
+        predictionViewMode,
+        predictionGroupCode,
+        user.team,
+        currentPredictions,
+        user.id,
+        predictionScopeMode
+      ),
+      currentPredictions,
+      user.id,
+      submittedMatch.id,
+      {
+        favoriteTeam: user.team,
+        viewMode: predictionViewMode,
+        scopeMode: predictionScopeMode,
+      }
+    );
     await refreshPanels(user);
     const savedPrediction =
       currentPredictions.find(
-        (item) => item.playerId === user.id && item.matchId === submittedMatch.id
+        (item) => item.playerId === persistedPrediction.playerId && item.matchId === persistedPrediction.matchId
       ) || persistedPrediction;
     upsertCurrentPrediction(savedPrediction);
+    selectedMatch = submittedMatch;
+    selectedMatchWasManual = true;
+    selectedMatchTeam = user.team;
     renderSelectedMatchDetail(submittedMatch, savedPrediction);
 
     if (shouldContinuePendingFlow && selectedMatch?.id && selectedMatch.id !== submittedMatch.id) {
