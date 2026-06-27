@@ -40,7 +40,7 @@ import {
   savePrediction,
   listPredictions,
   updatePredictionPoints,
-} from "./services/prediction-repository.js?v=prediction-save-verify";
+} from "./services/prediction-repository.js?v=prediction-cloud-player-fix";
 import {
   clearChallenges,
   deleteChallenge,
@@ -1100,15 +1100,14 @@ async function getActivePlayer() {
     return null;
   }
 
-  const localUser = await getCurrentUser();
-
-  if (localUser?.email?.toLowerCase() === sessionUser.email.toLowerCase() && localUser.id) {
-    return localUser;
+  if (isCloudMode()) {
+    const cloudUser =
+      (await findUserByEmail(sessionUser.email)) || (await createPlayerFromAuth(sessionUser));
+    await activateUserSession(cloudUser);
+    return cloudUser;
   }
 
-  const cloudUser = (await findUserByEmail(sessionUser.email)) || (await createPlayerFromAuth(sessionUser));
-  await activateUserSession(cloudUser);
-  return cloudUser;
+  return await getCurrentUser();
 }
 
 startCountdown("#countdown");

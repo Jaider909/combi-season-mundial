@@ -45,7 +45,7 @@ export async function savePrediction(prediction) {
 
   if (isSupabaseConfigured() && prediction.playerId) {
     const client = await getSupabaseClient();
-    const { error } = await client
+    const { data, error } = await client
       .from("predictions")
       .upsert(
         {
@@ -58,16 +58,27 @@ export async function savePrediction(prediction) {
           points_awarded: prediction.estimatedPoints || 0,
         },
         { onConflict: "player_id,match_id" }
-      );
+      )
+      .select("*")
+      .single();
 
     if (error) {
       throw error;
     }
 
-    const savedPrediction = await findPredictionForPlayer(prediction.playerId, prediction.matchId);
+    const savedPrediction = data
+      ? fromPredictionRow(data)
+      : await findPredictionForPlayer(prediction.playerId, prediction.matchId);
 
     if (!savedPrediction) {
       throw new Error("Supabase recibió la predicción, pero no quedó visible al consultar.");
+    }
+
+    if (
+      savedPrediction.playerId !== prediction.playerId ||
+      savedPrediction.matchId !== prediction.matchId
+    ) {
+      throw new Error("Supabase respondió una predicción diferente a la solicitada.");
     }
 
     return savedPrediction;
