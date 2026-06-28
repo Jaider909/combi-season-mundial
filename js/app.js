@@ -62,7 +62,7 @@ import {
   updateUser,
   updateUserPoints,
 } from "./services/user-repository.js?v=admin-user-manager";
-import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-sync-knockout-panel";
+import { renderAdmin, renderAdminMatchDetail } from "./ui/admin.js?v=admin-match-detail-sync";
 import { renderDashboard } from "./ui/dashboard.js?v=team-flags";
 import { renderAllGroups, renderTournamentPath, renderUserGroup } from "./ui/groups.js?v=final-path-groups";
 import {
@@ -487,6 +487,7 @@ function fromDatetimeLocalValue(value) {
 
 function syncResultForm(matchId) {
   const match = currentMatches.find((item) => item.id === matchId);
+  renderAdminMatchDetail(currentUsers, currentPredictions, currentMatches, matchId);
 
   if (!match) {
     resultForm.reset();
@@ -1832,7 +1833,6 @@ saveMatchScheduleButton?.addEventListener("click", async () => {
 resultMatchSelect.addEventListener("change", (event) => {
   resultSelectedMatchId = event.target.value;
   syncResultForm(resultSelectedMatchId);
-  renderAdminMatchDetail(currentUsers, currentPredictions, currentMatches, resultSelectedMatchId);
 });
 
 async function handleAdminMatchTableClick(event) {

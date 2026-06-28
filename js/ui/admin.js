@@ -55,20 +55,26 @@ function normalizeText(value) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function sameId(left, right) {
+  return String(left || "") === String(right || "");
+}
+
 function countPredictions(predictions, playerId) {
-  return predictions.filter((prediction) => prediction.playerId === playerId).length;
+  return predictions.filter((prediction) => sameId(prediction.playerId, playerId)).length;
 }
 
 function getMatchPredictionCount(predictions, matchId) {
-  return predictions.filter((prediction) => prediction.matchId === matchId).length;
+  return predictions.filter((prediction) => sameId(prediction.matchId, matchId)).length;
 }
 
 function getMissingPredictions(users, predictions, matchId) {
   const predictedPlayerIds = new Set(
-    predictions.filter((prediction) => prediction.matchId === matchId).map((prediction) => prediction.playerId)
+    predictions
+      .filter((prediction) => sameId(prediction.matchId, matchId))
+      .map((prediction) => String(prediction.playerId || ""))
   );
 
-  return users.filter((user) => user?.id && !predictedPlayerIds.has(user.id));
+  return users.filter((user) => user?.id && !predictedPlayerIds.has(String(user.id || "")));
 }
 
 function sortMatchesByNumber(matches) {
@@ -181,7 +187,7 @@ function renderMatchRow(match, total) {
 }
 
 function getUserById(users, userId) {
-  return users.find((user) => user.id === userId) || null;
+  return users.find((user) => sameId(user.id, userId)) || null;
 }
 
 function getUserByEmail(users, email) {
@@ -197,7 +203,7 @@ function formatCurrency(value) {
 }
 
 function getMatchById(matches, matchId) {
-  return matches.find((match) => match.id === matchId) || null;
+  return matches.find((match) => sameId(match.id, matchId)) || null;
 }
 
 function getChallengeStatusLabel(status) {
@@ -724,7 +730,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
     return;
   }
 
-  const matchPredictions = predictions.filter((prediction) => prediction.matchId === match.id);
+  const matchPredictions = predictions.filter((prediction) => sameId(prediction.matchId, match.id));
   const missingUsers = getMissingPredictions(users, predictions, match.id);
   const score =
     match.status === "finished"
@@ -831,7 +837,7 @@ function renderSelectedMatchDetail(users, predictions, match) {
 
 export function renderAdminMatchDetail(users = [], predictions = [], matches = [], selectedMatchId = null) {
   const sortedMatches = sortMatchesByNumber(matches);
-  const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
+  const selectedMatch = sortedMatches.find((match) => sameId(match.id, selectedMatchId)) || sortedMatches[0] || null;
 
   renderSelectedMatchDetail(users, predictions, selectedMatch);
 }
@@ -858,8 +864,8 @@ export function renderAdmin(
   const selectedTeamFilter = adminUserTeamFilter?.value || "";
   const matchSearchTerm = normalizeText(adminMatchSearch?.value);
   const selectedMatchStatus = adminMatchStatusFilter?.value || "";
-  const selectedMatch = sortedMatches.find((match) => match.id === selectedMatchId) || sortedMatches[0] || null;
-  const selectedUser = users.find((user) => user.id === selectedUserId) || null;
+  const selectedMatch = sortedMatches.find((match) => sameId(match.id, selectedMatchId)) || sortedMatches[0] || null;
+  const selectedUser = users.find((user) => sameId(user.id, selectedUserId)) || null;
   const filteredUsers = users.filter((user) => {
     const searchSource = normalizeText(`${user.alias} ${user.name} ${user.email} ${user.phone} ${user.team}`);
     const matchesSearch = !userSearchTerm || searchSource.includes(userSearchTerm);
