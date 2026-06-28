@@ -71,16 +71,19 @@ function getChallengeEvents(challenges, matches, users) {
   });
 }
 
-function getPredictionEvents(predictions, matches, users) {
+function getPredictionEvents(predictions, matches, users, { revealPredictionScores = false } = {}) {
   return predictions.map((prediction) => {
     const match = getMatch(matches, prediction.matchId);
     const user = getUser(users, prediction.playerId);
+    const predictionDetail = revealPredictionScores
+      ? `${prediction.homeScore}-${prediction.awayScore}`
+      : "marcador oculto";
 
     return {
       type: "Predicción",
       date: prediction.savedAt,
       title: `${userLabel(user)} guardó predicción`,
-      detail: `${matchLabel(match)} · ${prediction.homeScore}-${prediction.awayScore}`,
+      detail: `${matchLabel(match)} · ${predictionDetail}`,
     };
   });
 }
@@ -96,10 +99,16 @@ function getResultEvents(matches) {
     }));
 }
 
-export function buildActivityFeed({ challenges = [], predictions = [], matches = [], users = [] }) {
+export function buildActivityFeed({
+  challenges = [],
+  predictions = [],
+  matches = [],
+  users = [],
+  revealPredictionScores = false,
+}) {
   return [
     ...getChallengeEvents(challenges, matches, users),
-    ...getPredictionEvents(predictions, matches, users),
+    ...getPredictionEvents(predictions, matches, users, { revealPredictionScores }),
     ...getResultEvents(matches),
   ]
     .filter((event) => event.date)

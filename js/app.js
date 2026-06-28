@@ -70,7 +70,7 @@ import {
   renderChallenges,
   renderChallengeTeamOptions,
 } from "./ui/challenges.js?v=prediction-compact-closed";
-import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=team-flags";
+import { buildActivityFeed, renderActivityFeed } from "./ui/activity-feed.js?v=private-dashboard-feed";
 import {
   renderFavoriteTeamMatches,
   getVisiblePredictionMatches,
@@ -282,16 +282,23 @@ async function refreshPanels(user) {
     closedFavoriteMatches,
     nextAction,
   };
-  const activityEvents = buildActivityFeed({
+  const dashboardActivityEvents = buildActivityFeed({
     challenges: currentChallenges,
     predictions: currentPredictions,
     matches: currentMatches,
     users,
   });
+  const adminActivityEvents = buildActivityFeed({
+    challenges: currentChallenges,
+    predictions: currentPredictions,
+    matches: currentMatches,
+    users,
+    revealPredictionScores: true,
+  });
 
   renderDashboard(activeUser, stats);
-  renderActivityFeed("#dashboardActivityFeed", activityEvents);
-  renderActivityFeed("#adminActivityFeed", activityEvents);
+  renderActivityFeed("#dashboardActivityFeed", dashboardActivityEvents);
+  renderActivityFeed("#adminActivityFeed", adminActivityEvents);
   renderSelectedMatchDetail(selectedMatch, prediction);
   renderPredictionForm(
     selectedMatch,
