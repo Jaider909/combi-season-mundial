@@ -26,6 +26,8 @@ create table if not exists public.matches (
   away_team text not null,
   home_score integer,
   away_score integer,
+  advancing_team text,
+  decision_method text,
   status text not null default 'scheduled',
   venue text,
   city text,

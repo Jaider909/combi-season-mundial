@@ -17,7 +17,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=app-icon" />
     <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png?v=app-icon" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png?v=app-icon" />
-    <link rel="stylesheet" href="styles.css?v=final-path-groups" />
+    <link rel="stylesheet" href="styles.css?v=knockout-advancing-team" />
     <script defer src="/_vercel/insights/script.js"></script>
     <script>
       window.si =
@@ -892,6 +892,20 @@
               Goles visitante
               <input name="awayScore" type="number" min="0" max="20" value="0" required />
             </label>
+            <div class="knockout-decision-control is-hidden" id="knockoutDecisionControl">
+              <label>
+                Clasifica
+                <select name="advancingTeam" id="advancingTeamSelect"></select>
+              </label>
+              <label>
+                Definición
+                <select name="decisionMethod">
+                  <option value="90_minutos">90 minutos</option>
+                  <option value="tiempo_extra">Tiempo extra</option>
+                  <option value="penales">Penales</option>
+                </select>
+              </label>
+            </div>
             <label>
               Goleadores local
               <input name="homeScorers" type="hidden" />
@@ -1004,6 +1018,6 @@
         document.querySelector("#fileWarning")?.classList.remove("is-hidden");
       }
     </script>
-    <script type="module" src="js/app.js?v=official-round-of-32"></script>
+    <script type="module" src="js/app.js?v=knockout-advancing-team"></script>
   </body>
 </html>

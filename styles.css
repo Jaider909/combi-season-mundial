@@ -2662,6 +2662,17 @@ h3 {
   grid-column: span 2;
 }
 
+.result-form .knockout-decision-control {
+  grid-column: span 4;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.result-form .knockout-decision-control.is-hidden {
+  display: none;
+}
+
 .result-form label:nth-of-type(4),
 .result-form label:nth-of-type(5) {
   grid-column: span 6;
@@ -3379,9 +3390,14 @@ h3 {
   .result-form label:nth-of-type(5),
   .result-form label:nth-of-type(6),
   .result-form .match-schedule-control,
+  .result-form .knockout-decision-control,
   .result-form .btn,
   .result-form .match-schedule-button {
     grid-column: auto;
+  }
+
+  .result-form .knockout-decision-control {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -3536,10 +3552,15 @@ h3 {
   .result-form > *,
   .result-form label,
   .result-form .match-schedule-control,
+  .result-form .knockout-decision-control,
   .result-form .match-schedule-control label {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+  }
+
+  .result-form .knockout-decision-control {
+    grid-template-columns: 1fr;
   }
 
   .result-form input,

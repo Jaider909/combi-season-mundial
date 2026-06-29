@@ -13,6 +13,8 @@ function fromMatchRow(row) {
     awayScore: row.away_score,
     homeScorers: row.home_scorers || [],
     awayScorers: row.away_scorers || [],
+    advancingTeam: row.advancing_team,
+    decisionMethod: row.decision_method,
     status: row.status,
     venue: row.venue,
     city: row.city,
@@ -56,6 +58,14 @@ export async function updateMatchResult(matchId, result) {
     status: result.status || "finished",
   };
 
+  if ("advancingTeam" in result) {
+    payload.advancing_team = result.advancingTeam || null;
+  }
+
+  if ("decisionMethod" in result) {
+    payload.decision_method = result.decisionMethod || null;
+  }
+
   if (result.resultSource) {
     payload.result_source = result.resultSource;
   }
@@ -75,10 +85,17 @@ export async function updateMatchResult(matchId, result) {
     .select()
     .maybeSingle();
 
-  if (error && /result_source|result_review_status|result_synced_at/.test(error.message || "")) {
+  if (
+    error &&
+    /result_source|result_review_status|result_synced_at|advancing_team|decision_method/.test(
+      error.message || ""
+    )
+  ) {
     delete payload.result_source;
     delete payload.result_review_status;
     delete payload.result_synced_at;
+    delete payload.advancing_team;
+    delete payload.decision_method;
 
     const fallbackResult = await client
       .from("matches")

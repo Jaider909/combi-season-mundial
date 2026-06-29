@@ -178,13 +178,19 @@ function resolveKnockoutSlot(value, matchesByNumber) {
 
   const homeScore = Number(sourceMatch.homeScore);
   const awayScore = Number(sourceMatch.awayScore);
+  let winner = homeScore > awayScore ? sourceMatch.homeTeam : sourceMatch.awayTeam;
+  let loser = homeScore > awayScore ? sourceMatch.awayTeam : sourceMatch.homeTeam;
 
   if (homeScore === awayScore) {
-    return value;
-  }
+    const advancingTeam = sourceMatch.advancingTeam;
 
-  const winner = homeScore > awayScore ? sourceMatch.homeTeam : sourceMatch.awayTeam;
-  const loser = homeScore > awayScore ? sourceMatch.awayTeam : sourceMatch.homeTeam;
+    if (![sourceMatch.homeTeam, sourceMatch.awayTeam].includes(advancingTeam)) {
+      return value;
+    }
+
+    winner = advancingTeam;
+    loser = advancingTeam === sourceMatch.homeTeam ? sourceMatch.awayTeam : sourceMatch.homeTeam;
+  }
 
   return winnerMatch ? winner : loser;
 }

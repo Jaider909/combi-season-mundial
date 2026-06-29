@@ -31,8 +31,8 @@ import {
   updateMatchTeams,
   updateMatchResult,
   updateMatchSchedule,
-} from "./services/match-repository.js?v=admin-schedule-control";
-import { buildKnockoutUpdates } from "./services/knockout-service.js?v=official-round-of-32";
+} from "./services/match-repository.js?v=knockout-advancing-team";
+import { buildKnockoutUpdates } from "./services/knockout-service.js?v=knockout-advancing-team";
 import {
   countPredictionsForPlayer,
   deletePrediction,
@@ -103,6 +103,8 @@ const teamPlayerForm = document.querySelector("#teamPlayerForm");
 const syncKnockoutButton = document.querySelector("#syncKnockoutButton");
 const clearChallengesButton = document.querySelector("#clearChallengesButton");
 const saveMatchScheduleButton = document.querySelector("#saveMatchScheduleButton");
+const knockoutDecisionControl = document.querySelector("#knockoutDecisionControl");
+const advancingTeamSelect = document.querySelector("#advancingTeamSelect");
 const predictionSubmitButton = predictionForm.querySelector('button[type="submit"]');
 const challengeSubmitButton = challengeForm.querySelector('button[type="submit"]');
 const resultSubmitButton = resultForm.querySelector('button[type="submit"]');
@@ -492,6 +494,37 @@ function fromDatetimeLocalValue(value) {
   return date.toISOString();
 }
 
+function isKnockoutMatch(match) {
+  return Number(match?.matchNumber) >= 73;
+}
+
+function getScoreWinner(match, homeScore, awayScore) {
+  if (homeScore > awayScore) return match.homeTeam;
+  if (awayScore > homeScore) return match.awayTeam;
+  return "";
+}
+
+function syncKnockoutDecisionControl(match) {
+  if (!knockoutDecisionControl || !advancingTeamSelect) {
+    return;
+  }
+
+  if (!isKnockoutMatch(match)) {
+    knockoutDecisionControl.classList.add("is-hidden");
+    advancingTeamSelect.innerHTML = "";
+    return;
+  }
+
+  knockoutDecisionControl.classList.remove("is-hidden");
+  advancingTeamSelect.innerHTML = `
+    <option value="">Automático por marcador</option>
+    <option value="${escapeHtml(match.homeTeam)}">${formatTeamLabel(match.homeTeam)}</option>
+    <option value="${escapeHtml(match.awayTeam)}">${formatTeamLabel(match.awayTeam)}</option>
+  `;
+  advancingTeamSelect.value = match.advancingTeam || "";
+  resultForm.elements.decisionMethod.value = match.decisionMethod || "90_minutos";
+}
+
 function syncResultForm(matchId) {
   const match = currentMatches.find((item) => item.id === matchId);
   renderAdminMatchDetail(currentUsers, currentPredictions, currentMatches, matchId);
@@ -503,6 +536,7 @@ function syncResultForm(matchId) {
       awayScorers: [],
     };
     renderScorerChips(null);
+    syncKnockoutDecisionControl(null);
     return;
   }
 
@@ -521,6 +555,7 @@ function syncResultForm(matchId) {
   writeSelectedScorers("homeScorers", resultScorers.homeScorers);
   writeSelectedScorers("awayScorers", resultScorers.awayScorers);
   renderScorerChips(match);
+  syncKnockoutDecisionControl(match);
   const isLocked = match.status === "locked";
   resultNote.textContent =
     isLocked
@@ -1765,12 +1800,30 @@ resultForm.addEventListener("submit", async (event) => {
   try {
     setButtonBusy(resultSubmitButton, true, "Guardando...");
     resultSelectedMatchId = matchId;
+    const homeScore = Number(data.get("homeScore"));
+    const awayScore = Number(data.get("awayScore"));
+    const scoreWinner = getScoreWinner(match, homeScore, awayScore);
+    const isKnockout = isKnockoutMatch(match);
+    const selectedAdvancingTeam = data.get("advancingTeam")?.toString() || "";
+    const decisionMethod = data.get("decisionMethod")?.toString() || "90_minutos";
+
+    if (isKnockout && !scoreWinner && !selectedAdvancingTeam) {
+      showNote(
+        resultNote,
+        "Este partido quedó empatado. Elige quién clasifica antes de guardar el resultado.",
+        "warning"
+      );
+      return;
+    }
+
     const updatedMatch = {
       ...match,
-      homeScore: Number(data.get("homeScore")),
-      awayScore: Number(data.get("awayScore")),
+      homeScore,
+      awayScore,
       homeScorers: parseScorerList(data.get("homeScorers")),
       awayScorers: parseScorerList(data.get("awayScorers")),
+      advancingTeam: isKnockout ? selectedAdvancingTeam || scoreWinner : null,
+      decisionMethod: isKnockout ? (scoreWinner ? "90_minutos" : decisionMethod) : null,
       status: "finished",
       resultSource: "manual",
       resultReviewStatus: "reviewed",
