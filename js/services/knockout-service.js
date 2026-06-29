@@ -8,6 +8,25 @@ const placeholderPatterns = [
   /^Perdedor partido \d+$/,
 ];
 
+const confirmedRoundOf32Teams = new Map([
+  [73, { homeTeam: "Sudáfrica", awayTeam: "Canadá" }],
+  [74, { homeTeam: "Alemania", awayTeam: "Paraguay" }],
+  [75, { homeTeam: "Países Bajos", awayTeam: "Marruecos" }],
+  [76, { homeTeam: "Brasil", awayTeam: "Japón" }],
+  [77, { homeTeam: "Francia", awayTeam: "Suecia" }],
+  [78, { homeTeam: "Costa de Marfil", awayTeam: "Noruega" }],
+  [79, { homeTeam: "México", awayTeam: "Ecuador" }],
+  [80, { homeTeam: "Inglaterra", awayTeam: "Congo DR" }],
+  [81, { homeTeam: "Estados Unidos", awayTeam: "Bosnia y Herzegovina" }],
+  [82, { homeTeam: "Bélgica", awayTeam: "Corea del Sur" }],
+  [83, { homeTeam: "Portugal", awayTeam: "Croacia" }],
+  [84, { homeTeam: "España", awayTeam: "Austria" }],
+  [85, { homeTeam: "Suiza", awayTeam: "Argelia" }],
+  [86, { homeTeam: "Argentina", awayTeam: "Cabo Verde" }],
+  [87, { homeTeam: "Colombia", awayTeam: "Ghana" }],
+  [88, { homeTeam: "Australia", awayTeam: "Egipto" }],
+]);
+
 function isFinishedMatch(match) {
   return (
     match?.status === "finished" &&
@@ -182,9 +201,13 @@ export function buildKnockoutUpdates(matches) {
   return matches
     .filter((match) => match.matchNumber >= 73)
     .map((match) => {
-      const homeTeam = resolveSlot(match.homeTeam, groupResults, qualifiedThirds, matchesByNumber);
-      const awayTeam = resolveSlot(match.awayTeam, groupResults, qualifiedThirds, matchesByNumber);
-      const status = isPlaceholderTeam(homeTeam) || isPlaceholderTeam(awayTeam) ? "locked" : "open";
+      const confirmedTeams = confirmedRoundOf32Teams.get(Number(match.matchNumber));
+      const homeTeam =
+        confirmedTeams?.homeTeam || resolveSlot(match.homeTeam, groupResults, qualifiedThirds, matchesByNumber);
+      const awayTeam =
+        confirmedTeams?.awayTeam || resolveSlot(match.awayTeam, groupResults, qualifiedThirds, matchesByNumber);
+      const hasPlaceholder = isPlaceholderTeam(homeTeam) || isPlaceholderTeam(awayTeam);
+      const status = isFinishedMatch(match) ? match.status : hasPlaceholder ? "locked" : match.status === "locked" ? "open" : match.status;
 
       return {
         id: match.id,

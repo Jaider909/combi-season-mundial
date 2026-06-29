@@ -32,7 +32,7 @@ import {
   updateMatchResult,
   updateMatchSchedule,
 } from "./services/match-repository.js?v=admin-schedule-control";
-import { buildKnockoutUpdates } from "./services/knockout-service.js";
+import { buildKnockoutUpdates } from "./services/knockout-service.js?v=official-round-of-32";
 import {
   countPredictionsForPlayer,
   deletePrediction,
