@@ -1888,7 +1888,13 @@ h3 {
   gap: 10px;
 }
 
-.prediction-round h4 {
+.prediction-round summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
   margin: 0;
   padding: 10px 14px;
   color: rgba(255, 255, 255, 0.78);
@@ -1898,6 +1904,37 @@ h3 {
   font-size: 0.86rem;
   font-weight: 900;
   letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.prediction-round summary::-webkit-details-marker {
+  display: none;
+}
+
+.prediction-round summary::after {
+  content: "+";
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--ink);
+  background: var(--lime);
+  border-radius: 999px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.prediction-round[open] summary::after {
+  content: "-";
+}
+
+.prediction-round summary strong {
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.76rem;
+  font-weight: 950;
   text-transform: uppercase;
 }
 
@@ -3683,6 +3720,15 @@ h3 {
   .selected-match-heading,
   .prediction-match-card {
     grid-template-columns: 1fr;
+  }
+
+  .prediction-round summary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .prediction-round summary strong {
+    margin-left: 0;
   }
 
   .prediction-match-card {

@@ -773,6 +773,23 @@ function groupMatchesByRound(matches) {
   }, []);
 }
 
+function shouldOpenRound(group, selectedMatchId, index) {
+  if (group.matches.some((match) => sameId(match.id, selectedMatchId))) {
+    return true;
+  }
+
+  return !selectedMatchId && index === 0;
+}
+
+function renderRoundSummary(label, count) {
+  return `
+    <summary>
+      <span>${escapeHtml(label)}</span>
+      <strong>${count} partidos</strong>
+    </summary>
+  `;
+}
+
 export function renderPredictionControls(viewMode, groupCode, scopeMode = "favorite") {
   document.querySelectorAll("[data-prediction-view]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.predictionView === viewMode);
@@ -890,15 +907,15 @@ export function renderPredictionMatchList(matches, predictions, playerId, select
 function renderPredictionRoundGroups(matches, predictions, playerId, selectedMatchId) {
   return groupMatchesByRound(matches)
     .map(
-      (group) => `
-        <section class="prediction-round">
-          <h4>${escapeHtml(group.label)}</h4>
+      (group, index) => `
+        <details class="prediction-round" ${shouldOpenRound(group, selectedMatchId, index) ? "open" : ""}>
+          ${renderRoundSummary(group.label, group.matches.length)}
           <div class="prediction-round-list">
             ${group.matches
               .map((match) => renderPredictionMatchCard(match, predictions, playerId, selectedMatchId))
               .join("")}
           </div>
-        </section>
+        </details>
       `
     )
     .join("");
@@ -907,15 +924,15 @@ function renderPredictionRoundGroups(matches, predictions, playerId, selectedMat
 function renderCompactPredictionList(matches, predictions, playerId, selectedMatchId) {
   return groupMatchesByRound(matches)
     .map(
-      (group) => `
-        <section class="prediction-round prediction-round-compact">
-          <h4>${escapeHtml(group.label)}</h4>
+      (group, index) => `
+        <details class="prediction-round prediction-round-compact" ${shouldOpenRound(group, selectedMatchId, index) ? "open" : ""}>
+          ${renderRoundSummary(group.label, group.matches.length)}
           <div class="prediction-compact-list">
             ${group.matches
               .map((match) => renderCompactPredictionMatch(match, predictions, playerId, selectedMatchId))
               .join("")}
           </div>
-        </section>
+        </details>
       `
     )
     .join("");
