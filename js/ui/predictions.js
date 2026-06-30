@@ -611,6 +611,7 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
   const homeScorerInput = form.querySelector('[name="homeScorer"]');
   const awayScorerInput = form.querySelector('[name="awayScorer"]');
   bindPredictionScorerChips(form);
+  form.classList.remove("is-readonly-summary");
 
   if (!match) {
     form.classList.add("is-disabled");
@@ -670,6 +671,7 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
 
   if (isLockedMatch(match)) {
     form.classList.add("is-disabled");
+    form.classList.add("is-readonly-summary");
     deleteButton.classList.add("is-hidden");
     deleteButton.disabled = true;
     form.querySelectorAll("input, button").forEach((field) => {
@@ -696,6 +698,7 @@ export function renderPredictionForm(match, prediction, homePlayers = [], awayPl
 
   if (match.status === "finished" || isLiveMatch(match)) {
     form.classList.add("is-disabled");
+    form.classList.add("is-readonly-summary");
     deleteButton.classList.add("is-hidden");
     deleteButton.disabled = true;
     form.querySelectorAll("input, button").forEach((field) => {

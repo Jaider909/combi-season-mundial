@@ -81,7 +81,7 @@ import {
   renderMatchPredictionsPanel,
   renderPredictionSummary,
   renderSelectedMatchDetail,
-} from "./ui/predictions.js?v=collapsible-prediction-rounds";
+} from "./ui/predictions.js?v=compact-readonly-predictions";
 import { renderRanking } from "./ui/ranking.js?v=ranking-podium";
 import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";

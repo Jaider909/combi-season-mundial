@@ -2291,6 +2291,10 @@ h3 {
   opacity: 0.62;
 }
 
+.prediction-form.is-readonly-summary {
+  display: none;
+}
+
 .group-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
