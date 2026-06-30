@@ -2295,6 +2295,10 @@ h3 {
   display: none;
 }
 
+.prediction-summary.is-readonly-summary {
+  display: none;
+}
+
 .group-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);

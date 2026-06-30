@@ -11,6 +11,10 @@ export { isPredictionClosedForPlayer };
 
 export function renderPredictionSummary(prediction, match) {
   const summary = document.querySelector("#predictionSummary");
+  summary.classList.toggle(
+    "is-readonly-summary",
+    Boolean(match && (match.status === "finished" || isLiveMatch(match) || isLockedMatch(match)))
+  );
 
   if (!match) {
     summary.textContent = "Aún no hay partidos cargados para predecir.";
