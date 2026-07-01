@@ -2,6 +2,7 @@ import { isSupabaseConfigured, getSupabaseClient } from "./supabase-client.js";
 import { readJson, writeJson } from "./storage.js";
 
 const localAccountsKey = "combiSeasonAccounts";
+const productionUrl = "https://combiseason.com/";
 
 function listLocalAccounts() {
   return readJson(localAccountsKey, []);
@@ -113,7 +114,11 @@ export async function resetPasswordForEmail(email) {
   }
 
   const client = await getSupabaseClient();
-  const redirectTo = `${window.location.origin}${window.location.pathname}#restablecer`;
+  const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+  const baseUrl = isLocalHost
+    ? `${window.location.origin}${window.location.pathname}`
+    : productionUrl;
+  const redirectTo = `${baseUrl}#restablecer`;
   const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
 
   if (error) {

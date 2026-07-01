@@ -19,7 +19,7 @@ import {
   signOutUser,
   signUpUser,
   updatePassword,
-} from "./services/auth-service.js";
+} from "./services/auth-service.js?v=password-reset-domain";
 import {
   findParticipantByEmail,
   listAssignedParticipants,
