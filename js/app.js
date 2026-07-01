@@ -87,6 +87,12 @@ import { renderRoute } from "./ui/router.js?v=admin-public-preview-fix";
 import { renderSessionNav } from "./ui/session-nav.js";
 import { escapeHtml } from "./ui/dom.js?v=safe-text";
 
+if (window.location.hostname.endsWith(".vercel.app")) {
+  window.location.replace(
+    `https://combiseason.com${window.location.pathname}${window.location.search}${window.location.hash}`
+  );
+}
+
 document.body.dataset.appBoot = "starting";
 
 const form = document.querySelector("#signupForm");
