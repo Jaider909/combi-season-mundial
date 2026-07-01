@@ -2,7 +2,7 @@ import { isSupabaseConfigured, getSupabaseClient } from "./supabase-client.js";
 import { readJson, writeJson } from "./storage.js";
 
 const localAccountsKey = "combiSeasonAccounts";
-const productionUrl = "https://combiseason.com/";
+const productionUrl = "https://combiseason.com/index.html";
 
 function listLocalAccounts() {
   return readJson(localAccountsKey, []);
