@@ -1703,6 +1703,65 @@ h3 {
   font-weight: 850;
 }
 
+.match-predictions-details {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.match-predictions-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  color: var(--white);
+  font-weight: 950;
+  cursor: pointer;
+  list-style: none;
+}
+
+.match-predictions-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.match-predictions-details summary span {
+  color: var(--white);
+  font-size: 0.92rem;
+  text-transform: none;
+}
+
+.match-predictions-details summary strong {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  color: var(--ink);
+  background: var(--lime);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.match-predictions-details summary::after {
+  content: "Abrir";
+  padding: 7px 10px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.match-predictions-details[open] summary::after {
+  content: "Cerrar";
+}
+
+.match-predictions-details .match-predictions-table {
+  padding: 0 14px 14px;
+}
+
 .match-predictions-table {
   display: grid;
   gap: 8px;
@@ -3639,6 +3698,20 @@ h3 {
 
   .match-predictions-counts {
     justify-content: flex-start;
+  }
+
+  .match-predictions-details summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .match-predictions-details summary::after {
+    align-self: stretch;
+    text-align: center;
+  }
+
+  .match-predictions-details .match-predictions-table {
+    padding: 0 10px 10px;
   }
 
   .prediction-compact-match {

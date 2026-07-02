@@ -295,6 +295,9 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
   const resultSummary = isFinal
     ? `<div class="match-real-result">Resultado real: <strong>${escapeHtml(formatTeamLabel(match.homeTeam))} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${escapeHtml(formatTeamLabel(match.awayTeam))}</strong></div>`
     : "";
+  const detailLabel = shouldReveal || isFinal
+    ? "Ver detalle de predicciones"
+    : "Ver jugadores que ya guardaron";
 
   panel.innerHTML = `
     <div class="match-predictions-header">
@@ -310,29 +313,35 @@ export function renderMatchPredictionsPanel(match, users = [], predictions = [],
       </div>
     </div>
     ${resultSummary}
-    <div class="match-predictions-table">
-      <div class="match-prediction-row header-row">
-        <span>Jugador</span>
-        <span>Estado</span>
-        <span>Marcador</span>
-        <span>Goleadores</span>
-        <span>Último guardado</span>
-        <span>Explicación</span>
-        <span>Puntos</span>
-      </div>
-      ${playerUsers
-        .map((user) =>
-          renderPredictionAuditRow(
-            user,
-            getPredictionForPlayer(predictions, user.id, match.id),
-            match,
-            shouldReveal,
-            isFinal,
-            currentUser?.id === user.id
+    <details class="match-predictions-details">
+      <summary>
+        <span>${escapeHtml(detailLabel)}</span>
+        <strong>${savedCount}/${playerUsers.length} guardadas</strong>
+      </summary>
+      <div class="match-predictions-table">
+        <div class="match-prediction-row header-row">
+          <span>Jugador</span>
+          <span>Estado</span>
+          <span>Marcador</span>
+          <span>Goleadores</span>
+          <span>Último guardado</span>
+          <span>Explicación</span>
+          <span>Puntos</span>
+        </div>
+        ${playerUsers
+          .map((user) =>
+            renderPredictionAuditRow(
+              user,
+              getPredictionForPlayer(predictions, user.id, match.id),
+              match,
+              shouldReveal,
+              isFinal,
+              currentUser?.id === user.id
+            )
           )
-        )
-        .join("")}
-    </div>
+          .join("")}
+      </div>
+    </details>
   `;
 }
 
