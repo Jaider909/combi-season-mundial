@@ -856,7 +856,9 @@ export function getVisiblePredictionMatches(
 
   if (viewMode === "saved") {
     return scopedMatches.filter(
-      (match) => getPredictionFromIndex(predictionIndex, match.id)
+      (match) =>
+        !isPredictionClosedForPlayer(match) &&
+        getPredictionFromIndex(predictionIndex, match.id)
     );
   }
 
